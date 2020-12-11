@@ -1,14 +1,20 @@
-#BUILD
-FROM node:13.12.0-alpine3.11 AS build
+# pull official base image
+FROM node:13.12.0-alpine
+
+# set working directory
 WORKDIR /app
+
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
+# install app dependencies
 COPY package.json ./
-RUN npm install
-COPY . .
-RUN npm run build -- --configuration=production
-RUN ls /app/dist
-#RUN
-#FROM nginx:1.17.9-alpine
-#COPY --from=build /app/dist/dashboard-project /usr/share/nginx/html
-#COPY default.conf /etc/nginx/conf.d/
-#COPY domain.key /etc/nginx/
-#COPY domain.crt /etc/nginx/
+COPY package-lock.json ./
+RUN npm install --silent
+RUN npm install react-scripts@3.4.1 -g --silent
+
+# add app
+COPY . ./
+
+# start app
+CMD ["npm", "start"]
