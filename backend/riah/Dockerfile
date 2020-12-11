@@ -2,7 +2,7 @@ FROM maven:3.5.2-jdk-8-alpine AS build
 COPY . /tmp/
 WORKDIR /tmp/
 RUN mvn clean package -Dmaven.test.skip=true
-RUN /tmp/target
+RUN ls /tmp/target
 
 FROM adoptopenjdk/openjdk8-openj9:alpine-slim
 WORKDIR /app
