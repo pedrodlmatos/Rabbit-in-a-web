@@ -6,7 +6,7 @@ RUN ls /tmp/target
 
 FROM adoptopenjdk/openjdk8-openj9:alpine-slim
 WORKDIR /app
-COPY --from=0 /tmp/target/riah-0.0.1-SNAPSHOT riah.jar
+COPY --from=0 /tmp/target/riah-0.0.1-SNAPSHOT.jar riah.jar
 COPY src/main/resources /app
 COPY run.sh /app
 RUN ls /app
