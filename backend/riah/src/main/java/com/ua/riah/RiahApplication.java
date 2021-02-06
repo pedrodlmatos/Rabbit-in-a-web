@@ -1,6 +1,7 @@
 package com.ua.riah;
 
-import com.ua.riah.service.databaseService.DatabaseService;
+import com.ua.riah.service.source.sourceDatabaseService.SourceDatabaseService;
+import com.ua.riah.service.target.targetDatabase.TargetDatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,19 +16,29 @@ public class RiahApplication {
 	}
 }
 
+/*
 @Component
 class DatabaseLoader implements CommandLineRunner {
 
-	private final DatabaseService service;
+
+	//private final RoleService roleService;
+
+	private final TargetDatabaseService targetDatabaseService;
+
+	//private final SourceDatabaseService sourceDatabaseService;
 
 	@Autowired
-	public DatabaseLoader (DatabaseService service) {
-		this.service = service;
+	public DatabaseLoader (TargetDatabaseService targetDatabaseService, SourceDatabaseService sourceDatabaseService) {
+		//this.roleService = roleService;
+		this.targetDatabaseService = targetDatabaseService;
+		//this.sourceDatabaseService = sourceDatabaseService;
 	}
 
 	@Override
 	public void run(String... args) throws Exception {
-		service.loadCDMDatabases();
-		service.loadScanReport();
+		//roleService.createRoles();
+		targetDatabaseService.loadCDMDatabases();
+		//sourceDatabaseService.loadScanReport();
 	}
 }
+*/

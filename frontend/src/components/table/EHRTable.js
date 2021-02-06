@@ -17,6 +17,7 @@ class EHRTable extends Component {
      * @param table
      */
     selectSourceTable = (table) => {
+        /*console.log(table);*/
         this.setState( {
             clicked: !this.state.clicked
         });
@@ -33,7 +34,7 @@ class EHRTable extends Component {
 
     render() {
         return(
-            <div id={this.state.table.id} className={this.state.clicked ? "sourceTableRectangleSelected" : "sourceTableRectangle" } onClick={() => this.selectSourceTable(this.state.table)}>
+            <div id={this.state.table.name} className={this.state.clicked ? "sourceTableRectangleSelected" : "sourceTableRectangle" } onClick={() => this.selectSourceTable(this.state.table)}>
                 <p className="sourceTableText">
                     { this.state.table.name }
                 </p>

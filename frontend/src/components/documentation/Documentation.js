@@ -1,10 +1,18 @@
 import React, {Component} from "react";
+import {Row} from "react-bootstrap";
+import "./Documentation.css"
 
 class Documentation extends Component {
 
     render() {
         return (
-            <h1>Documentation</h1>
+            <div className="container">
+                <Row>
+                    <img className="logo" src="/rabbitinahatlogo.png" alt="Logo" />
+                </Row>
+
+
+            </div>
         )
     }
 }

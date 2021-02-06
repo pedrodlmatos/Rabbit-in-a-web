@@ -8,10 +8,10 @@ class SessionCard extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            //session: props.session,
             session_id: props.session.id,
-            //source_id: props.session.etl.sourceDB.id,
-            //target_id: props.session.etl.targetDB.id
+            name: props.session.name,
+            targetDatabase: props.session.targetDatabase,
+            sourceDatabase: props.session.sourceDatabase,
         }
     }
 
@@ -22,12 +22,18 @@ class SessionCard extends Component {
     render() {
         return(
             <Card className="card">
-                <Card.Body className="cardBody">
-                    <Card.Title className="cardTitle">
-                        { this.state.session_id }
+                <Card.Body>
+                    <Card.Title>
+                        { this.state.name }
                     </Card.Title>
 
-                    <Button className="btn btn-primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
+                    <Card.Text>
+                        EHR: { this.state.sourceDatabase.databaseName }
+                        <br/>
+                        CDM: { this.state.targetDatabase.version }
+                    </Card.Text>
+
+                    <Button className="accessButton btn btn-primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
                 </Card.Body>
             </Card>
         );

@@ -1,31 +1,26 @@
-.title {
-    text-align: center;
-}
-
 .tablesArea {
-    display: flex;
-    justify-content: space-evenly;
+    margin: 10px 15px;
 }
 
-
-
-.cdmTableRectangle {
-    width: 200px;
-    height: 50px;
-
-    margin: 5px 10px;
-
-    border-color: darkblue;
-    border-style: solid;
-    background-color: lightskyblue;
+.EHRTitle {
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
 }
 
-.cdmTableText {
-    font-size: 15px;
-    text-align: center;
+.CDMdropdown {
+    margin-left: 10px;
+    color: greenyellow;
+}
+
+.tableShow {
+    visibility: visible;
+}
+
+.tableHidden {
+    visibility: hidden;
 }
 
 .table {
-    border-spacing: 10px;
     border: 1px solid gray;
 }

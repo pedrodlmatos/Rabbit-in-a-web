@@ -5,7 +5,6 @@ import { MenuItems } from "./MenuItems";
 import './Navbar.css'
 import Home from "../home/home";
 import Sessions from "../sessionList/SessionList";
-import Demo from "../demo/Demo";
 import Session from "../session/Session";
 
 
@@ -37,7 +36,6 @@ class Navbar extends Component {
 
                 <Switch>
                     <Route exact path='/home' component={Home} />
-                    <Route exact path='/demo' component={Demo} />
                     <Route path='/sessions' component={Sessions} />
                     <Route path='/session/:id' component={Session} />
                     <Route exact path='/documentation' component={Documentation} />

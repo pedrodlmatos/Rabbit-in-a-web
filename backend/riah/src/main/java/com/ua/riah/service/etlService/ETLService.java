@@ -1,8 +1,19 @@
 package com.ua.riah.service.etlService;
 
 import com.ua.riah.model.ETL;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface ETLService {
 
-    ETL createCDMModel(String omop, String cdmVersion);
+    List<ETL> getAllETL();
+
+    ETL createDefaultELTSession();
+
+    ETL createETLSession(MultipartFile file, String cdm);
+
+    ETL getETLWithId(Long id);
+
+    ETL changeTargetDatabase(Long etl_id, String cdm);
 }

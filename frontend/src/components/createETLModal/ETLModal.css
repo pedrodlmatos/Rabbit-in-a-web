@@ -1,0 +1,7 @@
+.showFileName {
+    visibility: visible;
+}
+
+.hideFileName {
+    visibility: hidden;
+}

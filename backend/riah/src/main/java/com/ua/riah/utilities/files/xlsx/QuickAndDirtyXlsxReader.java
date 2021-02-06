@@ -3,8 +3,17 @@ package com.ua.riah.utilities.files.xlsx;
 import com.ua.riah.utilities.StringUtilities;
 import com.ua.riah.utilities.collections.IntegerComparator;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -37,7 +46,7 @@ public class QuickAndDirtyXlsxReader extends ArrayList<QuickAndDirtyXlsxReader.S
         }
     }
 
-    private void loadSharedStringsAndRels(FileInputStream inputStream) {
+    private void loadSharedStringsAndRels(InputStream inputStream) {
         try {
             int tasksComplete = 0;
             ZipInputStream zipInputStream = new ZipInputStream(inputStream);
@@ -79,9 +88,10 @@ public class QuickAndDirtyXlsxReader extends ArrayList<QuickAndDirtyXlsxReader.S
             }
     }
 
+    /*
     public QuickAndDirtyXlsxReader(InputStream stream) {
         readFromStream(stream);
-    }
+    }*/
 
     private void readFromStream(InputStream inputStream) {
         try {

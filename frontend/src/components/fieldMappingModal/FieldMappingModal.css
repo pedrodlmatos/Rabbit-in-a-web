@@ -1,0 +1,15 @@
+.showDetails {
+    visibility: visible;
+}
+
+.hideDetails {
+    visibility: hidden;
+}
+
+.showButton {
+    visibility: visible;
+}
+
+.hideButton {
+    visibility: hidden;
+}
