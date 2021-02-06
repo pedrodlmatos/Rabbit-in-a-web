@@ -17,9 +17,9 @@ services:
       PROFILE: "runtime"
     ports:
       - 8081:8081
-  #frontend:
-  #  build: 
-  #    context: frontend
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - 3000:3000
+  frontend:
+    build: 
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
