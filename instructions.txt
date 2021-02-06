@@ -1,3 +1,12 @@
+--- Install Jenkins ---
+sudo apt-get install default-jre
+sudo apt-get install wget
+wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+sudo sh -c 'echo deb http://pkg.jenkins-ci.org/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+(if necessary sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <the key>)
+sudo apt-get update
+sudo apt-get install jenkins
+
 --- Install Docker ---
 
 sudo apt-get update
