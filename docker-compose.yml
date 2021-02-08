@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres
     ports:
-      - 5432:5432 
+      - 6000:5432 
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -17,9 +17,9 @@ services:
       PROFILE: "dev"
     ports:
       - 8100:8000
-  #frontend:
-  #  build: 
-  #    context: frontend
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - 3000:3000
+  frontend:
+    build: 
+      context: frontend
+      dockerfile: Dockerfile.DEV
+    ports:
+      - 3000:3000
