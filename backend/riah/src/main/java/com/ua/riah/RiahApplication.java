@@ -16,7 +16,7 @@ public class RiahApplication {
 	}
 }
 
-/*
+
 @Component
 class DatabaseLoader implements CommandLineRunner {
 
@@ -41,4 +41,4 @@ class DatabaseLoader implements CommandLineRunner {
 		//sourceDatabaseService.loadScanReport();
 	}
 }
-*/
+
