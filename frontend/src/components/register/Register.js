@@ -4,7 +4,7 @@ import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
 import { isEmail } from "validator";
 import AuthService from "../../services/auth-service";
-import {Card, Col} from "react-bootstrap";
+import {Card} from "react-bootstrap";
 import './Register.css';
 
 const required = value => {

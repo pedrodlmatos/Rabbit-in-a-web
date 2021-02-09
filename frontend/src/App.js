@@ -6,10 +6,6 @@ import Home from "./components/home/home";
 import Sessions from "./components/sessionList/SessionList";
 import Session from "./components/session/Session";
 import Documentation from "./components/documentation/Documentation";
-import Login from "./components/login/Login";
-import Register from "./components/register/Register";
-import Profile from "./components/profile/Profile";
-import BoardUser from "./components/boards/BoardUser";
 
 class App extends Component {
     constructor(props) {
@@ -40,8 +36,6 @@ class App extends Component {
     }
 
     render() {
-        const { currentUser, showModeratorBoard, showAdminBoard } = this.state;
-
         return(
             <div>
                 <Router>
