@@ -1,7 +1,8 @@
 import axios from 'axios';
 import authHeader from './auth-header';
+import {environment} from "./environment";
 
-const API_URL = 'http://localhost:8100/api/tableMap/'
+const API_URL = environment.TABLE_MAP_URL;
 
 class TableMappingService {
 
