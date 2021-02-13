@@ -40,7 +40,7 @@ public class TargetDatabaseServiceImpl implements TargetDatabaseService {
     private final Logger logger = LoggerFactory.getLogger(TargetDatabaseServiceImpl.class);
 
     //private static String CONCEPT_ID_HINTS_FILE_NAME = "src/main/resources/CDMConceptIDHints_v5.0_02-OCT-19.csv";
-    private static String CONCEPT_ID_HINTS_FILE_NAME = "app/CDMConceptIDHints_v5.0_02-OCT-19.csv";
+    private static String CONCEPT_ID_HINTS_FILE_NAME = "CDMConceptIDHints_v5.0_02-OCT-19.csv";
 
 
     @Override

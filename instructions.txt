@@ -26,6 +26,13 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 
+--- Install node + npm ---
+sudo apt-get install curl software-properties-common
+curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
+sudo apt-get install -y nodejs
+
+
+
 
 
 docker-compose up -d --build

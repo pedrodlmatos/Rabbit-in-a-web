@@ -16,6 +16,6 @@ public enum CDMVersion {
 
     CDMVersion(String fileName) {
         //this.fileName = "src/main/resources/CDM_Versions/" + fileName;
-        this.fileName = "app/CDM_Versions/" + fileName;
+        this.fileName = "CDM_Versions/" + fileName;
     }
 }
