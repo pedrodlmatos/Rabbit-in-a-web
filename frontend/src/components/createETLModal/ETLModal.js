@@ -42,33 +42,37 @@ class ETLModal extends Component {
     render() {
         return(
             <Modal show={this.props.modalIsOpen} onHide={this.props.closeModal} size={"md"}>
-                <Modal.Header>
+                <Modal.Header closeButton>
                     <Modal.Title id="contained-modal-title-vcenter">
                         <p>Create ETL Session</p>
                     </Modal.Title>
                 </Modal.Header>
 
-                <Modal.Body>
-                    <Row>
-                        <p><strong>EHR: </strong></p>
-                        <p className={this.state.fileName === "" ? "hideFileName" : "showFileName"}>{this.state.fileName}</p>
-                    </Row>
-                    <Row>
-                        <FilePicker extensions={["xlsx"]} onChange={this.handleSave} onError={err => console.log(err)}>
-                            <button>Upload</button>
-                        </FilePicker>
-                    </Row>
+                <Modal.Body className="modalBody">
+                    <div className="bodyEntries">
+                        <Row>
+                            <p><strong>EHR:</strong></p>
+                            <p className={this.state.fileName === "" ? "hideFileName" : "showFileName"}> {this.state.fileName} </p>
+                        </Row>
+                        <Row>
+                            <FilePicker extensions={["xlsx"]} onChange={this.handleSave} onError={err => console.log(err)}>
+                                <Button>Upload</Button>
+                            </FilePicker>
+                        </Row>
+                    </div>
 
-                    <Row>
-                        <p><strong>CDM: </strong></p>
-                        <DropdownButton className="CDMdropdown" alignRight variant={"secondary"} title={this.state.cdm.name} id="dropdown">
-                            { CDMVersions.map((item, index) => {
-                                return (
-                                    <Dropdown.Item key={index} eventKey={[item.id, item.name]} onSelect={() => this.handleCDMSelect(item)}>{item.name}</Dropdown.Item>
-                                )
-                            }) }
-                        </DropdownButton>
-                    </Row>
+                    <div className="bodyEntries">
+                        <Row>
+                            <p><strong>CDM: </strong></p>
+                            <DropdownButton className="CDMdropdown" alignRight variant={"secondary"} title={this.state.cdm.name} id="dropdown">
+                                { CDMVersions.map((item, index) => {
+                                    return (
+                                        <Dropdown.Item key={index} eventKey={[item.id, item.name]} onSelect={() => this.handleCDMSelect(item)}>{item.name}</Dropdown.Item>
+                                    )
+                                }) }
+                            </DropdownButton>
+                        </Row>
+                    </div>
                 </Modal.Body>
 
                 <Modal.Footer>

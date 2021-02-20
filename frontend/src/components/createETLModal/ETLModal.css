@@ -5,3 +5,11 @@
 .hideFileName {
     visibility: hidden;
 }
+
+.modalBody {
+    margin: 0 2%;
+}
+
+.bodyEntries {
+    margin: 1% 0;
+}
