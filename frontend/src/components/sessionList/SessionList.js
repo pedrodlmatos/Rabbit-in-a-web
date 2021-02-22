@@ -43,24 +43,10 @@ class SessionList extends Component {
         });
     }
 
-    /*
-    createSession(event) {
-        ETLService.createETL()
-        .then((response) => {
-            this.setState(this.state.sessions.concat(response.data), () => window.location.reload());
-        }).catch(error => {
-            console.log(error.response)
-        });      
-    }*/
-
-    createSession() {
-
-    }
-
 
     render() {
         const sessions = this.state.sessions.map(
-            session => <SessionCard key={session.id} session={session}/>
+            session => <SessionCard key={session.id} id={session.id} name={session.name} ehr={session.sourceDatabase.databaseName} omop={session.targetDatabase.databaseName}/>
         )
         
 
@@ -68,9 +54,10 @@ class SessionList extends Component {
             <div className="sessionsContainer">
                 <h1>ETL Sessions</h1>
 
-                <CardDeck className="sessionCard">
-                    { sessions }
-                </CardDeck>
+                    <CardDeck className="sessionCard">
+                        { sessions }
+                    </CardDeck>
+
 
                 <Button type="btn btn-primary" onClick={() => this.openModal()}>Create Session</Button>
                 <ETLModal modalIsOpen={this.state.modalIsOpen} closeModal={this.closeModal} />

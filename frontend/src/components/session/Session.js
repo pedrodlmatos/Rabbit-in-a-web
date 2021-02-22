@@ -410,7 +410,7 @@ class Session extends Component {
                 <Row>
                     <Col sm={3} md={3} lg={3}>
                         <div>
-                            <h4 className="EHRTitle">EHR Database</h4>
+                            <h4>EHR Database</h4>
 
                             { this.state.sourceDB_tables.map((item, index) => {
                                 return (
@@ -421,7 +421,7 @@ class Session extends Component {
                     </Col>
 
                     <Col sm={3} md={3} lg={3}>
-                        <DropdownButton className="CDMdropdown" alignRight variant={"secondary"} title={this.state.cdmName} id="dropdown">
+                        <DropdownButton alignRight variant={"secondary"} title={this.state.cdmName} id="dropdown">
                             { CDMVersions.map((item, index) => {
                                 return (
                                     <Dropdown.Item key={index} eventKey={[item.id, item.name]} onSelect={() => this.handleCDMSelect(item.id)}>{item.name}</Dropdown.Item>
@@ -449,7 +449,7 @@ class Session extends Component {
                     <Col sm={6} md={6} lg={6}>
                         <div className={this.state.showTable ? "tableShow" : "tableHidden"}>
                             <h6><strong>Table name: </strong>{this.state.tableName}</h6>
-                            <Table className="table">
+                            <Table striped bordered hover>
                                 <thead>
                                 <tr>
                                     {this.state.columns.map((item, index) => {

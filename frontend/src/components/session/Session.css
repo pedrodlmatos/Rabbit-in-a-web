@@ -1,15 +1,8 @@
 .tablesArea {
-    margin: 10px 15px;
-}
-
-.EHRTitle {
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-bottom: 10px;
+    margin: 1% 2%;
 }
 
 .CDMdropdown {
-    margin-left: 10px;
     color: greenyellow;
 }
 
@@ -19,8 +12,4 @@
 
 .tableHidden {
     visibility: hidden;
-}
-
-.table {
-    border: 1px solid gray;
 }
