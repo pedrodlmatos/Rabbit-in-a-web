@@ -11,5 +11,11 @@
 }
 
 .bodyEntries {
+    vertical-align: center;
     margin: 1% 0;
+}
+
+.CDMdropdown {
+    margin-left: 10px;
+    color: greenyellow;
 }

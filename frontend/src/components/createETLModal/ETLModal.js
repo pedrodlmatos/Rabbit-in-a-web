@@ -77,7 +77,7 @@ class ETLModal extends Component {
 
                 <Modal.Footer>
                     <Button onClick={this.createSession}>Create</Button>
-                    <Button onClick={this.props.closeModal}>Close</Button>
+                    <Button className="btn-danger" onClick={this.props.closeModal}>Close</Button>
                 </Modal.Footer>
             </Modal>
         )

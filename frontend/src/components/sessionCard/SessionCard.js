@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import {Card, Button } from 'react-bootstrap';
 import './SessionCard.css';
+import {CDMVersions} from "../session/CDMVersions";
 
 
 class SessionCard extends Component {
@@ -10,7 +11,7 @@ class SessionCard extends Component {
         this.state = {
             session_id: props.session.id,
             name: props.session.name,
-            targetDatabase: props.session.targetDatabase,
+            targetDatabase: CDMVersions.filter(function(cdm) { return cdm.id === props.session.targetDatabase.databaseName })[0].name,
             sourceDatabase: props.session.sourceDatabase,
         }
     }
@@ -30,7 +31,7 @@ class SessionCard extends Component {
                     <Card.Text>
                         EHR: { this.state.sourceDatabase.databaseName }
                         <br/>
-                        CDM: { this.state.targetDatabase.version }
+                        CDM: { this.state.targetDatabase }
                     </Card.Text>
 
                     <Button className="accessButton btn btn-primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
