@@ -409,9 +409,10 @@ class Session extends Component {
                 <h1>{ this.state.name }</h1>
                 <Row>
                     <Col sm={3} md={3} lg={3}>
-                        <div>
+                        <div className="databaseNameArea">
                             <h4>EHR Database</h4>
-
+                        </div>
+                        <div>
                             { this.state.sourceDB_tables.map((item, index) => {
                                 return (
                                     <EHRTable key={index} id={item.name} handleCallback={this.setSelectedSourceTable} table={item} />
@@ -421,19 +422,22 @@ class Session extends Component {
                     </Col>
 
                     <Col sm={3} md={3} lg={3}>
-                        <DropdownButton alignRight variant={"secondary"} title={this.state.cdmName} id="dropdown">
-                            { CDMVersions.map((item, index) => {
+                        <div className="databaseNameArea">
+                            <DropdownButton alignRight variant={"secondary"} title={this.state.cdmName} id="dropdown">
+                                { CDMVersions.map((item, index) => {
+                                    return (
+                                        <Dropdown.Item key={index} eventKey={[item.id, item.name]} onSelect={() => this.handleCDMSelect(item.id)}>{item.name}</Dropdown.Item>
+                                    )
+                                }) }
+                            </DropdownButton>
+                        </div>
+                        <div>
+                            { this.state.targetDB_tables.map((item, index) => {
                                 return (
-                                    <Dropdown.Item key={index} eventKey={[item.id, item.name]} onSelect={() => this.handleCDMSelect(item.id)}>{item.name}</Dropdown.Item>
+                                    <CDMTable key={index} id={item.name} handleCallback={this.setSelectedTargetTable} table={item} />
                                 )
-                            }) }
-                        </DropdownButton>
-
-                        { this.state.targetDB_tables.map((item, index) => {
-                            return (
-                                <CDMTable key={index} id={item.name} handleCallback={this.setSelectedTargetTable} table={item} />
-                            )
-                        })}
+                            })}
+                        </div>
                     </Col>
                     {
                         this.state.arrows.map((ar, i) => (

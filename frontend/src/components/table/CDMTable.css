@@ -2,28 +2,32 @@
     width: 200px;
     height: 50px;
     position: relative;
-
     margin-top: 1%;
 
     border-color: darkblue;
     border-style: solid;
     background-color: lightskyblue;
 
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
     text-align: center;
-    vertical-align: center;
 }
 
 .targetTableRectangleSelected {
     width: 200px;
     height: 50px;
-
+    position: relative;
     margin-top: 1%;
 
     border-color: black;
     border-style: dashed;
     background-color: lightskyblue;
 
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
     text-align: center;
-    vertical-align: center;
 }
-

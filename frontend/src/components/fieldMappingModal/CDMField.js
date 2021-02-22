@@ -34,9 +34,7 @@ class CDMField extends Component {
     render() {
         return(
             <div id={this.state.field.name} className={this.state.clicked ? "targetFieldRectangleSelected" : "targetFieldRectangle" } onClick={ () => this.selectTargetField(this.state.field) }>
-                <p className="cdmFieldText">
-                    { this.props.field.name }
-                </p>
+                { this.props.field.name }
             </div>
         )
     }
