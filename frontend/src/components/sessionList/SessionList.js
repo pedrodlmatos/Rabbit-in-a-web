@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {CardDeck} from 'react-bootstrap';
+import {CardDeck, Spinner} from 'react-bootstrap';
 import SessionCard from "../sessionCard/SessionCard";
 import './SessionList.css';
 import Button from "react-bootstrap/Button";
@@ -12,7 +12,8 @@ class SessionList extends Component {
         super(props);
         this.state = {
             sessions: [],
-            modalIsOpen: false
+            modalIsOpen: false,
+            loading: false
         };
 
         this.openModal = this.openModal.bind(this);
@@ -20,11 +21,12 @@ class SessionList extends Component {
     }
 
 
-    componentDidMount() {
+    componentDidMount = async () => {
         ETLService.getAllETL()
             .then(response => {
                 this.setState({
-                    sessions: response.data
+                    sessions: response.data,
+                    loadingSessions: true
                 });
             }).catch(response => {
                 console.log(response);
@@ -52,15 +54,23 @@ class SessionList extends Component {
 
         return (
             <div className="sessionsContainer">
-                <h1>ETL Sessions</h1>
-
-                    <CardDeck className="sessionCard">
-                        { sessions }
-                    </CardDeck>
-
-
-                <Button type="btn btn-primary" onClick={() => this.openModal()}>Create Session</Button>
-                <ETLModal modalIsOpen={this.state.modalIsOpen} closeModal={this.closeModal} />
+                { this.state.loadingSessions ?
+                    (
+                        <div>
+                            <h1>ETL Sessions</h1>
+                            <CardDeck className="sessionCard">
+                                { sessions }
+                            </CardDeck>
+                            <Button type="btn btn-primary" onClick={() => this.openModal()}>Create Session</Button>
+                            <ETLModal modalIsOpen={this.state.modalIsOpen} closeModal={this.closeModal} />
+                        </div>
+                    ) :
+                    (
+                        <div>
+                            <Spinner animation="border"/>
+                        </div>
+                    )
+                }
             </div>
         )
     }

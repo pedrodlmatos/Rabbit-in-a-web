@@ -1,5 +1,5 @@
 export const environment = {
-    ETL_URL: 'http://localhost:8100/api/etl/',
+    ETL_URL: 'http://localhost:8100/v1/api/etl/',
     TABLE_MAP_URL: 'http://localhost:8100/api/tableMap/',
     FIELD_MAP_URL: 'http://localhost:8100/api/fieldMap/'
 

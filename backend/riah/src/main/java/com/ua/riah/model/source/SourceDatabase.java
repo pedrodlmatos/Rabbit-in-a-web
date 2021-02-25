@@ -3,15 +3,7 @@ package com.ua.riah.model.source;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ua.riah.model.ETL;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -29,9 +21,9 @@ public class SourceDatabase {
     @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SourceTable> tables;
 
-    @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<ETL> etl;
+    private ETL etl;
 
     // CONSTRUCTOR
     public SourceDatabase() {
@@ -62,11 +54,11 @@ public class SourceDatabase {
         this.tables = tables;
     }
 
-    public List<ETL> getEtl() {
+    public ETL getEtl() {
         return etl;
     }
 
-    public void setEtl(List<ETL> etl) {
+    public void setEtl(ETL etl) {
         this.etl = etl;
     }
 }

@@ -7,18 +7,28 @@ const API_URL = environment.ETL_URL;
 
 class ETLService {
 
-    getAllETL() {
-        return axios.get(API_URL + 'all', { headers: authHeader() })
+    getAllETL = async () => {
+        try {
+            return await axios.get(API_URL + 'sessions', { headers: authHeader() })
+        } catch (e) {
+            console.log(e);
+        }
+
+        //return axios.get(API_URL + 'sessions', { headers: authHeader() })
     }
 
     getETLById(id) {
-        return axios.get(API_URL + id, { headers: authHeader() });
+        return axios.get(API_URL + "sessions/" + id, { headers: authHeader() });
     }
 
-    createETL(file, cdm) {
+    createETL = async (file, cdm) => {
         let formData = new FormData();
         formData.append("file", file)
-        return axios.post(API_URL + "add", formData, { headers: authHeaderMultiPart(), params: { cdm: cdm } });
+        try {
+            return await axios.post(API_URL + "sessions", formData, { headers: authHeaderMultiPart(), params: { cdm: cdm } });
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     changeTargetDatabase(etl, cdm) {
