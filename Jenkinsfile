@@ -1,12 +1,11 @@
 pipeline {
-    agent {
+    agent any
+
+    stages {
         docker {
             image 'maven:3-alpine' 
             args '-v /root/.m2:/root/.m2' 
         }
-    }
-
-    stages {
 
         /*
          * Maven build backend projetct
@@ -17,18 +16,18 @@ pipeline {
             }
             parallel {
                 stage('Backend project') {
-                    steps {                    
-                        sh '''
-                            cd backend/riah
-                            mvn clean package -DskipTest
-                        '''
+                    steps {
+                        withMaven(maven: 'maven-latest', globalMavenSettingsConfig: 'default-global-settings') {
+                            sh '''
+                                cd backend/riah
+                                mvn clean package -DskipTest
+                            '''
+                        }
                     }
                 }
             }   
         }
     }
 
-    parameters {
-        booleanParam(name: 'Build', defaultValue: true, description: 'Build and Dockerize applications')
-    }
+    parameters {}
 }
