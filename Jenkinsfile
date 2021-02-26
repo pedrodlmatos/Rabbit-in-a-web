@@ -6,7 +6,7 @@ pipeline {
     }
 
     stages {
-        stage('Maven build') {
+        stage('Maven Build') {
             when {
                 expression { params.Build }
             }
