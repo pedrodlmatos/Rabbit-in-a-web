@@ -21,7 +21,7 @@ public class SourceDatabase {
     @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SourceTable> tables;
 
-    @OneToOne(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "sourceDatabase")
     @JsonIgnore
     private ETL etl;
 

@@ -6,6 +6,10 @@ import com.ua.riah.model.target.TargetDatabase;
 import javax.persistence.*;
 import java.util.List;
 
+/*
+* TODO: Fix model problem
+*/
+
 @Entity
 @Table(name = "ETL")
 public class ETL {
@@ -18,7 +22,7 @@ public class ETL {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id", nullable = false)
     private SourceDatabase sourceDatabase;
 

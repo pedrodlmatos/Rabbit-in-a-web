@@ -1,6 +1,7 @@
 package com.ua.riah.service.etlService;
 
 import com.ua.riah.model.ETL;
+import com.ua.riah.model.source.SourceDatabase;
 import com.ua.riah.model.target.TargetDatabase;
 import com.ua.riah.repository.ETLRepository;
 import com.ua.riah.service.source.sourceDatabaseService.SourceDatabaseService;
@@ -54,8 +55,9 @@ public class ETLServiceImpl implements ETLService {
     public ETL createETLSession(MultipartFile file, String cdm) {
         ETL etl = new ETL();
         etl.setName("ETL session " + etlRepository.count());
-        etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromFile(file));
         etl.setTargetDatabase(targetDatabaseService.getDatabaseByCDM(cdm));
+        SourceDatabase sourceDatabase = sourceDatabaseService.createDatabaseFromFile(file);
+        etl.setSourceDatabase(sourceDatabase);
         return etlRepository.save(etl);
     }
 
