@@ -1,8 +1,10 @@
 package com.ua.riah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.CDMVersion;
 import com.ua.riah.model.ETL;
+import com.ua.riah.views.Views;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,6 +33,7 @@ public class TargetDatabase {
     private CDMVersion version;
 
     @Column(name = "database_name", nullable = false)
+    @JsonView(Views.ETLSessionsList.class)
     private String databaseName;
 
     @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

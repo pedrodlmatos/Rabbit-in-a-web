@@ -8,6 +8,14 @@
     border-color: darkred;
     border-style: solid;
     background-color: orange;
+
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    text-align: center;
+    word-wrap: break-word;
 }
 
 .sourceFieldRectangleSelected {
@@ -19,9 +27,12 @@
     border-color: black;
     border-style: dashed;
     background-color: orange;
-}
 
-.sourceFieldText {
     font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
     text-align: center;
+    word-wrap: break-word;
 }

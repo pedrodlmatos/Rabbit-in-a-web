@@ -9,10 +9,10 @@ class SessionCard extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            session_id: props.session.id,
-            name: props.session.name,
-            targetDatabase: CDMVersions.filter(function(cdm) { return cdm.id === props.session.targetDatabase.databaseName })[0].name,
-            sourceDatabase: props.session.sourceDatabase,
+            session_id: props.id,
+            name: props.name,
+            targetDatabase: CDMVersions.filter(function(cdm) { return cdm.id === props.omop })[0].name,
+            sourceDatabase: props.ehr,
         }
     }
 
@@ -22,21 +22,24 @@ class SessionCard extends Component {
 
     render() {
         return(
-            <Card className="card">
-                <Card.Body>
-                    <Card.Title>
-                        { this.state.name }
-                    </Card.Title>
+            <div className="col-sm-3 col-md-2">
+                <Card className="card">
+                    <Card.Body>
+                        <Card.Title>
+                            { this.state.name }
+                        </Card.Title>
 
-                    <Card.Text>
-                        EHR: { this.state.sourceDatabase.databaseName }
-                        <br/>
-                        CDM: { this.state.targetDatabase }
-                    </Card.Text>
+                        <Card.Text>
+                            EHR: { this.state.sourceDatabase }
+                            <br/>
+                            CDM: { this.state.targetDatabase }
+                        </Card.Text>
 
-                    <Button className="accessButton btn btn-primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
-                </Card.Body>
-            </Card>
+                        <Button className="accessButton btn btn-primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
+                    </Card.Body>
+                </Card>
+            </div>
+
         );
     }
 }

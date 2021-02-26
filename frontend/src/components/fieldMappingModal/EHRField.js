@@ -34,9 +34,7 @@ class EHRField extends Component {
     render() {
         return(
             <div id={this.state.field.name} className={this.state.clicked ? "sourceFieldRectangleSelected" : "sourceFieldRectangle" } onClick={() => this.selectSourceField(this.state.field)}>
-                <p className="sourceFieldText">
-                    { this.state.field.name }
-                </p>
+                { this.state.field.name }
             </div>
         )
     }

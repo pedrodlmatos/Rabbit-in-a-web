@@ -240,14 +240,14 @@ class FieldMappingModal extends Component {
                 <Modal.Header>
                     <Modal.Title id="contained-modal-title-vcenter">
                         <p>
-                            { this.state.sourceTable.name } -----> {this.state.targetTable.name}
+                            { this.state.sourceTable.name } <i className="fa fa-long-arrow-alt-right"></i> {this.state.targetTable.name}
                         </p>
                     </Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
                     <Row>
-                        <Col md={4}>
+                        <Col md={5}>
                             { this.state.sourceTable.fields.map((item, index) => {
                                 return (
                                     <EHRField key={index} id={item.name} handleCallback={this.setSelectedSourceField} field={item} />
@@ -255,7 +255,7 @@ class FieldMappingModal extends Component {
                             })}
                         </Col>
                         
-                        <Col md={4}>
+                        <Col md={5}>
                             { this.state.targetTable.fields.map((item, index) => {
                                 return (
                                     <CDMField key={index} id={item.name} handleCallback={this.setSelectedTargetField} field={item} />
@@ -271,7 +271,7 @@ class FieldMappingModal extends Component {
                                     }}/>
                         ))}
 
-                        <Col md={4}>
+                        <Col md={2}>
                             <div className={this.state.showDetails ? "showDetails" : "hideDetails"}>
                                 <p><strong>Field name: </strong>{this.state.field.name}</p>
                                 <p><strong>Description: </strong>{this.state.field.description}</p>

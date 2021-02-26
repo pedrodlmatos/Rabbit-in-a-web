@@ -3,6 +3,11 @@ package com.ua.riah.controller;
 import com.ua.riah.model.ETL;
 import com.ua.riah.model.TableMapping;
 import com.ua.riah.service.etlService.ETLService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.hibernate.annotations.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +31,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/api/etl")
+@RequestMapping("/v1/api/etl")
 public class ETLController {
 
     @Autowired
@@ -34,7 +39,15 @@ public class ETLController {
 
     private static final Logger logger = LoggerFactory.getLogger(ETLController.class);
 
-    @GetMapping("/all")
+    @Operation(summary = "Retrieve all ETL sessions")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL sessions",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class))}
+                    )
+    })
+    @GetMapping("/sessions")
     public ResponseEntity<?> getAllETLs() {
         logger.info("ETL - Requesting all ETL sessions");
 
@@ -47,7 +60,17 @@ public class ETLController {
     }
 
 
-    @GetMapping("/{id}")
+    @Operation(summary = "Retrieve a ETL session by its id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200", description = "Found the ETL session",
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ETL.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "404", description = "ETL session not found", content = @Content
+            )
+    })
+    @GetMapping("/sessions/{id}")
     public ResponseEntity<?> getETLById(@PathVariable Long id) {
         logger.info("ETL - Requesting ETL session with id " + id);
 
@@ -60,15 +83,29 @@ public class ETLController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/add", consumes = "multipart/form-data")
+
+    @Operation(summary = "Create an ETL session")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201", description = "Creates a new ETL session",
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ETL.class))}
+            )
+    })
+    @PostMapping(value = "/sessions", consumes = "multipart/form-data")
     public ResponseEntity<?> createETLSession(@RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
         ETL etl = etlService.createETLSession(file, cdm);
         logger.info("ETL - Created ETL session with id: " + etl.getId());
-        return new ResponseEntity<>(etl, HttpStatus.OK);
+        return new ResponseEntity<>(etl, HttpStatus.CREATED);
     }
 
 
-    @PutMapping("/changeTrgDB")
+    @Operation(summary = "Change OMOP CDM version in ETL session")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200"
+            )
+    })
+    @PutMapping("/sessions")
     public ResponseEntity<?> changeTargetDatabase(@RequestBody ETL etl, @Param(value = "cdm") String cdm) {
         logger.info("ETL - Change target database of session {} to {}", etl.getId(), cdm);
 

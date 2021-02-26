@@ -1,15 +1,12 @@
 .tablesArea {
-    margin: 10px 15px;
+    margin: 1% 2%;
 }
 
-.EHRTitle {
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-bottom: 10px;
+.databaseNameArea {
+    min-height: 50px;
 }
 
 .CDMdropdown {
-    margin-left: 10px;
     color: greenyellow;
 }
 
@@ -19,8 +16,4 @@
 
 .tableHidden {
     visibility: hidden;
-}
-
-.table {
-    border: 1px solid gray;
 }

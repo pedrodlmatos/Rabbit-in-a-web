@@ -34,9 +34,7 @@ class CDMTable extends Component {
     render() {
         return(
             <div id={this.state.table.name} className={this.state.clicked ? "targetTableRectangleSelected" : "targetTableRectangle" } onClick={ () => this.selectTargetTable(this.state.table) }>
-                <p className="cdmTableText">
-                    { this.props.table.name }
-                </p>
+                { this.props.table.name }
             </div>
         )
     }
