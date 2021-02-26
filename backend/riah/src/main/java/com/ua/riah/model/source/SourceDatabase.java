@@ -1,7 +1,9 @@
 package com.ua.riah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.ETL;
+import com.ua.riah.views.Views;
 
 import javax.persistence.*;
 import java.util.List;
@@ -16,6 +18,7 @@ public class SourceDatabase {
     private Long id;
 
     @Column(name = "database_name", nullable = false)
+    @JsonView(Views.ETLSessionsList.class)
     private String databaseName;
 
     @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

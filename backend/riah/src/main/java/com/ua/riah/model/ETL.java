@@ -1,7 +1,9 @@
 package com.ua.riah.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.source.SourceDatabase;
 import com.ua.riah.model.target.TargetDatabase;
+import com.ua.riah.views.Views;
 
 import javax.persistence.*;
 import java.util.List;
@@ -17,9 +19,11 @@ public class ETL {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView(Views.ETLSessionsList.class)
     private Long id;
 
     @Column(name = "name", nullable = false)
+    @JsonView(Views.ETLSessionsList.class)
     private String name;
 
     @OneToOne(cascade = CascadeType.MERGE)
