@@ -1,18 +1,17 @@
 pipeline {
     agent any
-    stages {
-    stage('Stage 1') {
-        steps {
-            script {
-                echo 'Stage 1'
-            }
-        }
+
+    triggers {
+        pollSCM '* * * * *'
     }
-    stage('Stage 2') {
+
+    stages {
+        stage('Build') {
             steps {
-                script {
-                    echo 'Stage 2'
-                }
+                sh '''
+                    cd backend/riah
+                    mvn clean package -DskipTests
+                '''
             }
         }
     }
