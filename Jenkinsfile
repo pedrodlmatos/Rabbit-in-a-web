@@ -1,11 +1,11 @@
 pipeline {
     agent any
 
-    triggers {
-        pollSCM '* * * * *'
-    }
-
     stages {
+
+        /*
+         * Maven build backend projetct
+         */
         stage('Maven Build') {
             when {
                 expression { params.Build }
@@ -23,5 +23,9 @@ pipeline {
                 }
             }   
         }
+    }
+
+    parameters {
+        booleanParam(name: 'Build', defaultValue: true, description: 'Build and Dockerize applications')
     }
 }
