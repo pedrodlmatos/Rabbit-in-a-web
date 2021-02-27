@@ -12,7 +12,7 @@ pipeline {
             parallel {
                 stage('Backend project') {
                     steps {
-                        withMaven(mavenSettingsConfig: 'b7c8e3fd-55f0-461e-a31b-f67b6965e319') {
+                        withMaven(mavenSettingsConfig: '36ce45b9-8eb6-4068-b806-04f48c5a0a4f') {
                             sh '''
                                 cd backend/riah
                                 mvn clean package -DskipTest
