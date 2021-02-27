@@ -5,7 +5,7 @@ pipeline {
         /*
          * Maven build backend projetct
          */
-        stage('Maven build') {
+        stage('Maven Build') {
             when {
                 expression { params.Build }
             }
