@@ -17,7 +17,7 @@ pipeline {
             parallel {
                 stage('Backend project') {
                     steps {
-                        withMaven(maven: 'maven-latest', globalMavenSettingsConfig: 'default-global-settings') {
+                        withMaven(mavenSettingsConfig: 'b7c8e3fd-55f0-461e-a31b-f67b6965e319') {
                             sh '''
                                 cd backend/riah
                                 mvn clean package -DskipTest
@@ -29,5 +29,7 @@ pipeline {
         }
     }
 
-    parameters {}
+    parameters {
+        booleanParam(name: 'Build', defaultValue: true, description: 'Build and Dockerize applications')
+    }
 }
