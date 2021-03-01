@@ -8,9 +8,6 @@ import com.ua.riah.views.Views;
 import javax.persistence.*;
 import java.util.List;
 
-/*
-* TODO: Fix model problem
-*/
 
 @Entity
 @Table(name = "ETL")

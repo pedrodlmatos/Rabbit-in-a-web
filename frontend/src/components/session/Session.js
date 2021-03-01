@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Col, Row, Table, Dropdown, DropdownButton} from "react-bootstrap";
+import {Col, Row, Table, Dropdown, DropdownButton, Button} from "react-bootstrap";
 import Xarrow from "react-xarrows";
 import "./Session.css";
 import EHRTable from "../table/EHRTable";
@@ -8,6 +8,7 @@ import FieldMappingModal from "../fieldMappingModal/FieldMappingModal";
 import ETLService from "../../services/etl-list-service";
 import TableMappingService from "../../services/table-mapping-service";
 import { CDMVersions } from "./CDMVersions";
+import HelpModal from "./HelpModal";
 
 
 class Session extends Component {
@@ -26,12 +27,16 @@ class Session extends Component {
             columns: ['Field', "Type", "Description"], data: [], showTable: false, tableName: "",
 
             /* arrows */
-            arrows: [], selectedArrow: null, arrow_id: null, modalIsOpen: false
+            arrows: [], selectedArrow: null, arrow_id: null, modalIsOpen: false,
+
+            showHelpModal: false
         }
 
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
         this.handleCDMSelect = this.handleCDMSelect.bind(this);
+        this.openHelpModal = this.openHelpModal.bind(this);
+        this.closeHelpModal = this.closeHelpModal.bind(this);
     }
 
     /**
@@ -402,11 +407,30 @@ class Session extends Component {
         this.setState({ modalIsOpen: false });
     }
 
+    openHelpModal() {
+        this.setState({
+            showHelpModal: true
+        });
+    }
+
+    closeHelpModal() {
+        this.setState({
+            showHelpModal: false
+        });
+    }
+
     render() {
 
         return(
             <div className="tablesArea">
-                <h1>{ this.state.name }</h1>
+                <Row>
+                    <Col sm={4} md={4} lg={4}>
+                        <h1>{ this.state.name }</h1>
+                    </Col>
+
+                    <Button variant="info" size={"md"} onClick={this.openHelpModal}>Help <i className="fa fa-info"/></Button>
+                </Row>
+
                 <Row>
                     <Col sm={3} md={3} lg={3}>
                         <div className="databaseNameArea">
@@ -482,6 +506,8 @@ class Session extends Component {
                 </Row>
                 <FieldMappingModal modalIsOpen={this.state.modalIsOpen} closeModal={this.closeModal}
                                        data={this.state.arrow_id} remove={this.removeArrow}/>
+
+                <HelpModal modalIsOpen={this.state.showHelpModal} closeModal={this.closeHelpModal}/>
             </div>
         )
     }

@@ -35,6 +35,10 @@ class ETLModal extends Component {
      * @returns {Promise<void>}
      */
     createSession = async () => {
+        //
+        this.props.createSession();
+
+        //
         this.setState({ loading: true })
         ETLService.createETL(this.state.file, this.state.cdm.id).then(res => {
             window.location.href = '/session/' + res.data.id;

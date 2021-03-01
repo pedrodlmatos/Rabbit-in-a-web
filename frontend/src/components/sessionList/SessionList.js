@@ -13,11 +13,13 @@ class SessionList extends Component {
         this.state = {
             sessions: [],
             modalIsOpen: false,
-            loading: false
+            loading: false,
+            createSessionLoading: false
         };
 
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.createETLSession = this.createETLSession.bind(this);
     }
 
 
@@ -45,6 +47,12 @@ class SessionList extends Component {
         });
     }
 
+    createETLSession() {
+        this.setState({
+            createSessionLoading: true
+        })
+    }
+
 
     render() {
         const sessions = this.state.sessions.map(
@@ -61,8 +69,8 @@ class SessionList extends Component {
                             <CardDeck className="sessionCard">
                                 { sessions }
                             </CardDeck>
-                            <Button type="btn btn-primary" onClick={() => this.openModal()}>Create Session</Button>
-                            <ETLModal modalIsOpen={this.state.modalIsOpen} closeModal={this.closeModal} />
+                            <Button type="btn btn-primary" onClick={() => this.openModal()} disabled={this.state.createSessionLoading}>Create Session</Button>
+                            <ETLModal modalIsOpen={this.state.modalIsOpen} createSession={this.createETLSession} closeModal={this.closeModal} />
                         </div>
                     ) :
                     (
