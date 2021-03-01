@@ -69,7 +69,7 @@ class SessionList extends Component {
                             <CardDeck className="sessionCard">
                                 { sessions }
                             </CardDeck>
-                            <Button type="btn btn-primary" onClick={() => this.openModal()} disabled>Create Session</Button>
+                            <Button type="btn btn-primary" onClick={() => this.openModal()} disabled={this.state.createSessionLoading}>Create Session</Button>
                             <ETLModal modalIsOpen={this.state.modalIsOpen} createSession={this.createETLSession} closeModal={this.closeModal} />
                         </div>
                     ) :
