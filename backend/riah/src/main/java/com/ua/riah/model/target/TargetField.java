@@ -1,7 +1,9 @@
 package com.ua.riah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.FieldMapping;
+import com.ua.riah.views.Views;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,15 +24,19 @@ public class TargetField {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonView(Views.ETLSession.class)
     private Long id;
 
     @Column(name = "name")
+    @JsonView(Views.ETLSession.class)
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
     private String description;
 
     @Column(name = "type")
+    @JsonView(Views.ETLSession.class)
     private String type;
 
     @Column(name = "nullable")

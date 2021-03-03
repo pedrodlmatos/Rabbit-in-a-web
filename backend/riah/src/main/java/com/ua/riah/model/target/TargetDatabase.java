@@ -37,6 +37,7 @@ public class TargetDatabase {
     private String databaseName;
 
     @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonView(Views.ETLSession.class)
     private List<TargetTable> tables;
 
     @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

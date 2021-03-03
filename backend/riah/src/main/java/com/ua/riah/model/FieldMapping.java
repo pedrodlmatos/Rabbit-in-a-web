@@ -1,8 +1,10 @@
 package com.ua.riah.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.source.SourceField;
 import com.ua.riah.model.target.TargetField;
+import com.ua.riah.views.Views;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,14 +22,17 @@ public class FieldMapping {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonView(Views.ETLSession.class)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "source_id", nullable = false)
+    @JsonView(Views.ETLSession.class)
     private SourceField source;
 
     @ManyToOne
     @JoinColumn(name = "target_id", nullable = false)
+    @JsonView(Views.ETLSession.class)
     private TargetField target;
 
     @ManyToOne

@@ -22,6 +22,7 @@ public class SourceDatabase {
     private String databaseName;
 
     @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonView(Views.ETLSession.class)
     private List<SourceTable> tables;
 
     @OneToOne(mappedBy = "sourceDatabase")

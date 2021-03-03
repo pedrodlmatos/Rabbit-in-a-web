@@ -26,6 +26,7 @@ class SessionList extends Component {
     componentDidMount = async () => {
         ETLService.getAllETL()
             .then(response => {
+                console.log(response.data);
                 this.setState({
                     sessions: response.data,
                     loadingSessions: true

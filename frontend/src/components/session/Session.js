@@ -48,6 +48,7 @@ class Session extends Component {
         /* get data from API */
         ETLService.getETLById(session_id)
             .then(res => {
+                console.log(res.data)
                 let maps = []
 
                 res.data.tableMappings.forEach(function(item) {
@@ -429,6 +430,7 @@ class Session extends Component {
                     </Col>
 
                     <Button variant="info" size={"md"} onClick={this.openHelpModal}>Help <i className="fa fa-info"/></Button>
+                    <Button variant="warning" size="sm">File</Button>
                 </Row>
 
                 <Row>

@@ -25,13 +25,16 @@ public class ETL {
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id", nullable = false)
+    @JsonView(Views.ETLSessionsList.class)
     private SourceDatabase sourceDatabase;
 
     @ManyToOne
     @JoinColumn(name = "targetDatabase_id", nullable = false)
+    @JsonView(Views.ETLSessionsList.class)
     private TargetDatabase targetDatabase;
 
     @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL)
+    @JsonView(Views.ETLSession.class)
     private List<TableMapping> tableMappings;
 
 

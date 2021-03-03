@@ -1,7 +1,9 @@
 package com.ua.riah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.FieldMapping;
+import com.ua.riah.views.Views;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,9 +24,11 @@ public class SourceTable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonView(Views.ETLSession.class)
     private Long id;
 
     @Column(name = "name")
+    @JsonView(Views.ETLSession.class)
     private String name;
 
     @ManyToOne
@@ -33,6 +37,7 @@ public class SourceTable {
     private SourceDatabase sourceDatabase;
 
     @Column(name = "description", columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
     private String description;
 
     @Column(name = "rowCount", nullable = true)
@@ -42,6 +47,7 @@ public class SourceTable {
     private int rowsCheckedCount;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL)
+    @JsonView(Views.ETLSession.class)
     private List<SourceField> fields;
 
     @OneToMany(mappedBy = "source", cascade = CascadeType.ALL)

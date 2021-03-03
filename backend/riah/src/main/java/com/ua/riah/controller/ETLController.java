@@ -1,9 +1,12 @@
 package com.ua.riah.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.ETL;
 import com.ua.riah.model.TableMapping;
 import com.ua.riah.service.etlService.ETLService;
+import com.ua.riah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,10 +47,11 @@ public class ETLController {
             @ApiResponse(
                     responseCode = "200",
                     description = "ETL sessions",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class))}
+                    content = {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ETL.class)))}
                     )
     })
     @GetMapping("/sessions")
+    @JsonView(Views.ETLSessionsList.class)
     public ResponseEntity<?> getAllETLs() {
         logger.info("ETL - Requesting all ETL sessions");
 
@@ -71,6 +75,7 @@ public class ETLController {
             )
     })
     @GetMapping("/sessions/{id}")
+    @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getETLById(@PathVariable Long id) {
         logger.info("ETL - Requesting ETL session with id " + id);
 

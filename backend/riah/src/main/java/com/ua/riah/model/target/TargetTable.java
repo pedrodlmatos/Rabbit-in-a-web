@@ -1,7 +1,9 @@
 package com.ua.riah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.riah.model.FieldMapping;
+import com.ua.riah.views.Views;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -23,9 +25,11 @@ public class TargetTable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonView(Views.ETLSession.class)
     private Long id;
 
     @Column(name = "name")
+    @JsonView(Views.ETLSession.class)
     private String name;
 
     @ManyToOne
@@ -37,6 +41,7 @@ public class TargetTable {
     private String description;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonView(Views.ETLSession.class)
     private List<TargetField> fields;
 
     @OneToMany(mappedBy = "target", cascade = CascadeType.ALL)
