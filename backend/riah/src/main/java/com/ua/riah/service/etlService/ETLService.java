@@ -16,4 +16,6 @@ public interface ETLService {
     ETL getETLWithId(Long id);
 
     ETL changeTargetDatabase(Long etl_id, String cdm);
+
+    void createDocumentationFile(Long id);
 }

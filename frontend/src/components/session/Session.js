@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Col, Row, Table, Dropdown, DropdownButton, Button} from "react-bootstrap";
+import {Col, Row, Table, Dropdown, DropdownButton, Button, Form} from "react-bootstrap";
 import Xarrow from "react-xarrows";
 import "./Session.css";
 import EHRTable from "../table/EHRTable";
@@ -21,7 +21,7 @@ class Session extends Component {
             sourceDB_tables: [], targetDB_tables: [],
 
             /* selection info */
-            selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false,
+            selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false, comment: null,
 
             /* table info */
             columns: ['Field', "Type", "Description"], data: [], showTable: false, tableName: "",
@@ -128,7 +128,8 @@ class Session extends Component {
         this.setState({ 
             data: data, 
             showTable: true,
-            tableName: table.name
+            tableName: table.name,
+            comment: table.comment
         });
     }
 
@@ -479,30 +480,39 @@ class Session extends Component {
                     <Col sm={6} md={6} lg={6}>
                         <div className={this.state.showTable ? "tableShow" : "tableHidden"}>
                             <h6><strong>Table name: </strong>{this.state.tableName}</h6>
-                            <Table striped bordered hover>
-                                <thead>
-                                <tr>
-                                    {this.state.columns.map((item, index) => {
+
+                            <div className="table">
+                                <Table striped bordered hover>
+                                    <thead>
+                                    <tr>
+                                        {this.state.columns.map((item, index) => {
+                                            return (
+                                                <th key={index}>{item}</th>
+                                            )
+                                        })}
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    {this.state.data.map((item, index) => {
                                         return (
-                                            <th key={index}>{item}</th>
+                                            <tr key={index}>
+                                                <td>{ item.field }</td>
+                                                <td>{ item.type }</td>
+                                                <td>{ item.description }</td>
+                                            </tr>
                                         )
                                     })}
-                                </tr>
-                                </thead>
+                                    </tbody>
+                                </Table>
+                            </div>
 
-                                <tbody>
-                                {this.state.data.map((item, index) => {
-                                    return (
-                                        <tr key={index}>
-                                            <td>{ item.field }</td>
-                                            <td>{ item.type }</td>
-                                            <td>{ item.description }</td>
-                                        </tr>
-                                    )
-                                })}
-                                </tbody>
-
-                            </Table>
+                            <Form>
+                                <Form.Group controlId="formBasic">
+                                    <Form.Label>Comment</Form.Label>
+                                    <Form.Control type="text" defaultValue="asd"/>
+                                </Form.Group>
+                            </Form>
                         </div>
                     </Col>
                 </Row>

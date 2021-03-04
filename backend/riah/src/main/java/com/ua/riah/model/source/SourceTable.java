@@ -40,6 +40,10 @@ public class SourceTable {
     @JsonView(Views.ETLSession.class)
     private String description;
 
+    @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
+    private String comment;
+
     @Column(name = "rowCount", nullable = true)
     private int rowCount;
 
@@ -122,5 +126,13 @@ public class SourceTable {
 
     public void setMappings(List<FieldMapping> mappings) {
         this.mappings = mappings;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

@@ -9,6 +9,7 @@ import com.ua.riah.service.source.sourceTableService.SourceTableService;
 import com.ua.riah.service.tableMapping.TableMappingService;
 import com.ua.riah.service.target.targetDatabase.TargetDatabaseService;
 import com.ua.riah.service.target.targetTable.TargetTableService;
+import com.ua.riah.utilities.WordDocumentGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,6 +78,16 @@ public class ETLServiceImpl implements ETLService {
             return etlRepository.save(etl);
         }
         return null;
+    }
+
+    @Override
+    public void createDocumentationFile(Long id) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            WordDocumentGenerator generator = new WordDocumentGenerator(etl);
+            generator.generateWordDocument(etl);
+        }
     }
 
     /*

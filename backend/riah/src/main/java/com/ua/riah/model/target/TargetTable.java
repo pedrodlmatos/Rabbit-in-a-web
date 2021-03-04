@@ -40,6 +40,10 @@ public class TargetTable {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
+    private String comment;
+
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonView(Views.ETLSession.class)
     private List<TargetField> fields;
@@ -100,5 +104,13 @@ public class TargetTable {
 
     public void setMappings(List<FieldMapping> mappings) {
         this.mappings = mappings;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
