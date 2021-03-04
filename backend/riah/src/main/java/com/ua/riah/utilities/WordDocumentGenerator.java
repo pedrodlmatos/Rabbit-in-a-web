@@ -4,6 +4,8 @@
 package com.ua.riah.utilities;
 
 import com.ua.riah.model.ETL;
+import com.ua.riah.model.TableMapping;
+import com.ua.riah.model.source.SourceTable;
 import com.ua.riah.model.target.TargetTable;
 import com.ua.riah.utilities.files.customXWPF.CustomXWPFDocument;
 import com.ua.riah.utilities.mapping.MappingPanel;
@@ -53,6 +55,28 @@ public class WordDocumentGenerator {
         run.setText("Table name: " + table.getName());
         run.setFontSize(18);
 
-        //createDocumentParagraph(document, )
+        createDocumentParagraph(document, table.getComment());
+
+        for (TableMapping mapping :etl.getTableMappings()) {
+            if (mapping.getTarget() == table) {
+                SourceTable sourceTable = mapping.getSource();
+
+                // HERE
+            }
+        }
+    }
+
+    private static void createDocumentParagraph(CustomXWPFDocument document, String text) {
+        if (text.equals("")) {
+            return;
+        }
+        for (String line: text.split("\n")) {
+            addToParagraph(document.createParagraph(), line);
+        }
+    }
+
+    private static void addToParagraph(XWPFParagraph paragraph, String text) {
+        XWPFRun run = paragraph.createRun();
+        run.setText(text);
     }
 }

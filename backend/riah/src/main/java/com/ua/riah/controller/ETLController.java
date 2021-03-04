@@ -110,7 +110,7 @@ public class ETLController {
                     responseCode = "200"
             )
     })
-    @PutMapping("/sessions")
+    @PutMapping("/sessions/targetDB")
     public ResponseEntity<?> changeTargetDatabase(@RequestBody ETL etl, @Param(value = "cdm") String cdm) {
         logger.info("ETL - Change target database of session {} to {}", etl.getId(), cdm);
 
@@ -119,6 +119,15 @@ public class ETLController {
             response = new ETL();
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/sessions/comment")
+    public ResponseEntity<?> changeTableComment(@RequestBody ETL etl, @Param(value = "id") Long tableId, @Param(value = "comment") String comment) {
+        logger.info("ETL - Change table {} comment", tableId);
+
+        ETL response = etlService.changeComment(etl.getId(), tableId, comment);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

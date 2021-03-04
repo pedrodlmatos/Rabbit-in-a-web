@@ -18,6 +18,7 @@ public class SourceTableServiceImpl implements SourceTableService {
         table.setName(tableName);
         table.setSourceDatabase(database);
         table.setDescription(description);
+        table.setComment(tableName);
         table.setRowCount(n_rows);
         table.setRowsCheckedCount(n_rows_checked);
 
@@ -27,5 +28,24 @@ public class SourceTableServiceImpl implements SourceTableService {
     @Override
     public SourceTable getTableById(Long id) {
         return repository.findById(id).orElse(null);
+    }
+
+
+    /**
+     *
+     * @param tableId
+     * @param comment
+     * @return
+     */
+    @Override
+    public SourceTable changeComment(Long tableId, String comment) {
+        SourceTable table = repository.findById(tableId).orElse(null);
+
+        if (table != null) {
+            table.setComment(comment);
+            return repository.save(table);
+        }
+
+        return null;
     }
 }

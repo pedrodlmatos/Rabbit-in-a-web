@@ -17,6 +17,7 @@ public class TargetTableServiceImpl implements TargetTableService {
         TargetTable table = new TargetTable();
         table.setName(tableName);
         table.setTargetDatabase(database);
+        table.setComment(tableName);
 
         return repository.save(table);
     }
@@ -24,5 +25,17 @@ public class TargetTableServiceImpl implements TargetTableService {
     @Override
     public TargetTable getTableById(Long target_id) {
         return repository.findById(target_id).orElse(null);
+    }
+
+    @Override
+    public TargetTable changeComment(Long tableId, String comment) {
+        TargetTable table = repository.findById(tableId).orElse(null);
+
+        if (table != null) {
+            table.setComment(comment);
+            return repository.save(table);
+        }
+
+        return null;
     }
 }

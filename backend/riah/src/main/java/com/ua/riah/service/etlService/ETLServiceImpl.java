@@ -90,6 +90,19 @@ public class ETLServiceImpl implements ETLService {
         }
     }
 
+    @Override
+    public ETL changeComment(Long id, Long tableId, String comment) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            if (sourceTableService.changeComment(tableId, comment) != null || targetTableService.changeComment(tableId, comment) != null) {
+                return etl;
+            }
+        }
+
+        return etl;
+    }
+
     /*
     @Override
     public ETL createTableMapping(Long etl_id, Long source_id, Long target_id) {

@@ -421,6 +421,10 @@ class Session extends Component {
         });
     }
 
+    handleCommentSubmit = (event) => {
+
+    }
+
     render() {
 
         return(
@@ -507,12 +511,11 @@ class Session extends Component {
                                 </Table>
                             </div>
 
-                            <Form>
-                                <Form.Group controlId="formBasic">
-                                    <Form.Label>Comment</Form.Label>
-                                    <Form.Control type="text" defaultValue="asd"/>
-                                </Form.Group>
-                            </Form>
+                            <form className="form-group" onSubmit={this.handleCommentSubmit}>
+                                <input className="comment" name="comment" type="text" value={this.state.comment}/>
+
+                                <Button variant="primary" type="submit">Submit</Button>
+                            </form>
                         </div>
                     </Col>
                 </Row>

@@ -8,4 +8,6 @@ public interface TargetTableService {
     TargetTable createTable(TargetDatabase database, String tableName);
 
     TargetTable getTableById(Long target_id);
+
+    TargetTable changeComment(Long tableId, String comment);
 }
