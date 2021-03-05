@@ -17,8 +17,13 @@ class ETLService {
         //return axios.get(API_URL + 'sessions', { headers: authHeader() })
     }
 
-    getETLById(id) {
-        return axios.get(API_URL + "sessions/" + id, { headers: authHeader() });
+    getETLById = async (id) => {
+        try {
+            return await axios.get(API_URL + "sessions/" + id, { headers: authHeader() });
+        } catch (e) {
+            console.log(e);
+        }
+
     }
 
     createETL = async (file, cdm) => {
@@ -31,8 +36,17 @@ class ETLService {
         }
     }
 
+
+    /**
+     * Sends a request to change the OMOP CDM version
+     *
+     * @param etl ETL session
+     * @param cdm CDM version to change to
+     * @returns {Promise<AxiosResponse<any>>} ETL session with new data
+     */
+
     changeTargetDatabase(etl, cdm) {
-        return axios.put(API_URL + "changeTrgDB", etl, { headers: authHeader(), params: {cdm: cdm} });
+        return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl.id, cdm: cdm }});
     }
 }
 

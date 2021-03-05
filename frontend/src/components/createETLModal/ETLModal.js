@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Button, Dropdown, DropdownButton, Modal, Row, Spinner} from "react-bootstrap";
+import {Button, Col, Dropdown, DropdownButton, Form, Modal, Row, Spinner} from "react-bootstrap";
 import { FilePicker } from "react-file-picker";
 import {CDMVersions} from "../session/CDMVersions";
 import ETLService from '../../services/etl-list-service';
@@ -58,7 +58,53 @@ class ETLModal extends Component {
                     </Modal.Header>
 
                     <Modal.Body className="modalBody">
-                        <div className="bodyEntries">
+                        <Form>
+                            <Form.Group>
+                                <Form.Row>
+                                    <Form.Label>EHR: </Form.Label>
+                                    <Col><Form.File/></Col>
+                                </Form.Row>
+                            </Form.Group>
+                            <Form.Group inline>
+                                <Form.Row>
+                                    <Form.Label className="my-1 mr-2" htmlFor="inlineFormCustomSelectPref">OMOP CDM: </Form.Label>
+                                    <Form.Control as="select" className="my-1 mr-sm-2" id="inlineFormCustomSelectPref" custom>
+                                        { CDMVersions.map((item, index) => {
+                                            return (
+                                                <option value={item.id}>{item.name}</option>
+                                            )
+                                        }) }
+                                    </Form.Control>
+                                </Form.Row>
+                            </Form.Group>
+                        </Form>
+                    </Modal.Body>
+
+                    { this.state.loading ?
+                        (
+                            <Modal.Footer>
+                                <Button onClick={this.createSession} disabled>
+                                    <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>
+                                </Button>
+                                <Button className="btn-danger" onClick={this.props.closeModal} disabled>Close</Button>
+                            </Modal.Footer>
+                        ) : (
+                            <Modal.Footer>
+                                <Button onClick={this.createSession}>Create</Button>
+                                <Button className="btn-danger" onClick={this.props.closeModal}>Close</Button>
+                            </Modal.Footer>
+                        )
+                    }
+                </Modal>
+            </div>
+        )
+    }
+}
+
+export default ETLModal;
+
+/*
+<div className="bodyEntries">
                             <Row>
                                 <p><strong>EHR:</strong></p>
                                 <p className={this.state.fileName === "" ? "hideFileName" : "showFileName"}> {this.state.fileName} </p>
@@ -82,28 +128,4 @@ class ETLModal extends Component {
                                 </DropdownButton>
                             </Row>
                         </div>
-                    </Modal.Body>
-
-
-                        { this.state.loading ?
-                            (
-                                <Modal.Footer>
-                                    <Button onClick={this.createSession} disabled>
-                                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>
-                                    </Button>
-                                    <Button className="btn-danger" onClick={this.props.closeModal} disabled>Close</Button>
-                                </Modal.Footer>
-                            ) : (
-                                <Modal.Footer>
-                                    <Button onClick={this.createSession}>Create</Button>
-                                    <Button className="btn-danger" onClick={this.props.closeModal}>Close</Button>
-                                </Modal.Footer>
-                            )
-                        }
-                </Modal>
-            </div>
-        )
-    }
-}
-
-export default ETLModal;
+ */

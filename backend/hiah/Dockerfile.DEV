@@ -1,0 +1,16 @@
+FROM maven:3.5.2-jdk-8-alpine AS build
+COPY . /tmp/
+WORKDIR /tmp/
+RUN mvn clean package -Dmaven.test.skip=true
+RUN ls /tmp/target
+
+FROM adoptopenjdk/openjdk8-openj9:alpine-slim
+WORKDIR /app
+COPY --from=0 /tmp/target/hiah-0.0.1-SNAPSHOT.jar hiah.jar
+COPY src/main/resources /app
+COPY run.sh /app
+RUN ls -lR /app
+ENV CONFIG_FILE=application-dev.properties
+ENV APP=hiah
+ENV PROFILE=dev
+ENTRYPOINT ["sh", "run.sh"]

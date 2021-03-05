@@ -7,10 +7,10 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: riah
+      POSTGRES_DB: hiah
   backend:
     build: 
-      context: backend/riah
+      context: backend/hiah
       dockerfile: Dockerfile.DEV
     environment: 
       CONFIG_FILE: "application-dev.properties"

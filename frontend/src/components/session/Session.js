@@ -21,7 +21,7 @@ class Session extends Component {
             sourceDB_tables: [], targetDB_tables: [],
 
             /* selection info */
-            selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false, comment: null,
+            selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false, comment: null, commentDisabled: true,
 
             /* table info */
             columns: ['Field', "Type", "Description"], data: [], showTable: false, tableName: "",
@@ -37,6 +37,8 @@ class Session extends Component {
         this.handleCDMSelect = this.handleCDMSelect.bind(this);
         this.openHelpModal = this.openHelpModal.bind(this);
         this.closeHelpModal = this.closeHelpModal.bind(this);
+        this.editComment = this.editComment.bind(this);
+        this.saveComment = this.saveComment.bind(this);
     }
 
     /**
@@ -405,28 +407,18 @@ class Session extends Component {
         );
     }
 
-    closeModal(){
-        this.setState({ modalIsOpen: false });
-    }
+    closeModal(){ this.setState({ modalIsOpen: false }); }
 
-    openHelpModal() {
-        this.setState({
-            showHelpModal: true
-        });
-    }
+    openHelpModal() { this.setState({ showHelpModal: true }); }
 
-    closeHelpModal() {
-        this.setState({
-            showHelpModal: false
-        });
-    }
+    closeHelpModal() { this.setState({ showHelpModal: false }); }
 
-    handleCommentSubmit = (event) => {
+    editComment() { this.setState({commentDisabled: false}); }
 
-    }
+    saveComment() { this.setState({ commentDisabled: true }); }
+
 
     render() {
-
         return(
             <div className="tablesArea">
                 <Row>
@@ -511,11 +503,15 @@ class Session extends Component {
                                 </Table>
                             </div>
 
-                            <form className="form-group" onSubmit={this.handleCommentSubmit}>
-                                <input className="comment" name="comment" type="text" value={this.state.comment}/>
+                            <Form>
+                                <Form.Group controlId="formComment">
+                                    <Form.Label>Comment</Form.Label>
+                                    <Form.Control type="text" defaultValue={this.state.comment} disabled={this.state.commentDisabled}/>
+                                </Form.Group>
 
-                                <Button variant="primary" type="submit">Submit</Button>
-                            </form>
+                                <Button variant="primary" onClick={this.saveComment} disabled={this.state.commentDisabled}>Save</Button>
+                                <Button variant="info" onClick={this.editComment} disabled={!this.state.commentDisabled}>Edit comment</Button>
+                            </Form>
                         </div>
                     </Col>
                 </Row>
