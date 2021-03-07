@@ -16,9 +16,12 @@ class Session extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            cdmName: "",  etl_id: "",
-            sourceDB_id: "", targetDB_id: "", targetDB: "",
-            sourceDB_tables: [], targetDB_tables: [],
+            etl: {
+                id: null, name: null,
+                targetDatabase: { id: null, tables: [], databaseName: null },
+                sourceDatabase: { id: null, tables: [], databaseName: null }
+            },
+            cdmName: null,
 
             /* selection info */
             selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false, comment: null, commentDisabled: true,
@@ -50,7 +53,6 @@ class Session extends Component {
         /* get data from API */
         ETLService.getETLById(session_id)
             .then(res => {
-                console.log(res.data)
                 let maps = []
 
                 res.data.tableMappings.forEach(function(item) {
@@ -68,12 +70,17 @@ class Session extends Component {
                 })
 
                 this.setState({
-                    etl_id: res.data.id,
-                    name: res.data.name,
-                    sourceDB_id: res.data.sourceDatabase.id,
-                    targetDB_id: res.data.targetDatabase.id,
-                    sourceDB_tables: res.data.sourceDatabase.tables,
-                    targetDB_tables: res.data.targetDatabase.tables,
+                    etl: {
+                        id: res.data.id,
+                        name: res.data.name,
+                        sourceDatabase: res.data.sourceDatabase,
+                        targetDatabase: res.data.targetDatabase
+                    }, 
+                    
+                    //sourceDB_id: res.data.sourceDatabase.id,
+                    //targetDB_id: res.data.targetDatabase.id,
+                    //sourceDB_tables: res.data.sourceDatabase.tables,
+                    //targetDB_tables: res.data.targetDatabase.tables,
                     arrows: maps,
                     cdmName: CDMVersions.filter(function(cdm) { return cdm.id === res.data.targetDatabase.databaseName })[0].name
                 });
@@ -91,6 +98,41 @@ class Session extends Component {
     handleCDMSelect(cdm_id) {
 
         const etl = { 
+            id: this.state.etl.id,
+            sourceDatabase: this.state.etl.sourceDatabase,
+            targetDatabase: this.state.etl.targetDatabase
+        }
+        ETLService.changeTargetDatabase(etl, cdm_id)
+            .then(response => {
+                this.setState({
+                    etl: { 
+                        id: response.data.id,
+                        name: response.data.name,
+                        sourceDatabase: response.data.sourceDatabase,
+                        targetDatabase: response.data.targetDatabase 
+                    },
+                    //targetDB_id: response.data.targetDatabase.id,
+                    //targetDB_tables: response.data.targetDatabase.tables,
+                    cdmName: CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name,
+                    
+                    selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false,
+                    arrows: [], selectedArrow: null, modalShow: false
+                });
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+
+    /**
+     * Changes CDM database 
+     *
+     * @param e event
+     */
+    handleComment(table, comment) {
+        // TODO
+        /*
+        const etl = { 
             id: this.state.etl_id,
             sourceDatabase: this.state.sourceDatabase,
             targetDatabase: this.state.targetDatabase
@@ -107,7 +149,7 @@ class Session extends Component {
                 });
             }).catch(error => {
                 console.log(error);
-            });
+            });*/
     }
 
 
@@ -282,7 +324,7 @@ class Session extends Component {
      * @param endTable
      */
     createArrow = (startTable, endTable) => {
-        TableMappingService.addTableMapping(this.state.etl_id, startTable.id, endTable.id)
+        TableMappingService.addTableMapping(this.state.etl.id, startTable.id, endTable.id)
             .then(res => {
                 const arrow = {
                     id: 'arrow-' + res.data.id,
@@ -371,7 +413,7 @@ class Session extends Component {
             modalIsOpen: false
         });
 
-        TableMappingService.removeTableMapping(this.state.etl_id, this.state.arrow_id)
+        TableMappingService.removeTableMapping(this.state.etl.id, this.state.arrow_id)
             .then(res => {
                 let maps = []
                 res.data.forEach(function(item) {
@@ -417,13 +459,17 @@ class Session extends Component {
 
     saveComment() { this.setState({ commentDisabled: true }); }
 
+    updateComment(event) {
+        this.setState({ comment: event.target.value });
+    }
+
 
     render() {
         return(
             <div className="tablesArea">
                 <Row>
                     <Col sm={4} md={4} lg={4}>
-                        <h1>{ this.state.name }</h1>
+                        <h1>{ this.state.etl.name }</h1>
                     </Col>
 
                     <Button variant="info" size={"md"} onClick={this.openHelpModal}>Help <i className="fa fa-info"/></Button>
@@ -433,10 +479,10 @@ class Session extends Component {
                 <Row>
                     <Col sm={3} md={3} lg={3}>
                         <div className="databaseNameArea">
-                            <h4>EHR Database</h4>
+                            <h4>{this.state.etl.sourceDatabase.databaseName}</h4>
                         </div>
                         <div>
-                            { this.state.sourceDB_tables.map((item, index) => {
+                            { this.state.etl.sourceDatabase.tables.map((item, index) => {
                                 return (
                                     <EHRTable key={index} id={item.name} handleCallback={this.setSelectedSourceTable} table={item} />
                                 )
@@ -455,7 +501,7 @@ class Session extends Component {
                             </DropdownButton>
                         </div>
                         <div>
-                            { this.state.targetDB_tables.map((item, index) => {
+                            { this.state.etl.targetDatabase.tables.map((item, index) => {
                                 return (
                                     <CDMTable key={index} id={item.name} handleCallback={this.setSelectedTargetTable} table={item} />
                                 )
@@ -506,11 +552,11 @@ class Session extends Component {
                             <Form>
                                 <Form.Group controlId="formComment">
                                     <Form.Label>Comment</Form.Label>
-                                    <Form.Control type="text" defaultValue={this.state.comment} disabled={this.state.commentDisabled}/>
+                                    <Form.Control as="input" value={this.state.comment} onChange={this.updateComment.bind(this)} disabled={this.state.commentDisabled} />
                                 </Form.Group>
 
-                                <Button variant="primary" onClick={this.saveComment} disabled={this.state.commentDisabled}>Save</Button>
-                                <Button variant="info" onClick={this.editComment} disabled={!this.state.commentDisabled}>Edit comment</Button>
+                                <Button className="button" variant="primary" onClick={this.saveComment} disabled={this.state.commentDisabled}>Save</Button>
+                                <Button className="button" variant="warning" onClick={this.editComment} disabled={!this.state.commentDisabled}>Edit comment</Button>
                             </Form>
                         </div>
                     </Col>

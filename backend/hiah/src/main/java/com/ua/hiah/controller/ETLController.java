@@ -150,10 +150,13 @@ public class ETLController {
     }
 
     @PutMapping("/sessions/comment")
-    public ResponseEntity<?> changeTableComment(@RequestBody ETL etl, @Param(value = "id") Long tableId, @Param(value = "comment") String comment) {
+    public ResponseEntity<?> changeTableComment(@Param(value = "etl_id") Long etl_id, @Param(value = "id") Long tableId, @Param(value = "comment") String comment) {
         logger.info("ETL - Change table {} comment", tableId);
 
-        ETL response = etlService.changeComment(etl.getId(), tableId, comment);
+        ETL response = etlService.changeComment(etl_id, tableId, comment);
+        if (response == null) {
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

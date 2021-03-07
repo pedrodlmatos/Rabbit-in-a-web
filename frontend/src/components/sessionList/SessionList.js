@@ -19,14 +19,13 @@ class SessionList extends Component {
 
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
-        this.createETLSession = this.createETLSession.bind(this);
+        this.disableCreateButton = this.disableCreateButton.bind(this);
     }
 
 
     componentDidMount = async () => {
         ETLService.getAllETL()
             .then(response => {
-                console.log(response.data);
                 this.setState({
                     sessions: response.data,
                     loadingSessions: true
@@ -36,23 +35,26 @@ class SessionList extends Component {
             });
     }
 
-    openModal() {
-        this.setState({
-            modalIsOpen: true
-        });
-    }
 
-    closeModal() {
-        this.setState({
-            modalIsOpen: false
-        });
-    }
+    /**
+     * Changes state to show modal 
+     */
 
-    createETLSession() {
-        this.setState({
-            createSessionLoading: true
-        })
-    }
+    openModal() { this.setState({ modalIsOpen: true }); }
+
+
+    /**
+     * Changes state to close modal
+     */
+
+    closeModal() { this.setState({ modalIsOpen: false }); }
+
+
+    /**
+     * Changes state to disable create session button
+     */
+
+    disableCreateButton() { this.setState({ createSessionLoading: true }) }
 
 
     render() {
@@ -71,10 +73,9 @@ class SessionList extends Component {
                                 { sessions }
                             </CardDeck>
                             <Button type="btn btn-primary" onClick={() => this.openModal()} disabled={this.state.createSessionLoading}>Create Session</Button>
-                            <ETLModal modalIsOpen={this.state.modalIsOpen} createSession={this.createETLSession} closeModal={this.closeModal} />
+                            <ETLModal modalIsOpen={this.state.modalIsOpen} createSession={this.disableCreateButton} closeModal={this.closeModal} />
                         </div>
-                    ) :
-                    (
+                    ) : (
                         <div>
                             <Spinner animation="border"/>
                         </div>

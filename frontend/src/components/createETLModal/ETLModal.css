@@ -1,11 +1,3 @@
-.showFileName {
-    visibility: visible;
-}
-
-.hideFileName {
-    visibility: hidden;
-}
-
 .modalBody {
     margin: 0 2%;
 }
@@ -15,7 +7,10 @@
     margin: 1% 0;
 }
 
-.CDMdropdown {
-    margin-left: 10px;
-    color: greenyellow;
+.button {
+    margin-right: 1%;
+}
+
+.cdm_dropdown {
+    width: fit-content;
 }
