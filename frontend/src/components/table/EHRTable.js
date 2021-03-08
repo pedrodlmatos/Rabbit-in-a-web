@@ -12,25 +12,25 @@ class EHRTable extends Component {
         }
     }
 
+    
     /**
-     *
-     * @param table
+     * Changes state both in this component and in its parent
+     * 
+     * @param table clicked EHR table
      */
-    selectSourceTable = (table) => {
-        /*console.log(table);*/
-        this.setState( {
-            clicked: !this.state.clicked
-        });
 
+    selectSourceTable = (table) => {
+        this.setState( { clicked: !this.state.clicked });
         this.props.handleCallback(this);
     }
 
 
-    unselect() {
-        this.setState( {
-            clicked: false
-        })
-    }
+    /**
+     * Changes state to unselect table 
+     */
+
+    unselect() { this.setState( { clicked: false }) }
+
 
     render() {
         return(

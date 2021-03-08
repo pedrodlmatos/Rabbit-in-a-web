@@ -2,7 +2,9 @@ package com.ua.hiah.service.etlService;
 
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.source.SourceDatabase;
+import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
+import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.repository.ETLRepository;
 import com.ua.hiah.service.source.sourceDatabaseService.SourceDatabaseService;
 import com.ua.hiah.service.source.sourceTableService.SourceTableService;
@@ -14,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.transform.Source;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -64,7 +69,19 @@ public class ETLServiceImpl implements ETLService {
 
     @Override
     public ETL getETLWithId(Long id) {
-        return etlRepository.findById(id).orElse(null);
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
+            Collections.sort(sourceTables, Comparator.comparingLong(SourceTable::getId));
+
+            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
+            Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
+
+            return etl;
+        }
+
+        return null;
     }
 
     @Override
@@ -74,10 +91,37 @@ public class ETLServiceImpl implements ETLService {
         if (etl != null) {
             TargetDatabase database = targetDatabaseService.getDatabaseByCDM(cdm);
             etl.setTargetDatabase(database);
+
             tableMappingService.removeFromETL(etl_id);
+
+            List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
+            Collections.sort(sourceTables, Comparator.comparingLong(SourceTable::getId));
+
+            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
+            Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
+
             return etlRepository.save(etl);
         }
         return null;
+    }
+
+    @Override
+    public ETL changeComment(Long id, Long tableId, String comment) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            if (sourceTableService.changeComment(tableId, comment) != null) {
+                List<SourceTable> tables = etl.getSourceDatabase().getTables();
+                Collections.sort(tables, Comparator.comparingLong(SourceTable::getId));
+                return etlRepository.save(etl);
+            } else if (targetTableService.changeComment(tableId, comment) != null) {
+                List<TargetTable> tables = etl.getTargetDatabase().getTables();
+                Collections.sort(tables, Comparator.comparingLong(TargetTable::getId));
+                return etlRepository.save(etl);
+            }
+        }
+
+        return etl;
     }
 
     @Override
@@ -88,19 +132,6 @@ public class ETLServiceImpl implements ETLService {
             WordDocumentGenerator generator = new WordDocumentGenerator(etl);
             generator.generateWordDocument(etl);
         }
-    }
-
-    @Override
-    public ETL changeComment(Long id, Long tableId, String comment) {
-        ETL etl = etlRepository.findById(id).orElse(null);
-
-        if (etl != null) {
-            if (sourceTableService.changeComment(tableId, comment) != null || targetTableService.changeComment(tableId, comment) != null) {
-                return etl;
-            }
-        }
-
-        return etl;
     }
 
     /*

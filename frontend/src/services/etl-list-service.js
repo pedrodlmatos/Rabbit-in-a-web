@@ -80,7 +80,7 @@ class ETLService {
      * @returns 
      */
     changeComment(etl, table, comment) {
-        return axios.put(API_URL + "sessions/comment", null, { headers: authHeader(), params:{ id: table, etl_id: etl, comment: comment }});
+        return axios.put(API_URL + "sessions/comment", null, { headers: authHeader(), params:{ etl: etl, table: table, comment: comment }});
     }
 }
 
