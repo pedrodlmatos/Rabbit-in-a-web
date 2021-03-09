@@ -55,7 +55,6 @@ class Session extends Component {
         /* get data from API */
         ETLService.getETLById(session_id)
             .then(res => {
-                console.log(res.data);
                 let maps = []
 
                 res.data.tableMappings.forEach(function(item) {
@@ -110,6 +109,24 @@ class Session extends Component {
     }
 
 
+    selectSourceArrows(table) {
+        this.state.arrows.forEach(element => {
+            if (element.start.name === table.name) {
+                element.color = 'orange';
+            }
+        });
+    }
+
+
+    selectTargetArrows(table) {
+        this.state.arrows.forEach(element => {
+            if (element.end.name === table.name) {
+                element.color = 'blue';
+            }
+        });
+    }
+
+
     /**
      * Defines the content of fields table (field name, type and description)
      *
@@ -155,11 +172,17 @@ class Session extends Component {
                 selectedTable: element,
                 sourceSelected: true,
             });
+
+            // change color of mappings that comes from the selected table
+            this.selectSourceArrows(element.props.table);
             
             // change content of fields table
             this.defineData(element.props.table);
         } else if (this.state.selectedTable === element) {
             // select the same table
+            
+            // change color of arrows to grey
+            this.cleanClickedArrows();
 
             // unselect
             this.setState({
@@ -174,11 +197,17 @@ class Session extends Component {
             // unselect previous selected table
             this.state.selectedTable.setState({clicked: false});
 
+            // change color of arrows to grey
+            this.cleanClickedArrows();
+
             // change select table information
             this.setState( {
                 selectedTable: element,
                 sourceSelected: true
             });
+
+            // change color of mappings that comes from the selected table
+            this.selectSourceArrows(element.props.table);
 
             // change content of fields table
             this.defineData(element.props.table);
@@ -202,6 +231,9 @@ class Session extends Component {
         if (this.state.selectedTable === null) {
             // no table is selected
 
+            // change color of mappings that comes from the selected table
+            this.selectTargetArrows(element.props.table);
+
             // change select table information
             this.setState( {
                 selectedTable: element,
@@ -212,6 +244,9 @@ class Session extends Component {
             this.defineData(element.props.table);
         } else if (this.state.selectedTable === element) {
             // select the same table
+
+            // change color of arrows to grey
+            this.cleanClickedArrows();
 
             // unselect
             this.setState( {
@@ -242,12 +277,18 @@ class Session extends Component {
             // unselects previous selected table
             this.state.selectedTable.setState({clicked: false});
 
+            // change color of arrows to grey
+            this.cleanClickedArrows();
+
             // clean state
             this.setState( {
                 selectedTable: element,
                 sourceSelected: false,
                 data: []
             });
+
+            // change color of mappings that comes from the selected table
+            this.selectTargetArrows(element.props.table);
 
             // define fields table
             this.defineData(element.props.table)
@@ -284,7 +325,12 @@ class Session extends Component {
      * Unselects all arrows (changes color to grey)
      */
 
-    cleanClickedArrows() { this.setState({ arrows: this.state.arrows.map(ar => ar.color = "grey") }) }
+    cleanClickedArrows() { 
+        this.state.arrows.forEach(element => {
+            element.color = 'grey';
+        });
+        //this.setState({ arrows: this.state.arrows.map(ar => ar.color = "grey") }) 
+    }
 
 
     /**
@@ -416,7 +462,14 @@ class Session extends Component {
         });
     }
 
-    updateComment(event) { this.setState({ comment: event.target.value }); }
+
+
+    
+    
+    updateComment(event) { 
+        this.setState({ comment : event.target.value });
+    }
+
 
 
     render() {
