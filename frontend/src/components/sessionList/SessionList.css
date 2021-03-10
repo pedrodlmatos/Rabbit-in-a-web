@@ -1,9 +1,18 @@
+.pageContainer {
+    margin: 0.5% 2%;
+}
+
+.gridContainer {
+    padding-left: "40px";
+    padding-right: "40px"
+}
+
+/*
 .sessionsContainer {
-    margin: 10px 15px;
+    
 }
 
 .sessionCard {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-right: 10px;
+    
 }
+*/

@@ -1,10 +1,11 @@
 import React, {Component} from "react";
-import {Card, Button } from 'react-bootstrap';
+//import {Card, Button } from 'react-bootstrap';
+import { Card, CardActions, CardContent, Button, Typography } from '@material-ui/core';
 import './SessionCard.css';
-import {CDMVersions} from "../session/CDMVersions";
+import { CDMVersions } from "../session/CDMVersions";
 
 
-class SessionCard extends Component {
+export default class SessionCard extends Component {
 
     constructor(props) {
         super(props);
@@ -14,6 +15,8 @@ class SessionCard extends Component {
             targetDatabase: CDMVersions.filter(function(cdm) { return cdm.id === props.omop })[0].name,
             sourceDatabase: props.ehr,
         }
+
+        console.log("ASDASD");
     }
 
     redirect(session_id) {
@@ -21,6 +24,27 @@ class SessionCard extends Component {
     }
 
     render() {
+        return (
+            <Card className="card" variant="outlined">
+                <CardContent>
+                    <Typography className="title" color="textSecondary" gutterBottom>{ this.state.name }</Typography>
+
+                    <Typography variant="body2" component="p">{ this.state.sourceDatabase }</Typography>
+                    <Typography variant="body2" component="p">{ this.state.targetDatabase }</Typography>
+                    
+                </CardContent>
+
+                <CardActions>
+                    <Button size="small" variant="contained" color="primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
+                </CardActions>
+            </Card>
+        )
+    }
+
+    /*
+    render() {
+        
+        
         return(
             <div className="col-sm-3 col-md-2">
                 <Card className="card">
@@ -35,13 +59,11 @@ class SessionCard extends Component {
                             CDM: { this.state.targetDatabase }
                         </Card.Text>
 
-                        <Button className="accessButton btn btn-primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
+                        <Button className="accessButton btn btn-primary" >Access</Button>
                     </Card.Body>
                 </Card>
             </div>
 
         );
-    }
+    }*/
 }
-
-export default SessionCard

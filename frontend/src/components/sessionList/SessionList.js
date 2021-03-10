@@ -1,12 +1,13 @@
 import React, { Component } from "react";
-import {CardDeck, Spinner} from 'react-bootstrap';
-import SessionCard from "../sessionCard/SessionCard";
+import { Spinner } from 'react-bootstrap';
+import { Grid, Button } from '@material-ui/core';
 import './SessionList.css';
-import Button from "react-bootstrap/Button";
+import SessionCard from '../sessionCard/SessionCard';
+// import Button from "react-bootstrap/Button";
 import ETLService from '../../services/etl-list-service';
 import ETLModal from "../createETLModal/ETLModal";
 
-class SessionList extends Component {
+export default class SessionList extends Component {
 
     constructor(props) {
         super(props);
@@ -58,11 +59,39 @@ class SessionList extends Component {
 
 
     render() {
+        return (
+            <div>
+                { this.state.loadingSessions ? 
+                    (
+                        <div className="pageContainer">
+                            <h1>ETL Sessions</h1>
+
+                            <Grid className="gridContainer" container spacing={4}>
+                                { this.state.sessions.map(session => 
+                                    <Grid item xs={12} sm={6} md={2} lg={2}>
+                                        <SessionCard key={session.id} id={session.id} name={session.name} ehr={session.sourceDatabase.databaseName} omop={session.targetDatabase.databaseName}/>
+                                    </Grid>
+                                )}
+                            </Grid>
+
+                            <Button type="small" onClick={() => this.openModal()} disabled={this.state.createSessionLoading}>Create Session</Button>
+                            <ETLModal modalIsOpen={this.state.modalIsOpen} createSession={this.disableCreateButton} closeModal={this.closeModal} />
+                        </div>
+                    ) : (
+                        <Spinner animation="border"/>
+                    )
+                }
+            </div>
+        )
+    }
+
+    /*
+    render() {
         const sessions = this.state.sessions.map(
             session => <SessionCard key={session.id} id={session.id} name={session.name} ehr={session.sourceDatabase.databaseName} omop={session.targetDatabase.databaseName}/>
         )
         
-
+        
         return (
             <div className="sessionsContainer">
                 { this.state.loadingSessions ?
@@ -83,7 +112,5 @@ class SessionList extends Component {
                 }
             </div>
         )
-    }
+    }*/
 }
-
-export default SessionList
