@@ -8,13 +8,23 @@ import Sessions from "../sessionList/SessionList";
 import Session from "../session/Session";
 
 
-class Navbar extends Component {
-    state = { clicked: false }
+export default class Navbar extends Component {
+
+    constructor() {
+        super();
+        this.state = { clicked: false }
+    }
+    
+
+    /**
+     * 
+     */
 
     handleClick = () => {
         this.setState({ clicked: !this.state.clicked })
     }
 
+    
     render() {
         return(
             <Router>
@@ -24,7 +34,7 @@ class Navbar extends Component {
                         <i className={this.state.clicked ? 'fas fa-times' : 'fas fa-bars'}></i>
                     </div>
                     <ul className={this.state.clicked ? 'nav-menu active' : 'nav-menu'}>
-                        {MenuItems.map((item, index) => {
+                        { MenuItems.map((item, index) => {
                             return (
                                 <li key={index}>
                                     <Link className={item.cName} to={item.url}>{item.title}</Link>
@@ -44,5 +54,3 @@ class Navbar extends Component {
         )
     }
 }
-
-export default Navbar

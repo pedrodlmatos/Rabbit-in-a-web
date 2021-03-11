@@ -28,6 +28,7 @@
     "react-validation": "^3.0.7",
     "react-xarrows": "^1.5.2",
     "reactstrap": "^8.7.1",
+    "standard": "^16.0.3",
     "validator": "^13.5.2",
     "web-vitals": "^0.2.4"
   },

@@ -1,0 +1,86 @@
+import React, { Component } from "react";
+import { Grid, Button, CircularProgress } from "@material-ui/core";
+import "./SessionList.css";
+import SessionCard from "../sessionCard/session-card";
+import ETLService from "../../services/etl-list-service";
+import ETLModal from "../modals/createETLModal/etl-modal";
+
+export default class SessionList extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            sessions: [],
+            showModal: false,
+            loading: false,
+            createSessionLoading: false
+        };
+
+        this.openModal = this.openModal.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.disableCreateButton = this.disableCreateButton.bind(this);
+    }
+
+    componentDidMount = async () => {
+        ETLService.getAllETL().then(response => {
+            this.setState({
+                sessions: response.data,
+                loadingSessions: true
+            });
+        }).catch(response => {
+            console.log(response);
+        });
+    }
+
+
+    /**
+     * Changes state to show modal 
+     */
+
+    openModal() { this.setState({ modalIsOpen: true }); }
+
+
+    /**
+     * Changes state to close modal
+     */
+
+    closeModal() { this.setState({ modalIsOpen: false }); }
+
+
+    /**
+     * Changes state to disable create session button
+     */
+
+    disableCreateButton() { this.setState({ createSessionLoading: true }) }
+
+
+    render() {
+
+        const [showModal, setShowModal] = useState(false);
+        
+        return (
+            <div>
+                { this.state.loadingSessions ? 
+                    (
+                        <div className="pageContainer">
+                            <h1>ETL Sessions</h1>
+
+                            <Grid className="gridContainer" container spacing={4}>
+                                { this.state.sessions.map(session => 
+                                    <Grid item xs={12} sm={12} md={2} lg={2}>
+                                        <SessionCard key={session.id} id={session.id} name={session.name} ehr={session.sourceDatabase.databaseName} omop={session.targetDatabase.databaseName}/>
+                                    </Grid>
+                                )}
+                            </Grid>
+
+                            <Button type="medium" variant="contained" color="primary" onClick={() => this.openModal()} disabled={this.state.createSessionLoading}>Create Session</Button>
+                            <ETLModal title="Create ETL session" openModal={this.state.showModal}></ETLModal>
+                        </div>
+                    ) : (
+                        <CircularProgress color="primary" variant="determinate" size={40} />
+                    )
+                }
+            </div>
+        )
+    }
+}
