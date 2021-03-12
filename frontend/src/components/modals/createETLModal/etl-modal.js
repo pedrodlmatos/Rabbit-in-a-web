@@ -20,7 +20,7 @@ export default function ETLModal(props) {
     const classes = useStyles();
 
     return (
-        <Dialog open={openModal} maxWidth="md" classes={{ paper: classes.dialogWrapper }}>
+        <Dialog open={openModal} fullWidth classes={{ paper: classes.dialogWrapper }}>
             <DialogTitle className={classes.DialogTitle}>
                 <div style={{ display: 'flex' }}>
                     <Typography variant="h6" component="div" style={{ flexGrow: 1}}>

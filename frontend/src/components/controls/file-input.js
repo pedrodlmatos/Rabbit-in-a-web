@@ -1,18 +1,25 @@
 import React from 'react'
-import { Input } from '@material-ui/core';
+import { Input, Button, InputLabel } from '@material-ui/core';
 
 export default function FileInput(props) {
     
-    const { name, label, value, error=null, onChange, ...other } = props;
+    const { name, type, onChange, ...other } = props;
 
-    return (
-        <Input 
-            label={label} 
-            name={name} 
-            value={value} 
-            onChange={onChange} 
-            {...other} 
-            {...(error && {error:true, helperText:error})}
-        />
+    return ( 
+        <InputLabel>
+            <Input 
+                name={name}
+                type={type}
+                onChange={onChange}
+                hidden
+                {...other} />
+            <Button 
+                className="btn-choose"
+                variant="outlined"
+                component="span" >
+                    Choose EHR Scan
+            </Button>
+        </InputLabel>
+        
     )
 }

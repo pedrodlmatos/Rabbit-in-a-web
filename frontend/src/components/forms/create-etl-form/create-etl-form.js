@@ -4,31 +4,21 @@ import Controls from '../../controls/controls';
 import { useForm, Form } from '../../forms/use-form';
 import { CDMVersions } from '../../session/CDMVersions';
 
-const genderItems = [
-    { id: 'male', title: 'Male' },
-    { id: 'female', title: 'Female' },
-    { id: 'other', title: 'Other' }
-]
 
 const initialFValues = {
-    id: 0,
-    fullName: '',
-    gender: 'male',
-    departmentId: '',
-    isPermanent: false
+    ehrFile: '',
+    omop: CDMVersions.filter(function(cdm) { return cdm.id === 'CDMV60' })[0].id,
 }
 
 export default function CreateETLForm(props) {
-    const { addOrEdit, recordForEdit } = props;
+    
+    const { addSession, recordForEdit } = props;
+
 
     const validate = (fieldValues = values) => {
         let temp = { ...errors }
-        if ('fullName' in fieldValues) {
-            temp.fullName = fieldValues.fullName ? "" : "This field is required"
-        }
-        if ('departmentId' in fieldValues) {
-            temp.departmentId = fieldValues.departmentId.length !== 0 ? "" : "This field is required"
-        }
+
+        // TODO: Validate from
 
         setErrors({ ...temp })
 
@@ -37,19 +27,29 @@ export default function CreateETLForm(props) {
         }
     }
 
+
     const {
         values, setValues,
         errors, setErrors,
         handleInputChange,
+        handleFileChange,
         resetForm
     } = useForm(initialFValues, true, validate);
+
+
+    /**
+     * Validates form and sends request to API to create a new session
+     *  
+     * @param {*} e submit event
+     */
 
     const handleSubmit = e => {
         e.preventDefault();
         if (validate()) {
-            addOrEdit(values, resetForm);
+            addSession(values, resetForm);
         }
     }
+
 
     useEffect(() => {
         if (recordForEdit != null) {
@@ -59,38 +59,35 @@ export default function CreateETLForm(props) {
         }
     })
 
+
     return (
         <Form onSubmit={handleSubmit}>
             <Grid container>
-                <Grid item xs={6} sm={6} md={6} lg={6}>
-                    <Controls.Input 
-                        name="fullName"
-                        label="Full Name"
-                        value={values.fullName}
-                        onChange={handleInputChange}
-                        error={errors.fullName} 
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <Controls.FileInput
+                        name="ehrFile"
+                        type="file"
+                        onChange={handleFileChange} 
                     />
-                </Grid>
-
-                <Grid item xs={6} sm={6} md={6} lg={6}>
-                    <Controls.RadioGroup 
-                        name="gender"
-                        label="Gender"
-                        value={values.gender}
-                        onChange={handleInputChange}
-                        items={genderItems}
-                    />
+                    <p>
+                    { values.ehrFile === '' ? "Upload a file" : values.ehrFile.name }
+                    </p>    
+                    
 
                     <Controls.Select 
-                        name="departmentId"
-                        label="Department"
-                        value={values.departmentId}
+                        name="omop"
+                        label="OMOP CDM"
+                        value={values.omop}
                         onChange={handleInputChange}
                         options={CDMVersions}
                         errors={errors.departmentId}
                     />
 
-
+                    <div>
+                        <Controls.Button 
+                            type="submit"
+                            text="Create" />
+                    </div>
                 </Grid>
             </Grid>
         </Form>

@@ -19,15 +19,27 @@ export function useForm(initialFValues, validateOnChange = false, validate) {
         }
     }
 
+    const handleFileChange = e => {
+        const name = e.target.name;
+        const file = e.target.files[0];
+        console.log(file);
+
+        setValues({
+            ...values,
+            [name]: file
+        })
+    }
+
     const resetForm = () => {
         setValues(initialFValues);
-        setErrors({ });
+        setErrors({});
     }
 
     return {
         values, setValues,
         errors, setErrors,
         handleInputChange,
+        handleFileChange,
         resetForm
     }
 }

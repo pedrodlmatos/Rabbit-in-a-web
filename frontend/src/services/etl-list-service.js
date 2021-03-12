@@ -49,7 +49,8 @@ class ETLService {
     
     createETL = async (file, cdm) => {
         let formData = new FormData();
-        formData.append("file", file)
+        formData.append("file", file);
+        
         try {
             return await axios.post(API_URL + "sessions", formData, { headers: authHeaderMultiPart(), params: { cdm: cdm } });
         } catch (e) {

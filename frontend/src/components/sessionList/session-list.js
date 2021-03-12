@@ -32,7 +32,14 @@ export default function SessionList() {
     }, []);
 
 
-    const addOrEdit = (resetForm) => {
+    const createETLSession = (values, resetForm) => {
+        // sends request to API and then redirects to created session
+        ETLService.createETL(values.ehrFile, values.omop).then(res => {
+            window.location.href = '/session/' + res.data.id;
+        }).then(res => {
+            console.log(res);
+        })
+
         resetForm();
         setRecordForEdit(null);
         setOpenModal(false);
@@ -58,7 +65,7 @@ export default function SessionList() {
                         <Controls.Button variant="contained" size="medium" color="primary" text="Create ETL Session" onClick={() => {setOpenModal(true)}}></Controls.Button>
                         
                         <ETLModal title="Create ETL session" openModal={openModal} setOpenModal={setOpenModal}>
-                            <CreateETLForm recordForEdit={recordForEdit} addOrEdit={addOrEdit}/>
+                            <CreateETLForm recordForEdit={recordForEdit} addSession={createETLSession}/>
                         </ETLModal>
                     </div>
                 ) : (
