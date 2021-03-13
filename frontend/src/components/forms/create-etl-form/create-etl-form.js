@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { Grid } from '@material-ui/core';
+import React, { useState } from 'react'
+import { Grid, CircularProgress } from '@material-ui/core';
 import Controls from '../../controls/controls';
 import { useForm, Form } from '../../forms/use-form';
 import { CDMVersions } from '../../session/CDMVersions';
@@ -12,7 +12,8 @@ const initialFValues = {
 
 export default function CreateETLForm(props) {
     
-    const { addSession, recordForEdit } = props;
+    const { addSession, close } = props;
+    const [loading, setLoading] = useState(false);
 
 
     const validate = (fieldValues = values) => {
@@ -46,18 +47,14 @@ export default function CreateETLForm(props) {
     const handleSubmit = e => {
         e.preventDefault();
         if (validate()) {
+            setLoading(true);
             addSession(values, resetForm);
         }
     }
 
-
-    useEffect(() => {
-        if (recordForEdit != null) {
-            setValues({
-                ...recordForEdit
-            })
-        }
-    })
+    const closeModal = () => {
+        close(resetForm);
+    }
 
 
     return (
@@ -83,11 +80,22 @@ export default function CreateETLForm(props) {
                         errors={errors.departmentId}
                     />
 
-                    <div>
-                        <Controls.Button 
-                            type="submit"
-                            text="Create" />
-                    </div>
+                    { loading ? 
+                        (
+                            <div>
+                                <Controls.Button type="submit" text="Creating" disabled>
+                                    <CircularProgress color="primary" variant="indeterminate" size={20}/>
+                                </Controls.Button>
+    
+                                <Controls.Button text="Close" color="secondary" onClick={closeModal} disabled />
+                            </div>
+                        ) : (
+                            <div>
+                                <Controls.Button type="submit" text="Create" />
+                                <Controls.Button text="Close" color="secondary" onClick={closeModal} />
+                            </div>
+                        ) 
+                    }
                 </Grid>
             </Grid>
         </Form>

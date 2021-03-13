@@ -17,11 +17,9 @@ export default function SessionList() {
     const classes = useStyles();
     const [openModal, setOpenModal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [disabled, setDisabled] = useState(false);
     const [sessions, setSessions] = useState({ });
 
-    const [recordForEdit, setRecordForEdit] = useState(null);
-
-    
     useEffect(() => {
         ETLService.getAllETL().then(response => {
             setSessions(response.data);
@@ -40,8 +38,14 @@ export default function SessionList() {
             console.log(res);
         })
 
+        setDisabled(true);
         resetForm();
-        setRecordForEdit(null);
+        //setOpenModal(false);
+    }
+
+    
+    const closeModal = (resetForm) => {
+        resetForm();
         setOpenModal(false);
     }
     
@@ -62,10 +66,16 @@ export default function SessionList() {
                             )}
                         </Grid>
 
-                        <Controls.Button variant="contained" size="medium" color="primary" text="Create ETL Session" onClick={() => {setOpenModal(true)}}></Controls.Button>
+                        <Controls.Button 
+                            variant="contained" 
+                            size="medium" 
+                            color="primary" 
+                            text="Create ETL Session"
+                            disabled={disabled}
+                            onClick={() => {setOpenModal(true)}} />
                         
                         <ETLModal title="Create ETL session" openModal={openModal} setOpenModal={setOpenModal}>
-                            <CreateETLForm recordForEdit={recordForEdit} addSession={createETLSession}/>
+                            <CreateETLForm addSession={createETLSession} close={closeModal} />
                         </ETLModal>
                     </div>
                 ) : (
