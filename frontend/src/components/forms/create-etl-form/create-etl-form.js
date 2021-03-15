@@ -5,16 +5,29 @@ import { useForm, Form } from '../../forms/use-form';
 import { CDMVersions } from '../../session/CDMVersions';
 
 
+/**
+ * Initial values of the form
+ */
+
 const initialFValues = {
     ehrFile: '',
     omop: CDMVersions.filter(function(cdm) { return cdm.id === 'CDMV60' })[0].id,
 }
 
+
 export default function CreateETLForm(props) {
     
     const { addSession, close } = props;
+
     const [loading, setLoading] = useState(false);
 
+
+    /**
+     * Validates a field from the form
+     *  
+     * @param {*} fieldValues values
+     * @returns validated fields 
+     */
 
     const validate = (fieldValues = values) => {
         let temp = { ...errors }
@@ -39,7 +52,7 @@ export default function CreateETLForm(props) {
 
 
     /**
-     * Validates form and sends request to API to create a new session
+     * Validates form and calls function from parent to create ETL session
      *  
      * @param {*} e submit event
      */
@@ -51,6 +64,10 @@ export default function CreateETLForm(props) {
             addSession(values, resetForm);
         }
     }
+
+    /**
+     * Calls function from parent to close modal and resets form
+     */
 
     const closeModal = () => {
         close(resetForm);
@@ -64,21 +81,13 @@ export default function CreateETLForm(props) {
                     <Controls.FileInput
                         name="ehrFile"
                         type="file"
+                        placeholder="Upload EHR scan"
                         onChange={handleFileChange} 
                     />
-                    <p>
-                    { values.ehrFile === '' ? "Upload a file" : values.ehrFile.name }
-                    </p>    
+                    <p>{ values.ehrFile === '' ? "Upload a file" : values.ehrFile.name }</p>    
                     
 
-                    <Controls.Select 
-                        name="omop"
-                        label="OMOP CDM"
-                        value={values.omop}
-                        onChange={handleInputChange}
-                        options={CDMVersions}
-                        errors={errors.departmentId}
-                    />
+                    <Controls.Select  name="omop" label="OMOP CDM" value={values.omop} onChange={handleInputChange} options={CDMVersions} errors={errors.departmentId} />
 
                     { loading ? 
                         (

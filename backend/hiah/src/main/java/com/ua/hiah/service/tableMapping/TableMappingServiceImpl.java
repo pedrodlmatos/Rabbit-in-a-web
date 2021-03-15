@@ -51,6 +51,7 @@ public class TableMappingServiceImpl implements TableMappingService {
         TableMapping mapping = new TableMapping();
         mapping.setSource(sourceTableService.getTableById(source_id));
         mapping.setTarget(targetTableService.getTableById(target_id));
+        mapping.setComplete(false);
         mapping.setEtl(etlService.getETLWithId(etl_id));
         return repository.save(mapping);
     }
@@ -60,5 +61,16 @@ public class TableMappingServiceImpl implements TableMappingService {
         for(TableMapping mapping : repository.findAllByEtl_Id(etl_id)) {
             repository.delete(mapping);
         }
+    }
+
+    @Override
+    public TableMapping changeCompletionStatus(Long id, boolean completion) {
+        TableMapping mapping = repository.findById(id).orElse(null);
+
+        if (mapping != null) {
+            mapping.setComplete(completion);
+            return repository.save(mapping);
+        }
+        return null;
     }
 }

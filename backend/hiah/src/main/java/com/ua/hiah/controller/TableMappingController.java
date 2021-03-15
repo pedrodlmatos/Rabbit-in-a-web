@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/api/tableMap")
+@RequestMapping("/v1/api/tableMap")
 public class TableMappingController {
 
     private static final Logger logger = LoggerFactory.getLogger(TableMappingController.class);
@@ -35,7 +35,7 @@ public class TableMappingController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/create")
+    @PostMapping("/map")
     public ResponseEntity<?> createTableMapping(@Param(value = "elt_id") Long etl_id, @Param(value = "source_id") Long source_id, @Param(value = "target_id") Long target_id) {
         TableMapping response = service.addTableMapping(source_id, target_id, etl_id);
         if (response == null) {
@@ -46,7 +46,7 @@ public class TableMappingController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/remove")
+    @DeleteMapping("/map")
     public ResponseEntity<?> removeTableMapping(@Param(value="map_id") Long map_id, @Param(value="etl_id") Long etl_id) {
         TableMapping response = service.removeTableMapping(map_id);
 
@@ -57,5 +57,25 @@ public class TableMappingController {
 
         List<TableMapping> res = service.getTableMappingFromETL(etl_id);
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+
+    /**
+     *
+     * @param id
+     * @param completion
+     * @return
+     */
+
+    @PutMapping("/map/{id}")
+    public ResponseEntity<?> editCompleteMapping(@PathVariable Long id, @Param(value = "completion") boolean completion) {
+        logger.info("TABLE MAPPING - Change completion status of mapping " + id);
+        TableMapping response = service.changeCompletionStatus(id, completion);
+
+        if (response == null) {
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

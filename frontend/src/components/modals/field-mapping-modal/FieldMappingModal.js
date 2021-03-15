@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import {Modal, Row, Button, Col} from "react-bootstrap";
+import { FormGroup, FormControlLabel, Switch } from "@material-ui/core";
 import Xarrow from "react-xarrows";
 import "./FieldMappingModal.css";
 import EHRField from "./EHRField";
 import CDMField from "./CDMField";
-import TableMappingService from "../../services/table-mapping-service";
-import FieldMappingService from "../../services/field-mapping-service";
+import TableMappingService from "../../../services/table-mapping-service"
+import FieldMappingService from "../../../services/field-mapping-service";
 
 class FieldMappingModal extends Component {
 
@@ -15,6 +16,7 @@ class FieldMappingModal extends Component {
             map_id: null,
             sourceTable: { name: "", fields: [] },
             targetTable: { name: "", fields: [] },
+            complete: false,
             selectedField: null,
             field: { id:null, name: "", description: "", type: "" }, 
             selectedSource: false,
@@ -45,7 +47,8 @@ class FieldMappingModal extends Component {
                     map_id: res.data.id,
                     sourceTable: res.data.source,
                     targetTable: res.data.target,
-                    arrows: maps
+                    complete: res.data.complete,
+                    arrows: maps,
                 })
             })
         }
@@ -233,6 +236,19 @@ class FieldMappingModal extends Component {
         )
     }
 
+    
+    handleCompletionChange = (event) => {
+        TableMappingService.editCompleteMapping(this.state.map_id, !this.state.complete)
+            .then(res => { 
+                this.setState({
+                    complete: res.data.complete
+                });
+                this.props.changeMapCompletion(this.state.map_id, res.data.complete)
+            }).catch(res => {
+                console.log(res);
+            })
+    }
+
 
     render() {
         return(
@@ -242,6 +258,13 @@ class FieldMappingModal extends Component {
                         <p>
                             { this.state.sourceTable.name } <i className="fa fa-long-arrow-alt-right"></i> {this.state.targetTable.name}
                         </p>
+
+                        <FormGroup row>
+                            <FormControlLabel 
+                                control={<Switch checked={this.state.complete} onChange={this.handleCompletionChange} color='primary' />}
+                                label="Complete" />
+                        </FormGroup>
+
                     </Modal.Title>
                 </Modal.Header>
 

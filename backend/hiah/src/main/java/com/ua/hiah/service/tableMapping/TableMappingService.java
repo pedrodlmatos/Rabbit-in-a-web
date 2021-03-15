@@ -15,4 +15,6 @@ public interface TableMappingService {
     TableMapping removeTableMapping(Long map_id);
 
     List<TableMapping> getTableMappingFromETL(Long etl_id);
+
+    TableMapping changeCompletionStatus(Long id, boolean completion);
 }

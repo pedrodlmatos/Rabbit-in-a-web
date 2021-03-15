@@ -42,6 +42,10 @@ public class TableMapping {
     @JsonView(Views.ETLSession.class)
     private List<FieldMapping> fieldMappings;
 
+    @JsonView(Views.ETLSession.class)
+    @Column(name = "complete", nullable = false)
+    private boolean complete;
+
     @ManyToOne
     @JoinColumn(name = "etl_id", nullable = false)
     @JsonIgnore
@@ -90,6 +94,14 @@ public class TableMapping {
 
     public void setFieldMappings(List<FieldMapping> fieldMappings) {
         this.fieldMappings = fieldMappings;
+    }
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public void setComplete(boolean complete) {
+        this.complete = complete;
     }
 
     @Override

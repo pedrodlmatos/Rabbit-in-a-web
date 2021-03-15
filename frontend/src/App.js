@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import Home from "./components/home/home";
-import SessionList from './components/sessionList/session-list';
+import SessionList from './components/session-list/session-list';
 import Session from "./components/session/Session";
 import Documentation from "./components/documentation/Documentation";
 

@@ -6,6 +6,13 @@ export function useForm(initialFValues, validateOnChange = false, validate) {
     const [values, setValues] = useState(initialFValues);
     const [errors, setErrors] = useState({ });
 
+
+    /**
+     * Saves value of the field changed and validates it
+     * 
+     * @param {*} e input change event
+     */
+
     const handleInputChange = e => {
         const { name, value } = e.target;
 
@@ -19,10 +26,16 @@ export function useForm(initialFValues, validateOnChange = false, validate) {
         }
     }
 
+
+    /**
+     * Saves file of the changed field and validates it
+     * 
+     * @param {*} e input change event
+     */
+
     const handleFileChange = e => {
         const name = e.target.name;
         const file = e.target.files[0];
-        console.log(file);
 
         setValues({
             ...values,
@@ -30,10 +43,16 @@ export function useForm(initialFValues, validateOnChange = false, validate) {
         })
     }
 
+
+    /**
+     * Resets form to initial values
+     */
+
     const resetForm = () => {
         setValues(initialFValues);
         setErrors({});
     }
+
 
     return {
         values, setValues,
@@ -52,6 +71,7 @@ const useStyles = makeStyles(theme => ({
         }
     }
 }))
+
 
 export function Form(props) {
     const classes = useStyles();

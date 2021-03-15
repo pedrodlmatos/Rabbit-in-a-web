@@ -1,14 +1,15 @@
 import React, {Component} from "react";
-import {Col, Row, Table, Dropdown, DropdownButton, Button, Form} from "react-bootstrap";
+import {Col, Row, Table, Dropdown, DropdownButton, Form, Button} from "react-bootstrap";
 import Xarrow from "react-xarrows";
+import Controls from "../controls/controls";
 import "./Session.css";
 import EHRTable from "../table/EHRTable";
 import CDMTable from "../table/CDMTable";
-import FieldMappingModal from "../fieldMappingModal/FieldMappingModal";
+import FieldMappingModal from "../modals/field-mapping-modal/FieldMappingModal"
 import ETLService from "../../services/etl-list-service";
 import TableMappingService from "../../services/table-mapping-service";
 import { CDMVersions } from "./CDMVersions";
-import HelpModal from "./HelpModal";
+import HelpModal from "../modals/help-modal/help-modal";
 
 
 class Session extends Component {
@@ -41,6 +42,7 @@ class Session extends Component {
         this.closeHelpModal = this.closeHelpModal.bind(this);
         this.editComment = this.editComment.bind(this);
         this.saveComment = this.saveComment.bind(this);
+        this.changeCompletionStatus = this.changeCompletionStatus.bind(this);
     }
 
     /**
@@ -52,13 +54,15 @@ class Session extends Component {
 
         /* get data from API */
         ETLService.getETLById(session_id).then(res => {
+            console.log(res.data);
             let maps = []
             res.data.tableMappings.forEach(function(item) {
                 const arrow = {
                     id: item.id,
                     start: item.source,
                     end: item.target,
-                    color: "grey",
+                    complete: item.complete,
+                    color: item.complete ? "black" : "grey"
                 }
                 maps = maps.concat(arrow);
             });
@@ -177,7 +181,11 @@ class Session extends Component {
 
     resetArrowsColor() { 
         this.state.arrows.forEach(element => {
-            element.color = 'grey';
+            if (element.complete) {
+                element.color = 'black'
+            } else {
+                element.color = 'grey';
+            }
         });
     }
 
@@ -205,7 +213,7 @@ class Session extends Component {
         } else if(this.state.selectedArrow === arrow) {
             // select the arrow previous selected to unselect
             let arrows = this.state.arrows
-            arrows[index].color = "grey";
+            arrows[index].color = arrows[index].complete ? "black" : "grey";
             this.setState({
                 selectedArrow: null,
                 arrows: arrows
@@ -243,7 +251,8 @@ class Session extends Component {
                     id: item.id,
                     start: item.source,
                     end: item.target,
-                    color: "grey",
+                    complete: item.complete,
+                    color: item.complete ? "black" : "grey",
                 }
                 maps = maps.concat(arrow);
             });
@@ -255,6 +264,21 @@ class Session extends Component {
         }).catch(res => {
             console.log(res);
         })
+    }
+
+
+    /**
+     * 
+     * @param {*} arrow 
+     */
+
+    changeCompletionStatus(tableMap_id, completion) {
+        this.state.arrows.forEach(map => {
+            if (map.id === tableMap_id) {
+                map.color = completion ? "black" : "grey"
+            }
+        })
+        
     }
 
 
@@ -463,14 +487,13 @@ class Session extends Component {
         this.setState({ commentDisabled: true });
         // make request to API
         ETLService.changeComment(this.state.etl.id, this.state.selectedTable.props.table.id, this.state.comment).then(response => {
-            console.log(response.data)
             let maps = []
             response.data.tableMappings.forEach(function(item) {
                 const arrow = {
                     id: item.id,
                     start: item.source,
                     end: item.target,
-                    color: "grey",
+                    color: item.complete ? "black" : "grey",
                 }
                 maps = maps.concat(arrow);
             });
@@ -509,7 +532,7 @@ class Session extends Component {
                         <h1>{ this.state.etl.name }</h1>
                     </Col>
 
-                    <Button variant="info" size={"md"} onClick={this.openHelpModal}>Help <i className="fa fa-info"/></Button>
+                    <Controls.Button variant="contained" size="medium" color="primary" text="Help " onClick={this.openHelpModal}><i className="fa fa-info"/></Controls.Button>
                     <Button variant="warning" size="sm">File</Button>
                 </Row>
 
@@ -585,15 +608,16 @@ class Session extends Component {
                                     <Form.Label>Comment</Form.Label>
                                     <Form.Control as="textarea" value={this.state.comment} onChange={this.updateComment.bind(this)} disabled={this.state.commentDisabled} />
                                 </Form.Group>
-
+                                
                                 <Button className="button" variant="primary" onClick={this.saveComment} disabled={this.state.commentDisabled}>Save</Button>
                                 <Button className="button" variant="warning" onClick={this.editComment} disabled={!this.state.commentDisabled}>Edit comment</Button>
+                            
                             </Form>
                         </div>
                     </Col>
                 </Row>
                 <FieldMappingModal modalIsOpen={this.state.showFieldMappingModal} closeModal={this.closeModal}
-                                       data={this.state.arrow_id} remove={this.removeArrow}/>
+                                       data={this.state.arrow_id} remove={this.removeArrow} changeMapCompletion={this.changeCompletionStatus}/>
 
                 <HelpModal modalIsOpen={this.state.showHelpModal} closeModal={this.closeHelpModal}/>
             </div>
