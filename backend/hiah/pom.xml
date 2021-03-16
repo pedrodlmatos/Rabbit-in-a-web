@@ -125,7 +125,7 @@
 				</executions>
 
 				<configuration>
-					<serverId>central</serverId>
+					<serverId>nexus</serverId>
 					<nexusUrl>http://35.233.0.56:8081/nexus/</nexusUrl>
 					<skipStaging>true</skipStaging>
 				</configuration>
