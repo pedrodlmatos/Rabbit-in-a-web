@@ -61,7 +61,7 @@ pipeline {
                     }
                 }
 
-                state('Frontend project') {
+                stage('Frontend project') {
                     steps {
                         sh '''
                             cd frontend
@@ -89,7 +89,7 @@ pipeline {
                     }
                 }
 
-                stage('Backend project') {
+                stage('Frontend project') {
                     steps {
                         sh '''
                             docker tag hiah-frontend 35.233.0.56:5000/hiah/hiah:runtime
