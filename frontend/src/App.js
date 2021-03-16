@@ -1,39 +1,12 @@
 import React, {Component} from 'react';
-import AuthService from './services/auth-service';
 import './App.css';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import Home from "./components/home/home";
-import Sessions from "./components/sessionList/SessionList";
+import SessionList from './components/session-list/session-list';
 import Session from "./components/session/Session";
 import Documentation from "./components/documentation/Documentation";
 
 class App extends Component {
-    constructor(props) {
-        super(props);
-        this.logout = this.logout.bind(this);
-
-        this.state = {
-            showModeratorBoard: false,
-            showAdminBoard: false,
-            currentUser: undefined
-        };
-    }
-
-    componentDidMount() {
-        const user = AuthService.getCurrentUser();
-
-        if (user) {
-            this.setState({
-                currentUser: user,
-                showModeratorBoard: user.roles.includes("ROLE_MODERATOR"),
-                showAdminBoard: user.roles.includes("ROLE_ADMIN"),
-            });
-        }
-    }
-
-    logout() {
-        AuthService.logout();
-    }
 
     render() {
         return(
@@ -52,7 +25,7 @@ class App extends Component {
                     <div>
                         <Switch>
                             <Route exact path="/" component={Home}/>
-                            <Route path='/sessions' component={Sessions} />
+                            <Route path='/sessions' component={SessionList} />
                             <Route path='/session/:id' component={Session} />
                             <Route exact path='/documentation' component={Documentation} />
                         </Switch>

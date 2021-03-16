@@ -1,14 +1,15 @@
 import React, {Component} from "react";
-import {Col, Row, Table, Dropdown, DropdownButton, Button} from "react-bootstrap";
+import {Col, Row, Table, Dropdown, DropdownButton, Form, Button} from "react-bootstrap";
 import Xarrow from "react-xarrows";
+import Controls from "../controls/controls";
 import "./Session.css";
 import EHRTable from "../table/EHRTable";
 import CDMTable from "../table/CDMTable";
-import FieldMappingModal from "../fieldMappingModal/FieldMappingModal";
+import FieldMappingModal from "../modals/field-mapping-modal/FieldMappingModal"
 import ETLService from "../../services/etl-list-service";
 import TableMappingService from "../../services/table-mapping-service";
 import { CDMVersions } from "./CDMVersions";
-import HelpModal from "./HelpModal";
+import HelpModal from "../modals/help-modal/help-modal";
 
 
 class Session extends Component {
@@ -16,19 +17,21 @@ class Session extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            cdmName: "",  etl_id: "",
-            sourceDB_id: "", targetDB_id: "", targetDB: "",
-            sourceDB_tables: [], targetDB_tables: [],
-
+            etl: {
+                id: null, name: null,
+                targetDatabase: { id: null, tables: [], databaseName: null },
+                sourceDatabase: { id: null, tables: [], databaseName: null }
+            },
+            cdmName: "",
             /* selection info */
-            selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false,
-
+            selectedTable: null, sourceSelected: false,
             /* table info */
-            columns: ['Field', "Type", "Description"], data: [], showTable: false, tableName: "",
-
+            columns: ['Field', "Type", "Description"], data: [], showFieldsTable: false, tableName: "",
+            /* comment section */
+            comment: "", commentDisabled: true,
             /* arrows */
-            arrows: [], selectedArrow: null, arrow_id: null, modalIsOpen: false,
-
+            arrows: [], selectedArrow: null, arrow_id: null, showFieldMappingModal: false,
+            /* help modal */
             showHelpModal: false
         }
 
@@ -37,46 +40,46 @@ class Session extends Component {
         this.handleCDMSelect = this.handleCDMSelect.bind(this);
         this.openHelpModal = this.openHelpModal.bind(this);
         this.closeHelpModal = this.closeHelpModal.bind(this);
+        this.editComment = this.editComment.bind(this);
+        this.saveComment = this.saveComment.bind(this);
+        this.changeCompletionStatus = this.changeCompletionStatus.bind(this);
     }
 
     /**
      * Gets data (databases, tables, fields and table mappings) from API
      */
+
     componentDidMount() {
         const session_id = window.location.pathname.toString().replace("/session/", "");
 
         /* get data from API */
-        ETLService.getETLById(session_id)
-            .then(res => {
-                let maps = []
-
-                res.data.tableMappings.forEach(function(item) {
-                    const arrow = {
-                        id: 'arrow-' + item.id,
-                        map_id: item.id,
-                        start: item.source.name,
-                        end: item.target.name,
-                        color: "grey",
-
-                        startTable: item.source,
-                        endTable: item.target
-                    }
-                    maps = maps.concat(arrow);
-                })
-
-                this.setState({
-                    etl_id: res.data.id,
-                    name: res.data.name,
-                    sourceDB_id: res.data.sourceDatabase.id,
-                    targetDB_id: res.data.targetDatabase.id,
-                    sourceDB_tables: res.data.sourceDatabase.tables,
-                    targetDB_tables: res.data.targetDatabase.tables,
-                    arrows: maps,
-                    cdmName: CDMVersions.filter(function(cdm) { return cdm.id === res.data.targetDatabase.databaseName })[0].name
-                });
-            }).catch(res => {
-                console.log(res);
+        ETLService.getETLById(session_id).then(res => {
+            console.log(res.data);
+            let maps = []
+            res.data.tableMappings.forEach(function(item) {
+                const arrow = {
+                    id: item.id,
+                    start: item.source,
+                    end: item.target,
+                    complete: item.complete,
+                    color: item.complete ? "black" : "grey"
+                }
+                maps = maps.concat(arrow);
             });
+
+            this.setState({
+                etl: {
+                    id: res.data.id,
+                    name: res.data.name,
+                    sourceDatabase: res.data.sourceDatabase,
+                    targetDatabase: res.data.targetDatabase
+                }, 
+                arrows: maps,
+                cdmName: CDMVersions.filter(function(cdm) { return cdm.id === res.data.targetDatabase.databaseName })[0].name
+            });
+        }).catch(res => {
+            console.log(res);
+        });
     }
 
 
@@ -85,27 +88,219 @@ class Session extends Component {
      *
      * @param e event
      */
-    handleCDMSelect(cdm_id) {
 
-        const etl = { 
-            id: this.state.etl_id,
-            sourceDatabase: this.state.sourceDatabase,
-            targetDatabase: this.state.targetDatabase
+    handleCDMSelect(cdm_id) {
+        // unselect table (if any is selected)
+        if (this.state.selectedTable !== null) {
+            this.state.selectedTable.setState({ clicked: false });
         }
-        ETLService.changeTargetDatabase(etl, cdm_id)
-            .then(response => {
-                this.setState({
-                    targetDB_id: response.data.targetDatabase.id,
-                    targetDB_tables: response.data.targetDatabase.tables,
-                    cdmName: CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name,
-                    
-                    selectedTable: null, sourceSelectedTable: null, targetSelectedTable: false,
-                    arrows: [], selectedArrow: null, modalShow: false
-                });
-            }).catch(error => {
-                console.log(error);
+        // make request to API
+        ETLService.changeTargetDatabase(this.state.etl, cdm_id).then(response => {
+            this.setState({
+                etl: { 
+                    id: response.data.id,
+                    name: response.data.name,
+                    sourceDatabase: response.data.sourceDatabase,
+                    targetDatabase: response.data.targetDatabase 
+                },
+                cdmName: CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name,
+                
+                // reset variables
+                selectedTable: null, sourceSelected: false,
+                arrows: [], selectedArrow: null,
+                data: [], showFieldsTable: false
             });
+        }).catch(error => {
+            console.log(error);
+        });
     }
+
+
+    /**
+     * Changes color from arrows that start in selected table and makes the
+     * other lighter
+     * 
+     * @param {*} table selected table
+     */
+
+    selectArrowsFromSource(table) {
+        this.state.arrows.forEach(element => {
+            if (element.start.name === table.name) {
+                element.color = 'orange';
+            } else {
+                element.color = 'lightgrey'
+            }
+        });
+    }
+
+
+    /**
+     * Changes color from arrows that end in selected table and makes the
+     * other lighter
+     * 
+     * @param {*} table selected table
+     */
+
+    selectArrowsFromTarget(table) {
+        this.state.arrows.forEach(element => {
+            if (element.end.name === table.name) {
+                element.color = 'blue';
+            } else {
+                element.color = 'lightgrey'
+            }
+        });
+    }
+
+    /**
+     * Creates an arrow between a source table and a target table.
+     *
+     * @param startTable
+     * @param endTable
+     */
+
+     createArrow = (startTable, endTable) => {
+        TableMappingService.addTableMapping(this.state.etl.id, startTable.id, endTable.id).then(res => {
+            const arrow = {
+                id: res.data.id,
+                start: startTable,
+                end: endTable,
+                color: "grey",
+            }
+            this.setState({ 
+                arrows: this.state.arrows.concat(arrow)
+            });
+        }).catch(res => {
+            console.log(res);
+        });
+    }
+
+
+    /**
+     * Unselects all arrows (changes color to grey)
+     */
+
+    resetArrowsColor() { 
+        this.state.arrows.forEach(element => {
+            if (element.complete) {
+                element.color = 'black'
+            } else {
+                element.color = 'grey';
+            }
+        });
+    }
+
+
+    /**
+     * Selects an arrow (changes its color to red)
+     *  - If no arrow is previously selected, only selects an arrow
+     *  - If selects the arrow previously selected, unselect it
+     *  - If selects other arrow, unselects previous and selects the new one
+     */
+
+    selectArrow = (arrow) => {
+        // change color to grey
+        this.resetArrowsColor();
+
+        const index = this.state.arrows.indexOf(arrow);
+        if (this.state.selectedArrow === null) {
+            // no arrow is selected
+            let arrows = this.state.arrows
+            arrows[index].color = "red";
+            this.setState({
+                selectedArrow: arrow,
+                arrows: arrows
+            });
+        } else if(this.state.selectedArrow === arrow) {
+            // select the arrow previous selected to unselect
+            let arrows = this.state.arrows
+            arrows[index].color = arrows[index].complete ? "black" : "grey";
+            this.setState({
+                selectedArrow: null,
+                arrows: arrows
+            });
+        } else {
+            // select any other unselected arrow
+
+            // unselect previous
+            this.resetArrowsColor();
+            // select a new one
+            let arrows = this.state.arrows
+            arrows[index].color = "red";
+            this.setState({
+                selectedArrow: arrow,
+                arrows: arrows
+            });
+        }
+    }
+
+
+    /**
+     * Removes an arrow
+     *
+     * @param arrow arrow to remove
+     */
+
+    removeArrow = (arrow) => {
+        // close field mapping modal
+        this.setState({ showFieldMappingModal: false });
+        // make request to API
+        TableMappingService.removeTableMapping(this.state.etl.id, this.state.arrow_id).then(res => {
+            let maps = []
+            res.data.forEach(function(item) {
+                const arrow = {
+                    id: item.id,
+                    start: item.source,
+                    end: item.target,
+                    complete: item.complete,
+                    color: item.complete ? "black" : "grey",
+                }
+                maps = maps.concat(arrow);
+            });
+            this.setState({
+                // reset variables
+                selectedArrow: null,
+                arrows: maps
+            })
+        }).catch(res => {
+            console.log(res);
+        })
+    }
+
+
+    /**
+     * 
+     * @param {*} arrow 
+     */
+
+    changeCompletionStatus(tableMap_id, completion) {
+        this.state.arrows.forEach(map => {
+            if (map.id === tableMap_id) {
+                map.color = completion ? "black" : "grey"
+            }
+        })
+        
+    }
+
+
+    /**
+     * Changes state to open field mapping modal
+     * 
+     * @param {*} arrow selected table mapping
+     */
+
+    openModal(arrow) {
+        this.setState({
+            arrow_id: arrow.id,
+            showFieldMappingModal: true
+        });
+    }
+
+
+    /**
+     * Changes state to close field mapping modal
+     */
+
+    closeModal(){ this.setState({ showFieldMappingModal: false }); }
 
 
     /**
@@ -113,6 +308,7 @@ class Session extends Component {
      *
      * @param table table with data
      */
+
     defineData(table) {
         let data = []
         table.fields.map((item, index) => {
@@ -120,14 +316,15 @@ class Session extends Component {
                 data.push({
                     field: item.name,
                     type: item.type,
-                    description: item.description
+                    description: item.description,
                 })
             )
         });
         this.setState({ 
             data: data, 
-            showTable: true,
-            tableName: table.name
+            showFieldsTable: true,
+            tableName: table.name,
+            comment: table.comment
         });
     }
 
@@ -141,50 +338,46 @@ class Session extends Component {
      *
      * @param element
      */
+
     setSelectedSourceTable = (element) => {
         if (this.state.selectedTable === null) {
             // all tables were unselected
-
+            
             // change select table information
-            this.setState( {
+            this.setState({
                 selectedTable: element,
-                sourceSelectedTable: element.props.table,
-                targetSelectedTable: null
-            }, 
-                // () => { console.log(this.state.selectedTable); }
-            );
-
+                sourceSelected: true,
+            });
+            // change color of mappings that comes from the selected table
+            this.selectArrowsFromSource(element.props.table);
             // change content of fields table
             this.defineData(element.props.table);
         } else if (this.state.selectedTable === element) {
-            // select the same table
-
+            // select the same table -> unselect
+            
+            // change color of arrows to grey
+            this.resetArrowsColor();
             // unselect
-            this.setState( {
+            this.setState({
                 selectedTable: null,
-                sourceSelectedTable: null,
-                targetSelectedTable: null,
-
+                sourceSelected: false,
                 data: [],
-                showTable: false
-            }, 
-                //() => { console.log(this.state.selectedTable); }
-            );
+                showFieldsTable: false
+            });
         } else {
             // other table was selected
 
             // unselect previous selected table
             this.state.selectedTable.setState({clicked: false});
-
+            // change color of arrows to grey
+            this.resetArrowsColor();
             // change select table information
             this.setState( {
                 selectedTable: element,
-                sourceSelectedTable: element.props.table,
-                targetSelectedTable: null
-            }, 
-                //() => { console.log(this.state.selectedTable); }
-            );
-
+                sourceSelected: true
+            });
+            // change color of mappings that comes from the selected table
+            this.selectArrowsFromSource(element.props.table);
             // change content of fields table
             this.defineData(element.props.table);
         }
@@ -201,70 +394,64 @@ class Session extends Component {
      *
      * @param element
      */
-    setSelectedTargetTable = (element) => {
 
+    setSelectedTargetTable = (element) => {
         if (this.state.selectedTable === null) {
             // no table is selected
 
+            // change color of mappings that comes from the selected table
+            this.selectArrowsFromTarget(element.props.table);
             // change select table information
             this.setState( {
                 selectedTable: element,
-                sourceSelectedTable: null,
-                targetSelectedTable: element.props.table
-            }, 
-                //() => { console.log(this.state.selectedTable); }
-            );
-
+                sourceSelected: false
+            });
             // change content of fields table
             this.defineData(element.props.table);
         } else if (this.state.selectedTable === element) {
             // select the same table
 
+            // change color of arrows to grey
+            this.resetArrowsColor();
             // unselect
             this.setState( {
                 selectedTable: null,
-                sourceSelectedTable: null,
-                targetSelectedTable: null,
+                sourceSelected: false,
                 data: [],
-                showTable: false
-            }, 
-                // () => { console.log(this.state.selectedTable); }
-            );
-        } else if (this.state.sourceSelectedTable !== null) {
+                showFieldsTable: false
+            });
+        } else if (this.state.sourceSelected === true) {
             // source table is selected -> create arrow
 
-            this.createArrow(this.state.sourceSelectedTable, element.props.table)
-
+            // change arrows color to grey
+            this.resetArrowsColor();
+            // create arrow
+            this.createArrow(this.state.selectedTable.props.table, element.props.table)
             // unselects tables
             this.state.selectedTable.setState({clicked: false});
             element.setState({clicked: false});
-
             // clean state
             this.setState( {
                 selectedTable: null,
-                sourceSelectedTable: null,
-                targetSelectedTable: null,
+                sourceSelected: false,
                 data: [],
-                showTable: false
-            }, 
-                //() => { console.log(this.state.selectedTable); }
-            );
+                showFieldsTable: false
+            });
         } else {
             // other target table is selected
 
             // unselects previous selected table
             this.state.selectedTable.setState({clicked: false});
-
+            // change color of arrows to grey
+            this.resetArrowsColor();
             // clean state
             this.setState( {
                 selectedTable: element,
-                sourceSelectedTable: null,
-                targetSelectedTable: element.props.table,
+                sourceSelected: false,
                 data: []
-            }, 
-                // () => { console.log(this.state.selectedTable); }
-            );
-
+            });
+            // change color of mappings that comes from the selected table
+            this.selectArrowsFromTarget(element.props.table);
             // define fields table
             this.defineData(element.props.table)
         }
@@ -272,174 +459,91 @@ class Session extends Component {
 
 
     /**
-     * Creates an arrow between a source table and a target table.
-     *
-     * @param startTable
-     * @param endTable
+     * Change state to open help modal
      */
-    createArrow = (startTable, endTable) => {
-        TableMappingService.addTableMapping(this.state.etl_id, startTable.id, endTable.id)
-            .then(res => {
+
+    openHelpModal() { this.setState({ showHelpModal: true }); }
+
+    
+    /**
+     * Change state to close help modal
+     */
+
+    closeHelpModal() { this.setState({ showHelpModal: false }); }
+
+
+    /**
+     * Change state to enable table comment edition 
+     */
+
+    editComment() { this.setState({ commentDisabled: false}); }
+
+
+    /**
+     * Change state to save comment 
+     */
+    saveComment() { 
+        this.setState({ commentDisabled: true });
+        // make request to API
+        ETLService.changeComment(this.state.etl.id, this.state.selectedTable.props.table.id, this.state.comment).then(response => {
+            let maps = []
+            response.data.tableMappings.forEach(function(item) {
                 const arrow = {
-                    id: 'arrow-' + res.data.id,
-                    map_id: res.data.id,
-                    start: startTable.name,
-                    end: endTable.name,
-                    color: "grey",
-        
-                    startTable: startTable,
-                    endTable: endTable
+                    id: item.id,
+                    start: item.source,
+                    end: item.target,
+                    color: item.complete ? "black" : "grey",
                 }
-
-                this.setState({ 
-                    arrows: this.state.arrows.concat(arrow)
-                });
-            }).catch(res => {
-                console.log(res);
+                maps = maps.concat(arrow);
             });
+            this.setState({
+                etl: {
+                    id: response.data.id,
+                    name: response.data.name,
+                    sourceDatabase: response.data.sourceDatabase,
+                    targetDatabase: response.data.targetDatabase
+                }, 
+                arrows: maps,
+                cdmName: CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name
+            });
+        }).catch(error => {
+            console.log(error);
+        });
     }
 
 
     /**
-     * Unselects all arrows (changes color to gray)
+     * Saves table comment
+     * 
+     * @param {*} event comment change
      */
-    cleanClickedArrows() {
-        this.setState({
-            arrows: this.state.arrows.map(ar => ar.color = "grey")
-        })
+
+    updateComment(event) { 
+        this.setState({ comment : event.target.value });
     }
 
-
-    /**
-     * Selects an arrow (changes its color to red)
-     *  - If no arrow is previously selected, only selects an arrow
-     *  - If selects the arrow previously selected, unselect it
-     *  - If selects other arrow, unselects previous and selects the new one
-     */
-    selectArrow = (arrow) => {
-        const index = this.state.arrows.indexOf(arrow);
-
-        if (this.state.selectedArrow === null) {
-            // no arrow is selected
-
-            let arrows = this.state.arrows
-            arrows[index].color = "red";
-
-            this.setState({
-                selectedArrow: arrow,
-                arrows: arrows
-            });
-        } else if(this.state.selectedArrow === arrow) {
-            // select the arrow previous selected to unselect
-
-            let arrows = this.state.arrows
-            arrows[index].color = "grey";
-
-            this.setState({
-                selectedArrow: null,
-                arrows: arrows
-            });
-        } else {
-            // select any other unselected arrow
-
-            // unselect previous
-            this.cleanClickedArrows();
-
-            // select a new one
-            let arrows = this.state.arrows
-            arrows[index].color = "red";
-
-            this.setState({
-                selectedArrow: arrow,
-                arrows: arrows
-            });
-        }
-    }
-
-
-    /**
-     * Removes an arrow
-     *
-     * @param arrow arrow to remove
-     */
-    removeArrow = (arrow) => {
-        this.setState({
-            modalIsOpen: false
-        });
-
-        TableMappingService.removeTableMapping(this.state.etl_id, this.state.arrow_id)
-            .then(res => {
-                let maps = []
-                res.data.forEach(function(item) {
-                    const arrow = {
-                        id: 'arrow-' + item.id,
-                        map_id: item.id,
-                        start: item.source.name,
-                        end: item.target.name,
-                        color: "grey",
-
-                        startTable: item.source,
-                        endTable: item.target
-                    }
-                    maps = maps.concat(arrow);
-                })
-
-                this.setState({
-                    arrow_id: null,
-                    arrows: maps
-                })
-
-            }).catch(res => {
-                console.log(res);
-        })
-    }
-
-    openModal(arrow) {
-        this.setState({
-                arrow_id: arrow.map_id,
-                modalIsOpen: true
-            },
-            /*() => console.log(this.state)*/
-        );
-    }
-
-    closeModal(){
-        this.setState({ modalIsOpen: false });
-    }
-
-    openHelpModal() {
-        this.setState({
-            showHelpModal: true
-        });
-    }
-
-    closeHelpModal() {
-        this.setState({
-            showHelpModal: false
-        });
-    }
 
     render() {
-
         return(
             <div className="tablesArea">
                 <Row>
                     <Col sm={4} md={4} lg={4}>
-                        <h1>{ this.state.name }</h1>
+                        <h1>{ this.state.etl.name }</h1>
                     </Col>
 
-                    <Button variant="info" size={"md"} onClick={this.openHelpModal}>Help <i className="fa fa-info"/></Button>
+                    <Controls.Button variant="contained" size="medium" color="primary" text="Help " onClick={this.openHelpModal}><i className="fa fa-info"/></Controls.Button>
+                    <Button variant="warning" size="sm">File</Button>
                 </Row>
 
                 <Row>
                     <Col sm={3} md={3} lg={3}>
                         <div className="databaseNameArea">
-                            <h4>EHR Database</h4>
+                            <h4>{this.state.etl.sourceDatabase.databaseName}</h4>
                         </div>
                         <div>
-                            { this.state.sourceDB_tables.map((item, index) => {
+                            { this.state.etl.sourceDatabase.tables.map(item => {
                                 return (
-                                    <EHRTable key={index} id={item.name} handleCallback={this.setSelectedSourceTable} table={item} />
+                                    <EHRTable key={item.id} id={item.id} handleCallback={this.setSelectedSourceTable} table={item} />
                                 )
                             })}
                         </div>
@@ -456,56 +560,63 @@ class Session extends Component {
                             </DropdownButton>
                         </div>
                         <div>
-                            { this.state.targetDB_tables.map((item, index) => {
+                            { this.state.etl.targetDatabase.tables.map(item => {
                                 return (
-                                    <CDMTable key={index} id={item.name} handleCallback={this.setSelectedTargetTable} table={item} />
+                                    <CDMTable key={item.id} id={item.id} handleCallback={this.setSelectedTargetTable} table={item} />
                                 )
                             })}
                         </div>
                     </Col>
-                    {
-                        this.state.arrows.map((ar, i) => (
-                            <Xarrow start={ar.start} end={ar.end} key={i}
-                                    startAnchor="right" endAnchor="left" color={ar.color} strokeWidth={7.5} curveness={0.5}
-                                    passProps={{
-                                        onClick: () => this.selectArrow(ar),
-                                        onDoubleClick: () => this.openModal(ar)
-                                        }}/>
-                        ))
-                    }
+                    { this.state.arrows.map((ar, i) => (
+                        <Xarrow start={ar.start.name} end={ar.end.name} key={i} startAnchor="right" endAnchor="left" color={ar.color} strokeWidth={7.5} curveness={0.5}
+                            passProps={{ onClick: () => this.selectArrow(ar), onDoubleClick: () => this.openModal(ar) }}/>
+                    ))}
 
                     <Col sm={6} md={6} lg={6}>
-                        <div className={this.state.showTable ? "tableShow" : "tableHidden"}>
+                        <div className={this.state.showFieldsTable ? "tableShow" : "tableHidden"}>
                             <h6><strong>Table name: </strong>{this.state.tableName}</h6>
-                            <Table striped bordered hover>
-                                <thead>
-                                <tr>
-                                    {this.state.columns.map((item, index) => {
+
+                            <div className="table">
+                                <Table striped bordered hover>
+                                    <thead>
+                                    <tr>
+                                        {this.state.columns.map((item, index) => {
+                                            return (
+                                                <th key={index}>{item}</th>
+                                            )
+                                        })}
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    {this.state.data.map((item, index) => {
                                         return (
-                                            <th key={index}>{item}</th>
+                                            <tr key={index}>
+                                                <td>{ item.field }</td>
+                                                <td>{ item.type }</td>
+                                                <td>{ item.description }</td>
+                                            </tr>
                                         )
                                     })}
-                                </tr>
-                                </thead>
+                                    </tbody>
+                                </Table>
+                            </div>
 
-                                <tbody>
-                                {this.state.data.map((item, index) => {
-                                    return (
-                                        <tr key={index}>
-                                            <td>{ item.field }</td>
-                                            <td>{ item.type }</td>
-                                            <td>{ item.description }</td>
-                                        </tr>
-                                    )
-                                })}
-                                </tbody>
-
-                            </Table>
+                            <Form>
+                                <Form.Group controlId="formComment">
+                                    <Form.Label>Comment</Form.Label>
+                                    <Form.Control as="textarea" value={this.state.comment} onChange={this.updateComment.bind(this)} disabled={this.state.commentDisabled} />
+                                </Form.Group>
+                                
+                                <Button className="button" variant="primary" onClick={this.saveComment} disabled={this.state.commentDisabled}>Save</Button>
+                                <Button className="button" variant="warning" onClick={this.editComment} disabled={!this.state.commentDisabled}>Edit comment</Button>
+                            
+                            </Form>
                         </div>
                     </Col>
                 </Row>
-                <FieldMappingModal modalIsOpen={this.state.modalIsOpen} closeModal={this.closeModal}
-                                       data={this.state.arrow_id} remove={this.removeArrow}/>
+                <FieldMappingModal modalIsOpen={this.state.showFieldMappingModal} closeModal={this.closeModal}
+                                       data={this.state.arrow_id} remove={this.removeArrow} changeMapCompletion={this.changeCompletionStatus}/>
 
                 <HelpModal modalIsOpen={this.state.showHelpModal} closeModal={this.closeHelpModal}/>
             </div>
