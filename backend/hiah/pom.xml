@@ -14,6 +14,14 @@
 	<name>hiah</name>
 	<description>Demo project for Spring Boot</description>
 
+	<distributionManagement>
+		<repository>
+			<id>central</id>
+			<name>c04a282c7a6d-releases</name>
+			<url>http://35.233.0.56:8081/artifactory/libs-release</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
@@ -100,6 +108,28 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.5.1</version>
+
+				<executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<configuration>
+					<serverId>central</serverId>
+					<nexusUrl>http://35.233.0.56:8081/nexus/</nexusUrl>
+					<skipStaging>true</skipStaging>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

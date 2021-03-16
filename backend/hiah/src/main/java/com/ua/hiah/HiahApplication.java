@@ -17,7 +17,7 @@ public class HiahApplication {
 }
 
 
-/*
+
 @Component
 class DatabaseLoader implements CommandLineRunner {
 
@@ -42,5 +42,5 @@ class DatabaseLoader implements CommandLineRunner {
 		//sourceDatabaseService.loadScanReport();
 	}
 }
-*/
+
 
