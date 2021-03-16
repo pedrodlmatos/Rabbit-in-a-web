@@ -51,8 +51,11 @@ public class ETLController {
             @ApiResponse(
                     responseCode = "200",
                     description = "ETL sessions",
-                    content = {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ETL.class)))}
-                    )
+                    content = { @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ETL.class))
+                    )}
+            )
     })
     @GetMapping("/sessions")
     @JsonView(Views.ETLSessionsList.class)
@@ -78,11 +81,17 @@ public class ETLController {
     @Operation(summary = "Retrieve a ETL session by its id")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200", description = "Found the ETL session",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ETL.class))}
+                    responseCode = "200",
+                    description = "Found the ETL session",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ETL.class)
+                    )}
             ),
             @ApiResponse(
-                    responseCode = "404", description = "ETL session not found", content = @Content
+                    responseCode = "404",
+                    description = "ETL session not found",
+                    content = @Content
             )
     })
     @GetMapping("/sessions/{id}")
@@ -111,8 +120,12 @@ public class ETLController {
     @Operation(summary = "Create an ETL session")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201", description = "Creates a new ETL session",
-                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ETL.class))}
+                    responseCode = "201",
+                    description = "Creates a new ETL session",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ETL.class)
+                    )}
             )
     })
     @PostMapping(value = "/sessions", consumes = "multipart/form-data")
@@ -149,6 +162,31 @@ public class ETLController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
+    /**
+     * Change table comment
+     *
+     * @param etl ETL session id
+     * @param table Table id
+     * @param comment comment to change to
+     * @return altered ETL session
+     */
+    @Operation(summary = "Change table comment")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Changed table comment",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ETL.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Not found",
+                    content = @Content
+            )
+    })
     @PutMapping("/sessions/comment")
     public ResponseEntity<?> changeTableComment(@Param(value = "etl") Long etl, @Param(value = "table") Long table, @Param(value = "comment") String comment) {
         logger.info("ETL {} - Change table {} comment", etl, table);

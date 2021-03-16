@@ -396,7 +396,6 @@ class Session extends Component {
      */
 
     setSelectedTargetTable = (element) => {
-
         if (this.state.selectedTable === null) {
             // no table is selected
 
