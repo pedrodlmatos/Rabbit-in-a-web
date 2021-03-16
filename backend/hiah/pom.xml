@@ -15,11 +15,10 @@
 	<description>Demo project for Spring Boot</description>
 
 	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>e029b41c104e-releases</name>
-			<url>http://35.233.0.56:8081/artifactory/libs-release</url>
-		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>http://35.233.0.56:8081/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<properties>
