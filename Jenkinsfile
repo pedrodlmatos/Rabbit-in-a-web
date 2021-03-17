@@ -94,10 +94,23 @@ pipeline {
                 }
             }
         }
+
+        /* Deploy latest images in runtime VM */
+        stage('Deploy in runtime') {
+            when {
+                expression { params.Deploy }
+            }
+            steps {
+                sshagent(credentials: ['hiah']) {
+                    sh 'ssh -o StrictHostKeyChecking=no -l hiah 35.233.0.56 "bash -s" < devops/deploy.sh'
+                }
+            }
+        }
     }
 
     parameters {
         booleanParam(name: 'Build', defaultValue: true, description: 'Build and Dockerize applications')
         booleanParam(name: 'Publish', defaultValue: true, description: 'Publish artifacts to artifactory and docker registry')
+        booleanParam(name: 'Deploy', defaultValue: true, description: 'Deploy latest images to runtime VM')
     }
 }
