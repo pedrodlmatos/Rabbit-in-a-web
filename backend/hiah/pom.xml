@@ -10,19 +10,19 @@
 	</parent>
 	<groupId>com.ua</groupId>
 	<artifactId>hiah</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>hiah</name>
+	<version>0.0.1</version>
+	<name>Hare-in-a-hat</name>
 	<description>Demo project for Spring Boot</description>
 
 	<distributionManagement>
 		<snapshotRepository>
 			<id>nexusdeploymentrepo</id>
-			<url>http://35.233.0.56:8081/repository/maven-snapshots/</url>
+			<url>http://35.195.9.62:8081/nexus/content/repositories/snapshots/</url>
 		</snapshotRepository>
 
 		<repository>
 			<id>nexusdeploymentrepo</id>
-			<url>http://35.233.0.56:8081/repository/maven-releases/</url>
+			<url>http://35.195.9.62:8081/nexus/content/repositories/releases/</url>
 		</repository>
 	</distributionManagement>
 
@@ -131,7 +131,7 @@
 
 				<configuration>
 					<serverId>nexusdeploymentrepo</serverId>
-					<nexusUrl>http://35.233.0.56:8081/nexus/</nexusUrl>
+					<nexusUrl>http://35.195.9.62:8081/nexus/</nexusUrl>
 					<skipStaging>true</skipStaging>
 				</configuration>
 			</plugin>
