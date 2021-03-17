@@ -102,7 +102,7 @@ pipeline {
             }
             steps {
                 sshagent(credentials: ['hiah']) {
-                    sh 'ssh -o StrictHostKeyChecking=no -l tese-vm 35.233.0.56 "bash -s" < devops/deploy.sh'
+                    sh 'ssh -o StrictHostKeyChecking=no -l pedrolopesmatos17 35.233.0.56 "bash -s" < devops/deploy.sh'
                 }
             }
         }
