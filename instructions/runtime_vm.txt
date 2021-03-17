@@ -6,3 +6,16 @@ $ docker run -d -p 8081:8081 --name nexus sonatype/nexus:oss
 Credenciais:
 user: admin
 pass: admin123
+
+
+
+2. Criar par de chaves ssh (para ligar à VM de runtime)
+
+$ ssh-keygen
+(passphrase: hareinahat)
+
+$ nano /etc/ssh/sshd_config
+Mudar para PasswordAuthentication yes
+Mudar para PermitRootLogin yes
+
+$ ssh-copy-id -i ~/.ssh/id_rsa.pub pedrolopesmatos17@35.195.9.62

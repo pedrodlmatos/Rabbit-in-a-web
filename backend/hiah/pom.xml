@@ -19,7 +19,7 @@
 			<id>nexusdeploymentrepo</id>
 			<url>http://35.195.9.62:8081/nexus/content/repositories/snapshots/</url>
 		</snapshotRepository>
-
+		
 		<repository>
 			<id>nexusdeploymentrepo</id>
 			<url>http://35.195.9.62:8081/nexus/content/repositories/releases/</url>
