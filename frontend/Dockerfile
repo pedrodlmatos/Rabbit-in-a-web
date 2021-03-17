@@ -1,8 +1,9 @@
 #Build
 FROM node:13.12.0-alpine3.11 AS build
 WORKDIR /app
-COPY package.json ./
-RUN npm install
-COPY . .
-RUN npm run build -- --configuration=production
-RUN ls /app/dist
+ENV PATH /app/node_modules/.bin:$PATH
+COPY ./package.json /app/
+COPY ./yarn.lock /app/
+RUN yarn --silent
+COPY . /app
+RUN yarn build

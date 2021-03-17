@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     stages {
-        /*
-         * Maven build backend projetct
-         */
+        /* Maven build backend projetct */
         stage('Maven Build') {
             when {
                 expression { params.Build }
@@ -23,10 +21,9 @@ pipeline {
             }   
         }
 
-        /*
-         * Push jar artifacts to artifactory
-         */
-        stage('Push jar artifacts to artifactory') {
+        
+        /* Push jar artifacts to repository */
+        stage('Push jar artifacts to repository') {
             when {
                 expression { params.Publish }
             }
@@ -44,9 +41,8 @@ pipeline {
             }
         }
 
-        /*
-         * Build docker images locally
-         */
+
+        /* Build docker images locally */
         stage('Docker build') {
             when {
                 expression { params.Build }
@@ -72,9 +68,8 @@ pipeline {
             }
         }
 
-        /*
-         * Push new images to docker registry
-         */
+
+        /* Push new images to docker registry */
         stage('Docker registry push') {
             when {
                 expression { params.Publish }

@@ -7,6 +7,13 @@ sudo sh -c 'echo deb http://pkg.jenkins-ci.org/debian-stable binary/ > /etc/apt/
 sudo apt-get update
 sudo apt-get install jenkins
 
+# install docker-compose on jenkins vm
+
+# give root permissions to run docker
+sudo usermod -a -G docker jenkins
+sudo service jenkins restart
+
+
 --- Install Docker ---
 
 sudo apt-get update
