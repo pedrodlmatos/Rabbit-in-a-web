@@ -1,0 +1,8 @@
+1. Install Jenkins on machine
+
+$ sudo apt-get install default-jre
+$ sudo apt-get install wget
+$ wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+
+
+

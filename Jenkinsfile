@@ -101,7 +101,7 @@ pipeline {
                 expression { params.Deploy }
             }
             steps {
-                sshagent(credentials: ['hiah']) {
+                sshagent(credentials: ['pedrolopesmatos17']) {
                     sh 'ssh -o StrictHostKeyChecking=no -l pedrolopesmatos17 35.225.211.221 "bash -s" < devops/deploy.sh'
                 }
             }
