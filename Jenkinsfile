@@ -102,10 +102,7 @@ pipeline {
             }
             steps {
                 sshagent(credentials: ['hiah']) {
-                    sh '''
-                        ssh -l pedrolopesmatos17 35.225.211.221
-                        ls
-                    '''
+                    sh 'ssh -o StrictHostKeyChecking=no -l pedrolopesmatos17 35.225.211.221 "bash -s" < deploy.sh'
                 }
             }
         }
