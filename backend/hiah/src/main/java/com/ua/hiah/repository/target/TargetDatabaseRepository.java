@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface TargetDatabaseRepository extends JpaRepository<TargetDatabase, Long> {
 
     TargetDatabase findTargetDatabaseByVersion(CDMVersion version);
+
 }

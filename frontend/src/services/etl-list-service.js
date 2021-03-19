@@ -14,6 +14,7 @@ class ETLService {
      */
 
     getAllETL = async () => {
+        console.log(API_URL);
         try {
             return await axios.get(API_URL + 'sessions', { headers: authHeader() })
         } catch (e) {

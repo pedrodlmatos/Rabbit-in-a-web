@@ -43,11 +43,16 @@ public class TargetDatabaseServiceImpl implements TargetDatabaseService {
     private static String CONCEPT_ID_HINTS_FILE_NAME = "CDMConceptIDHints_v5.0_02-OCT-19.csv";
 
 
+    /**
+     * Loads OMOP CDM databases (if not present)
+     */
     @Override
     public void loadCDMDatabases() {
         for (CDMVersion version : CDMVersion.values()) {
-            repository.save(loadCDMDatabaseFromCSV(version));
-            logger.info("TARGET DATABASE - LOADED database " + version);
+            if (repository.findTargetDatabaseByVersion(version) == null) {
+                repository.save(loadCDMDatabaseFromCSV(version));
+                logger.info("TARGET DATABASE - LOADED database " + version);
+            }
         }
     }
 
