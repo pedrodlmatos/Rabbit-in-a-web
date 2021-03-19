@@ -5,4 +5,4 @@ docker run -p 8100:8000 -e CONFIG_FILE="application-runtime.properties" -e sprin
 
 docker stop hiah-frontend && docker rm hiah-frontend || echo "Frontend project not found"
 docker image rm 35.195.9.62:5000/v2/hiah-frontend:runtime
-docker run -p 50080:80 -d --name=hiah-frontend 35.195.9.62:5000/v2/hiah-frontend:runtime
+docker run -p 3000:80 -d --name=hiah-frontend 35.195.9.62:5000/v2/hiah-frontend:runtime
