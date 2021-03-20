@@ -32,7 +32,8 @@ class Session extends Component {
             /* arrows */
             arrows: [], selectedArrow: null, arrow_id: null, showFieldMappingModal: false,
             /* help modal */
-            showHelpModal: false
+            showHelpModal: false,
+            responseData: null
         }
 
         this.openModal = this.openModal.bind(this);
@@ -524,9 +525,16 @@ class Session extends Component {
     }
 
     getFiles() {
-        ETLService.downloadSourceFieldsFile(this.state.etl.id).then(response => {
-            console.log(response.data);
+        ETLService.downloadSourceFieldsFile(this.state.etl.id)
+        .then((response) => response.blob())
+        .then((blob) => {
+            console.log(blob);
         })
+        /*
+        ETLService.downloadSourceFieldsFile(this.state.etl.id)
+            .then(response => response.blob())
+            .then(response => console.log(response));
+            */
     }
 
 

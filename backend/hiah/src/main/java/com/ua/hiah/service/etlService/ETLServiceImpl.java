@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -127,14 +126,14 @@ public class ETLServiceImpl implements ETLService {
     }
 
     @Override
-    public ByteArrayInputStream createSourceFieldListCSV(Long id) {
+    public byte[] createSourceFieldListCSV(Long id) {
         ETL etl = etlRepository.findById(id).orElse(null);
 
         if (etl != null) {
             List<Row> rows = ETLSummaryGenerator.createSourceFieldList(etl);
-            ByteArrayInputStream inputStream = ETLSummaryGenerator.writeCSV("sourceList.csv", rows);
+            byte[] outputStream = ETLSummaryGenerator.writeCSV("sourceList.csv", rows);
 
-            return inputStream;
+            return outputStream;
         }
         return null;
     }

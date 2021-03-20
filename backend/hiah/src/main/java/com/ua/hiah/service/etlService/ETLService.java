@@ -3,7 +3,6 @@ package com.ua.hiah.service.etlService;
 import com.ua.hiah.model.ETL;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public interface ETLService {
@@ -20,7 +19,7 @@ public interface ETLService {
 
     void createDocumentationFile(Long id);
 
-    ByteArrayInputStream createSourceFieldListCSV(Long id);
+    byte[] createSourceFieldListCSV(Long id);
 
     ETL changeComment(Long id, Long tableId, String comment);
 }

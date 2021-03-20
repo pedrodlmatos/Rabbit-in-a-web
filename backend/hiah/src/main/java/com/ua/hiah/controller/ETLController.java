@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import javassist.bytecode.ByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -205,12 +208,15 @@ public class ETLController {
     public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl") Long etl) {
         logger.info("ETL {} - Download source field list CSV", etl);
 
-        InputStreamResource file = new InputStreamResource(etlService.createSourceFieldListCSV(etl));
+        byte[] content = etlService.createSourceFieldListCSV(etl);
+        String filename = "sourceList.csv";
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sourceList.csv")
-                .contentType(MediaType.parseMediaType("application/csv"))
-                .body(file);
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.parseMediaType("application/csv"));
+        header.setContentDispositionFormData(filename, filename);
+        header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+        return new ResponseEntity<byte[]>(content, header, HttpStatus.OK);
 
     }
 }

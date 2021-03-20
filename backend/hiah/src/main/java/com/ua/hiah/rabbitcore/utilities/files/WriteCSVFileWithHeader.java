@@ -56,13 +56,12 @@ public class WriteCSVFileWithHeader {
         }
     }
 
-    public ByteArrayInputStream close() {
+    public byte[] closeAndGetContent() {
         try {
             printer.flush();
-            ByteArrayInputStream content = new ByteArrayInputStream(outputStream.toByteArray());
             printer.close();
 
-            return content;
+            return outputStream.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }

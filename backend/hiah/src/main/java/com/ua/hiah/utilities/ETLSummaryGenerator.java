@@ -11,13 +11,12 @@ import com.ua.hiah.rabbitcore.utilities.files.Row;
 import com.ua.hiah.rabbitcore.utilities.files.WriteCSVFileWithHeader;
 import org.apache.commons.csv.CSVFormat;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ETLSummaryGenerator {
 
-    public static ByteArrayInputStream writeCSV(String filename, List<Row> rows) {
+    public static byte[] writeCSV(String filename, List<Row> rows) {
         if (!filename.toLowerCase().endsWith(".csv"))
             filename = filename + ".csv";
 
@@ -25,7 +24,7 @@ public class ETLSummaryGenerator {
         for (Row row : rows)
             out.write(row);
 
-        ByteArrayInputStream content = out.close();
+        byte[] content = out.closeAndGetContent();
         return content;
     }
 
