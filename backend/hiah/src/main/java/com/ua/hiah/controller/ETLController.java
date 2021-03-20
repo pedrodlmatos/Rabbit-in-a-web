@@ -13,9 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -171,6 +171,7 @@ public class ETLController {
      * @param comment comment to change to
      * @return altered ETL session
      */
+
     @Operation(summary = "Change table comment")
     @ApiResponses(value = {
             @ApiResponse(
@@ -197,5 +198,19 @@ public class ETLController {
         }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    @GetMapping(value = "/sessions/sourceCSV")
+    public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl") Long etl) {
+        logger.info("ETL {} - Download source field list CSV", etl);
+
+        InputStreamResource file = new InputStreamResource(etlService.createSourceFieldListCSV(etl));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sourceList.csv")
+                .contentType(MediaType.parseMediaType("application/csv"))
+                .body(file);
+
     }
 }

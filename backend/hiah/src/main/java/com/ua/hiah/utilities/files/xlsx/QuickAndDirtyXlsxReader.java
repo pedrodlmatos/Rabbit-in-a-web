@@ -1,6 +1,6 @@
 package com.ua.hiah.utilities.files.xlsx;
 
-import com.ua.hiah.utilities.StringUtilities;
+import com.ua.hiah.rabbitcore.utilities.StringUtilities;
 import com.ua.hiah.utilities.collections.IntegerComparator;
 
 import java.io.BufferedReader;

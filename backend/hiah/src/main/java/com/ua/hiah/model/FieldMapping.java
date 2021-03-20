@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "FIELD_MAPPING")
@@ -76,4 +78,5 @@ public class FieldMapping {
     public void setTableMapping(TableMapping tableMapping) {
         this.tableMapping = tableMapping;
     }
+
 }

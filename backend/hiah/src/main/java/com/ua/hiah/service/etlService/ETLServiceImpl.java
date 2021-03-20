@@ -5,18 +5,20 @@ import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.rabbitcore.utilities.files.Row;
 import com.ua.hiah.repository.ETLRepository;
 import com.ua.hiah.service.source.sourceDatabaseService.SourceDatabaseService;
 import com.ua.hiah.service.source.sourceTableService.SourceTableService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
 import com.ua.hiah.service.target.targetDatabase.TargetDatabaseService;
 import com.ua.hiah.service.target.targetTable.TargetTableService;
+import com.ua.hiah.utilities.ETLSummaryGenerator;
 import com.ua.hiah.utilities.WordDocumentGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.transform.Source;
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -123,6 +125,20 @@ public class ETLServiceImpl implements ETLService {
 
         return etl;
     }
+
+    @Override
+    public ByteArrayInputStream createSourceFieldListCSV(Long id) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            List<Row> rows = ETLSummaryGenerator.createSourceFieldList(etl);
+            ByteArrayInputStream inputStream = ETLSummaryGenerator.writeCSV("sourceList.csv", rows);
+
+            return inputStream;
+        }
+        return null;
+    }
+
 
     @Override
     public void createDocumentationFile(Long id) {

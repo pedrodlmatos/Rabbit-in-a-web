@@ -43,6 +43,7 @@ class Session extends Component {
         this.editComment = this.editComment.bind(this);
         this.saveComment = this.saveComment.bind(this);
         this.changeCompletionStatus = this.changeCompletionStatus.bind(this);
+        this.getFiles = this.getFiles.bind(this);
     }
 
     /**
@@ -522,6 +523,12 @@ class Session extends Component {
         this.setState({ comment : event.target.value });
     }
 
+    getFiles() {
+        ETLService.downloadSourceFieldsFile(this.state.etl.id).then(response => {
+            console.log(response.data);
+        })
+    }
+
 
     render() {
         return(
@@ -532,7 +539,7 @@ class Session extends Component {
                     </Col>
 
                     <Controls.Button variant="contained" size="medium" color="primary" text="Help " onClick={this.openHelpModal}><i className="fa fa-info"/></Controls.Button>
-                    <Button variant="warning" size="sm">File</Button>
+                    <Controls.Button variant="contained" size="medium" color="primary" text="Files" onClick={this.getFiles} />
                 </Row>
 
                 <Row>

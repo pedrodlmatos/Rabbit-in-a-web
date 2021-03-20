@@ -3,6 +3,7 @@ package com.ua.hiah.model.source;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -155,5 +157,19 @@ public class SourceField {
 
     public void setMappings(List<FieldMapping> mappings) {
         this.mappings = mappings;
+    }
+
+    /*
+     * Adapted from ETL (Rabbit in a hat)
+     */
+    public List<String> getMappingsFromSourceField() {
+        List<String> result = new ArrayList<>();
+
+        for (FieldMapping mapping : this.getMappings()) {
+            TargetField targetField = mapping.getTarget();
+            result.add(String.format("%s.%s", targetField.getTable().getName(), targetField.getName()));
+        }
+
+        return result;
     }
 }

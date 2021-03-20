@@ -85,6 +85,11 @@ class ETLService {
     changeComment(etl, table, comment) {
         return axios.put(API_URL + "sessions/comment", null, { headers: authHeader(), params:{ etl: etl, table: table, comment: comment }});
     }
+
+
+    downloadSourceFieldsFile(etl) {
+        return axios.get(API_URL + "sessions/sourceCSV", { headers: authHeader(), params: { etl: etl }})
+    }
 }
 
 export default new ETLService();
