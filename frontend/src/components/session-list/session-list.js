@@ -101,7 +101,7 @@ export default function SessionList() {
                     </ETLModal>
                 </div>
             ) : (
-                <CircularProgress color="primary" variant="determinate" size={40} />
+                <CircularProgress color="primary" variant="indeterminate" size={40} />
             )}
         </div>
     )
