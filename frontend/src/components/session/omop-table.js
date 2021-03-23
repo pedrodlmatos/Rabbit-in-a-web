@@ -10,11 +10,13 @@ const useStyles = makeStyles(theme => ({
         borderColor: 'darkblue',
         borderStyle: 'solid',
         backgroundColor: 'lightblue',
+        fontSize: 15,
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
         flexDirection: 'column',
-        textAlign: 'center'
+        textAlign: 'center',
+        wordWrap: 'break-word'
     },
     selected: {
         width: 200,
@@ -23,12 +25,14 @@ const useStyles = makeStyles(theme => ({
         marginTop: theme.spacing(1),
         borderColor: 'black',
         borderStyle: 'dashed',
-        backgroundColor: 'blue',
+        backgroundColor: 'lightblue',
+        fontSize: 15,
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
         flexDirection: 'column',
-        textAlign: 'center'
+        textAlign: 'center',
+        wordWrap: 'break-word'
     }
     
 
@@ -36,12 +40,14 @@ const useStyles = makeStyles(theme => ({
 
 export default function OMOPTable(props) {
     const classes = useStyles();
-    const { id, table, handleSourceTableSelection } = props;
-    const [clicked, setClicked] = useState(false);
+    const { id, table, clicked, handleTargetTableSelection } = props;
 
+    const selectTable = () => {
+        handleTargetTableSelection(table);
+    }
 
     return(
-        <div id={table.name} className={clicked ? classes.selected : classes.unselected}>
+        <div id={id} className={clicked ? classes.selected : classes.unselected} onClick={selectTable}>
             { table.name }
         </div>    
     )

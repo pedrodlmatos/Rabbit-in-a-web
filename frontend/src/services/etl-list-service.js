@@ -69,7 +69,7 @@ class ETLService {
      */
 
     changeTargetDatabase(etl, cdm) {
-        return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl.id, cdm: cdm }});
+        return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl, cdm: cdm }});
     }
 
 

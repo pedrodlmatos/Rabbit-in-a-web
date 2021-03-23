@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/api/fieldMap")
+@RequestMapping("/v1/api/fieldMap")
 public class FieldMappingController {
 
     private Logger logger = LoggerFactory.getLogger(FieldMappingController.class);

@@ -10,11 +10,14 @@ const useStyles = makeStyles(theme => ({
         borderColor: 'darkred',
         borderStyle: 'solid',
         backgroundColor: 'orange',
+        fontSize: 15,
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
         flexDirection: 'column',
-        textAlign: 'center'
+        textAlign: 'center',
+        wordWrap: 'break-work'
+        
     },
     selected: {
         width: 200,
@@ -24,11 +27,13 @@ const useStyles = makeStyles(theme => ({
         borderColor: 'black',
         borderStyle: 'dashed',
         backgroundColor: 'orange',
+        fontSize: 15,
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
         flexDirection: 'column',
-        textAlign: 'center'
+        textAlign: 'center',
+        wordWrap: 'break-work'
     }
 }))
 

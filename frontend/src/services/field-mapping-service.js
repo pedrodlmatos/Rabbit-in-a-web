@@ -7,7 +7,7 @@ const API_URL = environment.FIELD_MAP_URL;
 class FieldMappingService {
 
     addFieldMapping(tableMap, source, target) {
-        return axios.post(API_URL + "create", {}, { headers: authHeader(), params: { tableMap: tableMap, source_id: source, target_id: target } });
+        return axios.post(API_URL + "create", null, { headers: authHeader(), params: { tableMap: tableMap, source_id: source, target_id: target } });
     }
 
     removeFieldMapping(tableMapping_id, fieldMapping_id) {
