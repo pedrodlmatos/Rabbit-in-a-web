@@ -9,6 +9,7 @@ import FieldMappingModal from '../modals/field-mapping-modal/field-mapping-modal
 import { CDMVersions } from './CDMVersions';
 import EHRTable from './ehr-table';
 import OMOPTable from './omop-table';
+import InfoTable from '../info-table/info-table';
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -22,18 +23,34 @@ const useStyles = makeStyles(theme => ({
     },
     hideFieldsInfo: {
         visibility: 'false'
+    },
+    fieldInfo: {
+        marginLeft: theme.spacing(-20)
     }
-
 }))
 
 
 export default function Session() {
-
     const initialETLValues = {
         id: null, name: null,
         targetDatabase: { id: null, tables: [], databaseName: '' },
         sourceDatabase: { id: null, tables: [], databaseName: null }
     }
+
+    const columns = React.useMemo(() => [
+        {
+            Header: 'Field',
+            accessor: 'field'
+        },
+        {
+            Header: 'Type',
+            accessor: 'type'
+        },
+        {
+            Header: 'Description',
+            accessor: 'description'
+        }
+    ], [])
 
     const classes = useStyles();
     const [loading, setLoading] = useState(true);
@@ -47,10 +64,10 @@ export default function Session() {
     const [selectedTable, setSelectedTable] = useState({})
     const [sourceSelected, setSourceSelected] = useState(false);
     const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
+    
 
     
     useEffect(() => {
-
         const session_id = window.location.pathname.toString().replace("/session/", "");
         
         ETLService.getETLById(session_id).then(res => {
@@ -467,10 +484,12 @@ export default function Session() {
                             removeTableMapping={removeTableMapping}
                             changeMappingCompletion={changeCompleteStatus}/>
                         
-                        <Grid item xs={6} sm={6} md={6} lg={6}>
+                        <Grid item xs={6} sm={6} md={6} lg={6} className={classes.fieldInfo}>
                             { showFieldsInfo && fieldsInfo !== [] ? (
                                 <div>
                                     <h6><strong>Table: </strong>{selectedTable.name}</h6>
+
+                                    <InfoTable columns={columns} data={fieldsInfo}/>
                                 </div>
                             ) : (
                                 <></>

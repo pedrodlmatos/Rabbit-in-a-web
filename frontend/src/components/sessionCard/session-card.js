@@ -1,20 +1,35 @@
-import React, {Component} from "react";
-import { Card, CardActions, CardContent, Button, Typography } from '@material-ui/core';
-import './session-card.css';
+import React from "react";
+import { makeStyles, Card, CardActions, CardContent, Button, Typography } from '@material-ui/core';
 import { CDMVersions } from "../session/CDMVersions";
 
 
-export default class SessionCard extends Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            session_id: props.id,
-            name: props.name,
-            targetDatabase: CDMVersions.filter(function(cdm) { return cdm.id === props.omop })[0].name,
-            sourceDatabase: props.ehr,
-        }
+const useStyles = makeStyles(theme => ({
+    card: {
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(5),
+        borderStyle: 'solid',
+        borderColor: 'black',
+        borderRadius: '0.25rem',
+        borderWidth: 1,
+        minWidth: 200,
+        minHeight: 100,
+        maxWidth: 300
+    },
+    title: {
+        fontSize: 14
+    },
+    accessButton: {
+        margin: '0 auto',
+        display: 'block'
     }
+}))
+
+
+export default function SessionCard(props) {
+    const classes = useStyles();
+    const { id, name, omop, ehr } = props;
+    const omopName = CDMVersions.filter(function(cdm) { return cdm.id === omop })[0].name;
+
 
     /**
      * Redirect to ETL session page
@@ -22,33 +37,30 @@ export default class SessionCard extends Component {
      * @param {*} session_id session's id
      */
 
-    redirect(session_id) {
+    const redirect = (session_id) => {
         window.location.href = '/session/' + session_id;
     }
 
+    return(
+        <Card className={classes.card} variant="outlined">
+            <CardContent>
+                <Typography className={classes.title} color="textSecondary" gutterBottom>{ name }</Typography>
 
-    render() {
-        return (
-            <Card className="card" variant="outlined">
-                <CardContent>
-                    <Typography className="title" color="textSecondary" gutterBottom>{ this.state.name }</Typography>
+                <Typography variant="body2" component="p">
+                    <Typography variant="body2" component="b">EHR: </Typography>
+                    { ehr }
+                </Typography>
+                
+                <Typography variant="body2" component="p">
+                    <Typography variant="body2" component="b">OMOP CDM: </Typography>
+                    { omopName }
+                </Typography>
+                
+            </CardContent>
 
-                    <Typography variant="body2" component="p">
-                        <Typography variant="body2" component="b">EHR: </Typography>
-                        { this.state.sourceDatabase }
-                    </Typography>
-                    
-                    <Typography variant="body2" component="p">
-                        <Typography variant="body2" component="b">OMOP CDM: </Typography>
-                        { this.state.targetDatabase }
-                    </Typography>
-                    
-                </CardContent>
-
-                <CardActions>
-                    <Button className="accessButton" size="medium" variant="contained" color="primary" onClick={() => { this.redirect(this.state.session_id); }}>Access</Button>
-                </CardActions>
-            </Card>
-        )
-    }
+            <CardActions>
+                <Button className={classes.accessButton} size="medium" variant="contained" color="primary" onClick={() => redirect(id)}>Access</Button>
+            </CardActions>
+        </Card>
+    )
 }
