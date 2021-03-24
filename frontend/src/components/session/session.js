@@ -26,6 +26,12 @@ const useStyles = makeStyles(theme => ({
     },
     fieldInfo: {
         marginLeft: theme.spacing(-20)
+    },
+    hiddenButton: {
+        visibility: 'hidden'
+    },
+    showButton: {
+        visibility: 'false'
     }
 }))
 
@@ -64,7 +70,7 @@ export default function Session() {
     const [selectedTable, setSelectedTable] = useState({})
     const [sourceSelected, setSourceSelected] = useState(false);
     const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
-    
+    const [enableEditCommentButton, setEnableEditCommentButton] = useState(true);    
 
     
     useEffect(() => {
@@ -399,6 +405,18 @@ export default function Session() {
         setSelectedMapping(mapping);
     }
 
+
+    const enableCommentChange = () => {
+        setEnableEditCommentButton(false);
+    }
+
+
+    const saveComment = () => {
+        // TODO save comment in api
+        setEnableEditCommentButton(true);
+
+    }
+
     return(
         <div>
             { loading ? (
@@ -490,6 +508,36 @@ export default function Session() {
                                     <h6><strong>Table: </strong>{selectedTable.name}</h6>
 
                                     <InfoTable columns={columns} data={fieldsInfo}/>
+                                    <br />
+
+                                    <Controls.Input 
+                                        variant="outlined" 
+                                        value={selectedTable.comment}
+                                        name="comment"
+                                        disabled={enableEditCommentButton}
+                                        fullWidth={true}
+                                        label="Comment"
+                                        rows={3}
+                                        size="medium"
+                                        type="string" 
+                                    />
+                                    <Controls.Button
+                                        className={enableEditCommentButton ? classes.showButton : classes.hiddenButton}
+                                        text="Edit comment"
+                                        size="medium"
+                                        color="primary"
+                                        variant="contained"
+                                        onClick={enableCommentChange}
+                                    />
+
+                                    <Controls.Button
+                                        className={enableEditCommentButton ? classes.hiddenButton : classes.showButton}
+                                        text="Save"
+                                        size="medium"
+                                        color="primary"
+                                        variant="contained"
+                                        onClick={saveComment}
+                                    />
                                 </div>
                             ) : (
                                 <></>

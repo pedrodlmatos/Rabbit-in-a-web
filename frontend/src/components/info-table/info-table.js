@@ -22,6 +22,7 @@ const StyledTableRow = withStyles((theme) => ({
 
 const useStyles = makeStyles({
     table: {
+        maxHeight: 500,
         minWidth: 700
     }
 })
@@ -31,8 +32,8 @@ export default function InfoTable({ columns, data }) {
     const { getTableProps, headers, rows, prepareRow } = useTable({ columns, data });
 
     return(
-        <TableContainer component={Paper}>
-            <Table className={classes.table} aria-label="customized table" {...getTableProps()}>
+        <TableContainer className={classes.table} component={Paper}>
+            <Table stickyHeader aria-label="customized table" {...getTableProps()}>
                 <TableHead>
                     <TableRow>
                     {headers.map(column => (
