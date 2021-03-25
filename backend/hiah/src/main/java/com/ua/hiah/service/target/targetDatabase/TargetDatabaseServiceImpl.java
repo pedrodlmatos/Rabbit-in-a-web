@@ -43,19 +43,6 @@ public class TargetDatabaseServiceImpl implements TargetDatabaseService {
     private static String CONCEPT_ID_HINTS_FILE_NAME = "CDMConceptIDHints_v5.0_02-OCT-19.csv";
 
 
-    /**
-     * Loads OMOP CDM databases (if not present)
-     */
-    @Override
-    public void loadCDMDatabases() {
-        for (CDMVersion version : CDMVersion.values()) {
-            if (repository.findTargetDatabaseByVersion(version) == null) {
-                repository.save(loadCDMDatabaseFromCSV(version));
-                logger.info("TARGET DATABASE - LOADED database " + version);
-            }
-        }
-    }
-
     @Override
     public List<TargetDatabase> getAllTargetDatabases() {
         logger.info("TARGET DATABASE - Get all target databases");
@@ -68,8 +55,8 @@ public class TargetDatabaseServiceImpl implements TargetDatabaseService {
     }
 
     @Override
-    public TargetDatabase getDatabaseByCDM(String cdm) {
-        return repository.findTargetDatabaseByVersion(CDMVersion.valueOf(cdm));
+    public TargetDatabase createDatabaseByCDM(String cdm) {
+        return repository.save(loadCDMDatabaseFromCSV(CDMVersion.valueOf(cdm)));
     }
 
     /**
@@ -83,7 +70,6 @@ public class TargetDatabaseServiceImpl implements TargetDatabaseService {
         TargetDatabase database = new TargetDatabase();
         database.setDatabaseName(DBName);
         database.setVersion(cdmVersion);
-        database = repository.save(database);
 
         List<TargetTable> tables = new ArrayList<>();
 

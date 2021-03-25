@@ -62,7 +62,7 @@ public class ETLServiceImpl implements ETLService {
     public ETL createETLSession(MultipartFile file, String cdm) {
         ETL etl = new ETL();
         etl.setName("ETL session " + etlRepository.count());
-        etl.setTargetDatabase(targetDatabaseService.getDatabaseByCDM(cdm));
+        etl.setTargetDatabase(targetDatabaseService.createDatabaseByCDM(cdm));
         SourceDatabase sourceDatabase = sourceDatabaseService.createDatabaseFromFile(file);
         etl.setSourceDatabase(sourceDatabase);
         return etlRepository.save(etl);
@@ -90,7 +90,7 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(etl_id).orElse(null);
 
         if (etl != null) {
-            TargetDatabase database = targetDatabaseService.getDatabaseByCDM(cdm);
+            TargetDatabase database = targetDatabaseService.createDatabaseByCDM(cdm);
             etl.setTargetDatabase(database);
 
             tableMappingService.removeFromETL(etl_id);

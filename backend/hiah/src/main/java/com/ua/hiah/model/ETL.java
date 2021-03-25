@@ -28,8 +28,8 @@ public class ETL {
     @JsonView(Views.ETLSessionsList.class)
     private SourceDatabase sourceDatabase;
 
-    @ManyToOne
-    @JoinColumn(name = "targetDatabase_id", nullable = false)
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id", nullable = false)
     @JsonView(Views.ETLSessionsList.class)
     private TargetDatabase targetDatabase;
 

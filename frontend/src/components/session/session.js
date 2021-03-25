@@ -112,18 +112,20 @@ export default function Session() {
      *
      * @param e change OMOP CDM event
      */
+    
     const handleCDMChange = e => {
         // clean state
         if (selectedTable !== {}) {
             setSelectedTable({});
             setSourceSelected(false);
             setShowFieldsInfo(false);
-            setFieldsInfo(null);
+            setFieldsInfo([]);
         }
 
         const cdm = e.target.value;
         ETLService.changeTargetDatabase(etl.id, cdm).then(response => {
-            setEtl(response.data);
+            console.log(response.data);
+            setEtl({...etl, targetDatabase: response.data.targetDatabase });
             setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name);
             setMappings([]);
             setSelectedMapping({});
@@ -290,7 +292,6 @@ export default function Session() {
                 description: element.description
             })
         })
-
         setFieldsInfo(data);
         setShowFieldsInfo(true);
     }
@@ -406,16 +407,22 @@ export default function Session() {
     }
 
 
-    const enableCommentChange = () => {
-        setEnableEditCommentButton(false);
-    }
-
-
     const saveComment = () => {
         // TODO save comment in api
         setEnableEditCommentButton(true);
 
+        // make request to API
+        ETLService.changeComment(etl.id, selectedTable.id, selectedTable.comment).then(response => {
+            setEtl({
+                ...etl, 
+                sourceDatabase: response.data.sourceDatabase,
+                targetDatabase: response.data.targetDatabase
+            })
+        }).catch(error => {
+            console.log(error);
+        });
     }
+
 
     return(
         <div>
@@ -520,6 +527,7 @@ export default function Session() {
                                         rows={3}
                                         size="medium"
                                         type="string" 
+                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
                                     />
                                     <Controls.Button
                                         className={enableEditCommentButton ? classes.showButton : classes.hiddenButton}
@@ -527,7 +535,7 @@ export default function Session() {
                                         size="medium"
                                         color="primary"
                                         variant="contained"
-                                        onClick={enableCommentChange}
+                                        onClick={() => setEnableEditCommentButton(false)}
                                     />
 
                                     <Controls.Button
