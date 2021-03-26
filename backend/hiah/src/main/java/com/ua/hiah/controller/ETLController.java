@@ -2,7 +2,7 @@ package com.ua.hiah.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
-import com.ua.hiah.service.etlService.ETLService;
+import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -10,27 +10,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import javassist.bytecode.ByteArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -53,7 +43,7 @@ public class ETLController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "ETL sessions",
+                    description = "Retrieve all ETL sessions",
                     content = { @Content(
                             mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = ETL.class))
@@ -68,11 +58,10 @@ public class ETLController {
         List<ETL> response = etlService.getAllETL();
 
         if (response == null)
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.OK);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 
     /**
      * Gets an ETL session given its id
@@ -129,15 +118,24 @@ public class ETLController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = ETL.class)
                     )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "OMOP CDM not valid",
+                    content = @Content
             )
     })
     @PostMapping(value = "/sessions", consumes = "multipart/form-data")
     public ResponseEntity<?> createETLSession(@RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
         ETL etl = etlService.createETLSession(file, cdm);
+
+        if (etl == null) {
+            return new ResponseEntity<>(etl, HttpStatus.BAD_REQUEST);
+        }
+
         logger.info("ETL - Created ETL session with id: " + etl.getId());
         return new ResponseEntity<>(etl, HttpStatus.CREATED);
     }
-
 
     /**
      *
@@ -153,6 +151,7 @@ public class ETLController {
             )
     })
     @PutMapping("/sessions/targetDB")
+    @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> changeTargetDatabase(@Param(value = "etl") Long etl, @Param(value = "cdm") String cdm) {
         logger.info("ETL - Change target database of session {} to {}", etl, cdm);
 

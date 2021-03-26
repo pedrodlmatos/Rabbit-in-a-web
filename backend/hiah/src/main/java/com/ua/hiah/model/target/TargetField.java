@@ -6,16 +6,7 @@ import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +16,7 @@ public class TargetField {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.ETLSession.class)
     private Long id;
 
@@ -44,15 +35,21 @@ public class TargetField {
     @Column(name = "nullable")
     private boolean isNullable;
 
+    @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
+    private String comment;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_table_id")
     @JsonIgnore
     private TargetTable table;
 
+
     @OneToMany(mappedBy = "target")
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;
+
 
     // CONSTRUCTOR
     public TargetField() {
@@ -107,6 +104,15 @@ public class TargetField {
         this.table = table;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+
     public List<FieldMapping> getMappings() {
         return mappings;
     }
@@ -115,9 +121,7 @@ public class TargetField {
         this.mappings = mappings;
     }
 
-    /*
-     * Adapted from ETL (Rabbit in a hat)
-     */
+    /* Adapted from ETL (Rabbit in a hat) */
     public List<String> getMappingsToTargetField() {
         List<String> result = new ArrayList<>();
 
@@ -127,5 +131,17 @@ public class TargetField {
         }
 
         return result;
+    }
+
+
+    @Override
+    public String toString() {
+        return "TargetField{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", isNullable=" + isNullable +
+                '}';
     }
 }

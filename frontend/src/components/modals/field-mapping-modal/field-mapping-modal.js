@@ -22,10 +22,12 @@ export default function FieldMappingModal(props) {
     const [targetTable, setTargetTable] = useState(null);
     const [fieldMappings, setFieldMappings] = useState([]);
     const [complete, setComplete] = useState(false);
+    const [logic, setLogic] = useState('');
     const [selectedField, setSelectedField] = useState({});
     const [sourceSelected, setSourceSelected] = useState(false);
     const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
     const [showDeleteButton, setShowDeleteButton] = useState(false);
+    const [showFieldInfo, setShowFieldInfo] = useState(false);
     
 
     /**
@@ -48,6 +50,7 @@ export default function FieldMappingModal(props) {
             setSourceTable(res.data.source);
             setTargetTable(res.data.target);
             setComplete(res.data.complete);
+            setLogic(res.data.logic);
             setLoading(false);
         })
     }
@@ -281,6 +284,10 @@ export default function FieldMappingModal(props) {
         )
     }
 
+    const saveLogic = () => {
+        // TODO
+    }
+
     
     return(
         <Dialog fullScreen open={openModal} onEnter={getInformation} classes={{ paper: classes.dialogWrapper }}>
@@ -352,7 +359,27 @@ export default function FieldMappingModal(props) {
                                 />
                             ))}
 
-                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                            <Grid item xs={6} sm={6} md={6} lg={6}>
+                                <Controls.Input 
+                                    variant="outlined" 
+                                    value={logic === null ? '' : logic}
+                                    name="comment"
+                                    disabled={false}
+                                    fullWidth={true}
+                                    label="Logic"
+                                    placeholder="Edit mapping logic"
+                                    rows={3}
+                                    size="medium"
+                                    type="string" 
+                                    onChange={(e) => setLogic(e.target.value)}
+                                />
+                                <Controls.Button
+                                    text="Save"
+                                    size="medium"
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={saveLogic}
+                                />
                             </Grid>
                         </Grid>
                     </DialogContent>

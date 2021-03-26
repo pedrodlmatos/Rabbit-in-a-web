@@ -11,5 +11,3 @@ public class HiahApplication {
 		SpringApplication.run(HiahApplication.class, args);
 	}
 }
-
-

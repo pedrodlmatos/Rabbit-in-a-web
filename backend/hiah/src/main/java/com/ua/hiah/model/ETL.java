@@ -5,9 +5,17 @@ import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.List;
-
 
 @Entity
 @Table(name = "ETL")
@@ -24,12 +32,12 @@ public class ETL {
     private String name;
 
     @OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id")
     @JsonView(Views.ETLSessionsList.class)
     private SourceDatabase sourceDatabase;
 
     @OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id")
     @JsonView(Views.ETLSessionsList.class)
     private TargetDatabase targetDatabase;
 
@@ -38,7 +46,6 @@ public class ETL {
     private List<TableMapping> tableMappings;
 
 
-    // GETTERS AND SETTERS
     public Long getId() {
         return id;
     }
@@ -55,20 +62,20 @@ public class ETL {
         this.name = name;
     }
 
-    public TargetDatabase getTargetDatabase() {
-        return targetDatabase;
-    }
-
-    public void setTargetDatabase(TargetDatabase targetDatabase) {
-        this.targetDatabase = targetDatabase;
-    }
-
     public SourceDatabase getSourceDatabase() {
         return sourceDatabase;
     }
 
     public void setSourceDatabase(SourceDatabase sourceDatabase) {
         this.sourceDatabase = sourceDatabase;
+    }
+
+    public TargetDatabase getTargetDatabase() {
+        return targetDatabase;
+    }
+
+    public void setTargetDatabase(TargetDatabase targetDatabase) {
+        this.targetDatabase = targetDatabase;
     }
 
     public List<TableMapping> getTableMappings() {
@@ -81,9 +88,12 @@ public class ETL {
 
     @Override
     public String toString() {
-        return String.format("ETL{id=%s, name=%s, sourceDatabase=(%s, %s), targetDatabase=(%s, %s)\n",
-                id, name,
-                sourceDatabase.getId(), sourceDatabase.getDatabaseName(),
-                targetDatabase.getId(), targetDatabase.getDatabaseName());
+        return "ETL{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                //", sourceDatabase=" + sourceDatabase +
+                ", targetDatabase=" + targetDatabase +
+                ", tableMappings=" + tableMappings +
+                '}';
     }
 }

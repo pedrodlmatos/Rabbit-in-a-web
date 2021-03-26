@@ -15,7 +15,7 @@ public class TargetDatabase {
 
     @Id
     @Column(name = "id", unique = true)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -26,7 +26,11 @@ public class TargetDatabase {
     @JsonView(Views.ETLSessionsList.class)
     private String databaseName;
 
-    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "vocabulary_version", nullable = true)
+    @JsonView(Views.ETLSession.class)
+    private String conceptIdHintsVocabularyVersion;
+
+    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JsonView(Views.ETLSession.class)
     private List<TargetTable> tables;
 
@@ -85,5 +89,21 @@ public class TargetDatabase {
         this.version = version;
     }
 
+    public String getConceptIdHintsVocabularyVersion() {
+        return conceptIdHintsVocabularyVersion;
+    }
 
+    public void setConceptIdHintsVocabularyVersion(String conceptIdHintsVocabularyVersion) {
+        this.conceptIdHintsVocabularyVersion = conceptIdHintsVocabularyVersion;
+    }
+
+    @Override
+    public String toString() {
+        return "TargetDatabase{" +
+                "id=" + id +
+                ", version=" + version +
+                ", databaseName='" + databaseName + '\'' +
+                ", tables=" + tables +
+                '}';
+    }
 }

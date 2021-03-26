@@ -2,9 +2,9 @@ package com.ua.hiah.service.tableMapping;
 
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.repository.TableMappingRepository;
-import com.ua.hiah.service.etlService.ETLService;
-import com.ua.hiah.service.source.sourceTableService.SourceTableService;
-import com.ua.hiah.service.target.targetTable.TargetTableService;
+import com.ua.hiah.service.etl.ETLService;
+import com.ua.hiah.service.source.table.SourceTableService;
+import com.ua.hiah.service.target.table.TargetTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,13 +54,6 @@ public class TableMappingServiceImpl implements TableMappingService {
         mapping.setComplete(false);
         mapping.setEtl(etlService.getETLWithId(etl_id));
         return repository.save(mapping);
-    }
-
-    @Override
-    public void removeFromETL(Long etl_id) {
-        for(TableMapping mapping : repository.findAllByEtl_Id(etl_id)) {
-            repository.delete(mapping);
-        }
     }
 
     @Override

@@ -5,17 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -24,7 +14,7 @@ public class TargetTable {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.ETLSession.class)
     private Long id;
 
@@ -33,25 +23,24 @@ public class TargetTable {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "target_database_id", nullable = false)
+    @JoinColumn(name = "target_database_id")
     @JsonIgnore
     private TargetDatabase targetDatabase;
-
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
     private String comment;
 
-    @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "table", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JsonView(Views.ETLSession.class)
     private List<TargetField> fields;
+
 
     @OneToMany(mappedBy = "target", cascade = CascadeType.ALL)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;
+
 
     // CONSTRUCTOR
     public TargetTable() {
@@ -82,14 +71,6 @@ public class TargetTable {
         this.targetDatabase = targetDatabase;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public List<TargetField> getFields() {
         return fields;
     }
@@ -97,6 +78,7 @@ public class TargetTable {
     public void setFields(List<TargetField> fields) {
         this.fields = fields;
     }
+
 
     public List<FieldMapping> getMappings() {
         return mappings;
@@ -106,11 +88,22 @@ public class TargetTable {
         this.mappings = mappings;
     }
 
+
     public String getComment() {
         return comment;
     }
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public String toString() {
+        return "TargetTable{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", comment='" + comment + '\'' +
+                ", fields=" + fields +
+                '}';
     }
 }

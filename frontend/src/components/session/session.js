@@ -124,12 +124,13 @@ export default function Session() {
 
         const cdm = e.target.value;
         ETLService.changeTargetDatabase(etl.id, cdm).then(response => {
-            console.log(response.data);
+            setLoading(true);
             setEtl({...etl, targetDatabase: response.data.targetDatabase });
             setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name);
             setMappings([]);
             setSelectedMapping({});
-        })
+            window.location.href = '/session/' + response.data.id
+        });
     }
 
 
@@ -307,7 +308,8 @@ export default function Session() {
      * @param table selected source table
      */
 
-    const selectSourceTable = (table) => {        
+    const selectSourceTable = (table) => {
+        setEnableEditCommentButton(true);        
         if (selectedTable === {}) {
             // all tables are unselected
             setSelectedTable(table);
@@ -352,6 +354,7 @@ export default function Session() {
      */
 
     const selectTargetTable = (table) => {
+        setEnableEditCommentButton(true);
         if (selectedTable === {}) {
             // no table is selected
             // change color of mappings that goes to the selected table
@@ -519,11 +522,12 @@ export default function Session() {
 
                                     <Controls.Input 
                                         variant="outlined" 
-                                        value={selectedTable.comment}
+                                        value={selectedTable.comment === null ? "" : selectedTable.comment}
                                         name="comment"
                                         disabled={enableEditCommentButton}
                                         fullWidth={true}
                                         label="Comment"
+                                        placeholder="Edit table comment"
                                         rows={3}
                                         size="medium"
                                         type="string" 

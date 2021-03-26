@@ -5,16 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -23,7 +14,7 @@ public class SourceTable {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.ETLSession.class)
     private Long id;
 
@@ -35,10 +26,6 @@ public class SourceTable {
     @JoinColumn(name = "source_database_id", nullable = false)
     @JsonIgnore
     private SourceDatabase sourceDatabase;
-
-    @Column(name = "description", columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
-    private String description;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
@@ -54,10 +41,12 @@ public class SourceTable {
     @JsonView(Views.ETLSession.class)
     private List<SourceField> fields;
 
+
     @OneToMany(mappedBy = "source", cascade = CascadeType.ALL)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;
+
 
     // CONSTRUCTOR
     public SourceTable() {
@@ -86,14 +75,6 @@ public class SourceTable {
 
     public void setSourceDatabase(SourceDatabase sourceDatabase) {
         this.sourceDatabase = sourceDatabase;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public int getRowCount() {
@@ -134,5 +115,17 @@ public class SourceTable {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @Override
+    public String toString() {
+        return "SourceTable{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", comment='" + comment + '\'' +
+                ", rowCount=" + rowCount +
+                ", rowsCheckedCount=" + rowsCheckedCount +
+                ", fields=" + fields +
+                '}';
     }
 }
