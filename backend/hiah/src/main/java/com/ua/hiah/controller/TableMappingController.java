@@ -171,10 +171,47 @@ public class TableMappingController {
                     content = @Content
             )
     })
-    @PutMapping("/map/{id}")
+    @PutMapping("/map/{id}/complete")
     public ResponseEntity<?> editCompleteMapping(@PathVariable Long id, @Param(value = "completion") boolean completion) {
         logger.info("TABLE MAPPING - Change completion status of mapping " + id);
         TableMapping response = service.changeCompletionStatus(id, completion);
+
+        if (response == null) {
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    /**
+     * Changes the completion status of a table mapping
+     *
+     * @param id table mapping id
+     * @param logic table mapping logic
+     * @return table mapping altered
+     */
+
+    @Operation(summary = "Change table mapping completion status")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Changed completion status",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TableMapping.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Table mapping not found",
+                    content = @Content
+            )
+    })
+    @PutMapping("/map/{id}/logic")
+    public ResponseEntity<?> editMappingLogic(@PathVariable Long id, @Param(value = "logic") String logic) {
+        logger.info("TABLE MAPPING - Change mapping logic of mapping " + id);
+        TableMapping response = service.changeMappingLogic(id, logic);
 
         if (response == null) {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);

@@ -49,14 +49,14 @@ public class ETLServiceImpl implements ETLService {
 
 
     @Override
-    public ETL createETLSession(MultipartFile file, String cdm) {
+    public ETL createETLSession(String name, MultipartFile file, String cdm) {
         if (targetDatabaseService.CDMExists(cdm)) {
             ETL etl = new ETL();
             etl.setName("ETL session " + etlRepository.count());
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
             logger.info("ETL SERVICE - Loaded OMOP CDM database " + cdm);
 
-            etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromScanReport(file));
+            etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromScanReport(name, file));
             logger.info("ETL SERVICE - Loaded EHR database");
             return etlRepository.save(etl);
         }

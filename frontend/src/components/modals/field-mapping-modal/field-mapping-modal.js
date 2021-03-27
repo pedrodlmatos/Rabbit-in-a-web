@@ -3,15 +3,22 @@ import { makeStyles, Dialog, DialogTitle, DialogContent, DialogActions, Typograp
 import CloseIcon from '@material-ui/icons/Close';
 import TableMappingService from '../../../services/table-mapping-service';
 import FieldMappingService from '../../../services/field-mapping-service';
+import FieldService from '../../../services/field-service';
 import EHRTable from '../../session/ehr-table';
 import OMOPTable from '../../session/omop-table';
 import Controls from '../../controls/controls';
 import Xarrow from 'react-xarrows/lib';
 
 
-const useStyles = makeStyles(theme => {
+const useStyles = makeStyles(theme => ({
+    hiddenButton: {
+        visibility: 'hidden'
+    },
+    showButton: {
+        visibility: 'false'
+    }
 
-})
+}))
 
 export default function FieldMappingModal(props) {
 
@@ -27,7 +34,9 @@ export default function FieldMappingModal(props) {
     const [sourceSelected, setSourceSelected] = useState(false);
     const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
     const [showDeleteButton, setShowDeleteButton] = useState(false);
+    const [loadingSaveLogic, setLoadingSaveLogic] = useState(false);
     const [showFieldInfo, setShowFieldInfo] = useState(false);
+    const [enableEditCommentButton, setEnableEditCommentButton] = useState(true);
     
 
     /**
@@ -134,6 +143,23 @@ export default function FieldMappingModal(props) {
         });
     }
 
+    const defineData = (field) => {
+        // TODO
+        setShowFieldInfo(true);
+        /*
+        let data = [];
+        table.fields.forEach(element => {
+            data.push({
+                field: element.name,
+                type: element.type,
+                description: element.description
+            })
+        })
+        setFieldsInfo(data);
+        setShowFieldsInfo(true);
+        */
+    }
+
 
     /**
      * Defines the selected field and changes state of current and previous selected field.
@@ -153,7 +179,7 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromSource(field);
             // define fields info
-            //defineData(table);
+            defineData(field);
         } else if (selectedField === field) {
             // select the same table
             // change color of arrows to grey
@@ -161,7 +187,7 @@ export default function FieldMappingModal(props) {
             // unselect
             setSelectedField({});
             setSourceSelected(false);
-            //setShowFieldsInfo(false);
+            setShowFieldInfo(false);
             //setFieldsInfo(null);
         } else {
             // select any other source table
@@ -173,7 +199,7 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromSource(field);
             // change content of fields table
-            //defineData(table);
+            defineData(field);
         }
     }
 
@@ -186,7 +212,7 @@ export default function FieldMappingModal(props) {
             setSelectedField(field);
             setSourceSelected(false);
             // change content of fields table
-            //defineData(table);
+            defineData(field);
         } else if (selectedField === field) {
             // select the same field -> unselect
             // change color of arrows to grey
@@ -194,7 +220,7 @@ export default function FieldMappingModal(props) {
             // unselect
             setSelectedField({});
             setSourceSelected(false);
-            //setShowFieldsInfo(false);
+            setShowFieldInfo(false);
             //setFieldsInfo(null);
         } else if (sourceSelected) {
             // source field is selected -> create arrow
@@ -206,7 +232,7 @@ export default function FieldMappingModal(props) {
             setSelectedField({});
             // clean state
             setSourceSelected(false);
-            //setShowFieldsInfo(false);
+            setShowFieldInfo(false);
             //setFieldsInfo(null);
         } else {
             // other target field is selected
@@ -218,7 +244,7 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromTarget(field);
             // change content of fields table
-            //defineData(table);
+            defineData(field);
         }
     }
 
@@ -284,8 +310,71 @@ export default function FieldMappingModal(props) {
         )
     }
 
+
+    /**
+     * 
+     */
+
     const saveLogic = () => {
-        // TODO
+        setLoadingSaveLogic(true);
+
+        // make request to API
+        TableMappingService.editMappingLogic(mappingId, logic).then(response => {
+            setLogic(response.data.logic);
+            setLoadingSaveLogic(false);
+        }).catch(error => {
+            console.log(error);
+        });
+    }
+
+
+    /**
+     * 
+     */
+
+    const saveComment = () => {
+        setEnableEditCommentButton(true);
+
+        if (sourceSelected) {
+            FieldService.changeSourceTableComment(selectedField.id, selectedField.comment).then(response => {
+                let fields = []
+                sourceTable.fields.forEach(item => {
+                    if (item.id === response.data.id) {
+                        fields = fields.concat(response.data)
+                    } else {
+                        fields = fields.concat(item)
+                    }
+                })
+                sourceTable.fields = fields;
+
+                setSourceTable({
+                    ...sourceTable,
+                    fields: fields
+                })
+            }).catch(error => {
+                console.log(error);
+            });
+        } else {
+            FieldService.changeTargetTableComment(selectedField.id, selectedField.comment).then(response => {
+                let fields = []
+                targetTable.fields.forEach(item => {
+                    if (item.id === response.data.id) {
+                        fields = fields.concat(response.data)
+                    } else {
+                        fields = fields.concat(item)
+                    }
+                })
+                targetTable.fields = fields;
+
+                setTargetTable({
+                    ...targetTable,
+                    fields: fields
+                })
+
+            }).catch(error => {
+                console.log(error);
+            });
+        }
     }
 
     
@@ -361,16 +450,12 @@ export default function FieldMappingModal(props) {
 
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <Controls.Input 
-                                    variant="outlined" 
                                     value={logic === null ? '' : logic}
                                     name="comment"
-                                    disabled={false}
                                     fullWidth={true}
                                     label="Logic"
                                     placeholder="Edit mapping logic"
-                                    rows={3}
-                                    size="medium"
-                                    type="string" 
+                                    rows={3} 
                                     onChange={(e) => setLogic(e.target.value)}
                                 />
                                 <Controls.Button
@@ -378,8 +463,45 @@ export default function FieldMappingModal(props) {
                                     size="medium"
                                     color="primary"
                                     variant="contained"
+                                    disabled={loadingSaveLogic}
                                     onClick={saveLogic}
                                 />
+
+                                { showFieldInfo ? (
+                                    <div>
+                                        <Controls.Input 
+                                            value={selectedField.comment === null ? "" : selectedField.comment}
+                                            name="comment"
+                                            disabled={enableEditCommentButton}
+                                            fullWidth={true}
+                                            label="Comment"
+                                            placeholder="Edit table comment"
+                                            rows={3} 
+                                            onChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
+                                        />
+                                        <Controls.Button
+                                            className={enableEditCommentButton ? classes.showButton : classes.hiddenButton}
+                                            text="Edit comment"
+                                            size="medium"
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={() => setEnableEditCommentButton(false)}
+                                        />
+
+                                        <Controls.Button
+                                            className={enableEditCommentButton ? classes.hiddenButton : classes.showButton}
+                                            text="Save"
+                                            size="medium"
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={saveComment}
+                                        />
+                                    </div>
+                                ) : (
+                                    <>
+                                    </>
+                                ) }
+                                
                             </Grid>
                         </Grid>
                     </DialogContent>

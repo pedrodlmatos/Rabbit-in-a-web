@@ -7,4 +7,6 @@ public interface TargetFieldService {
     TargetField createField(TargetField field);
 
     TargetField getFieldById(Long target_id);
+
+    TargetField changeComment(Long field, String comment);
 }

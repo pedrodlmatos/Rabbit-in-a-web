@@ -2,6 +2,7 @@ import { Grid, CircularProgress, makeStyles } from '@material-ui/core'
 import React, { useState, useEffect } from 'react'
 import Xarrow from 'react-xarrows/lib';
 import ETLService from '../../services/etl-list-service';
+import TableService from '../../services/table-service';
 import TableMappingService from '../../services/table-mapping-service';
 import Controls from '../controls/controls';
 import HelpModal from '../modals/help-modal/help-modal';
@@ -410,20 +411,52 @@ export default function Session() {
     }
 
 
+    /**
+     * 
+     */
     const saveComment = () => {
-        // TODO save comment in api
         setEnableEditCommentButton(true);
 
-        // make request to API
-        ETLService.changeComment(etl.id, selectedTable.id, selectedTable.comment).then(response => {
-            setEtl({
-                ...etl, 
-                sourceDatabase: response.data.sourceDatabase,
-                targetDatabase: response.data.targetDatabase
-            })
-        }).catch(error => {
-            console.log(error);
-        });
+        if (sourceSelected) {
+            TableService.changeSourceTableComment(selectedTable.id, selectedTable.comment).then(response => {
+                let tables = []
+                etl.sourceDatabase.tables.forEach(item => {
+                    if (item.id === response.data.id) {
+                        tables = tables.concat(response.data)
+                    } else {
+                        tables = tables.concat(item)
+                    }
+                })
+                etl.sourceDatabase.tables = tables;
+
+                setEtl({
+                    ...etl,
+                    sourceDatabase: etl.sourceDatabase
+                })
+            }).catch(error => {
+                console.log(error);
+            });
+        } else {
+            TableService.changeTargetTableComment(selectedTable.id, selectedTable.comment).then(response => {
+                let tables = []
+                etl.targetDatabase.tables.forEach(item => {
+                    if (item.id === response.data.id) {
+                        tables = tables.concat(response.data)
+                    } else {
+                        tables = tables.concat(item)
+                    }
+                })
+                etl.targetDatabase.tables = tables;
+
+                setEtl({
+                    ...etl,
+                    targetDatabase: etl.targetDatabase
+                })
+
+            }).catch(error => {
+                console.log(error);
+            });
+        }
     }
 
 

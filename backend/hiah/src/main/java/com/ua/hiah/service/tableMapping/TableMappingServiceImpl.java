@@ -66,4 +66,15 @@ public class TableMappingServiceImpl implements TableMappingService {
         }
         return null;
     }
+
+    @Override
+    public TableMapping changeMappingLogic(Long id, String logic) {
+        TableMapping mapping = repository.findById(id).orElse(null);
+
+        if (mapping != null) {
+            mapping.setLogic(logic);
+            return repository.save(mapping);
+        }
+        return null;
+    }
 }

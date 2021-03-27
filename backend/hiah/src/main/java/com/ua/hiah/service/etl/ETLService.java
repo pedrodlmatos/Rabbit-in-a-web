@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ETLService {
 
-    ETL createETLSession(MultipartFile file, String cdm);
+    ETL createETLSession(String name, MultipartFile file, String cdm);
 
     List<ETL> getAllETL();
 

@@ -126,8 +126,8 @@ public class ETLController {
             )
     })
     @PostMapping(value = "/sessions", consumes = "multipart/form-data")
-    public ResponseEntity<?> createETLSession(@RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
-        ETL etl = etlService.createETLSession(file, cdm);
+    public ResponseEntity<?> createETLSession(@Param(value = "name") String name, @RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
+        ETL etl = etlService.createETLSession(name, file, cdm);
 
         if (etl == null) {
             return new ResponseEntity<>(etl, HttpStatus.BAD_REQUEST);
@@ -165,42 +165,7 @@ public class ETLController {
     }
 
 
-    /**
-     * Change table comment
-     *
-     * @param etl ETL session id
-     * @param table Table id
-     * @param comment comment to change to
-     * @return altered ETL session
-     */
 
-    @Operation(summary = "Change table comment")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Changed table comment",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ETL.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Not found",
-                    content = @Content
-            )
-    })
-    @PutMapping("/sessions/comment")
-    public ResponseEntity<?> changeTableComment(@Param(value = "etl") Long etl, @Param(value = "table") Long table, @Param(value = "comment") String comment) {
-        logger.info("ETL {} - Change table {} comment", etl, table);
-
-        ETL response = etlService.changeComment(etl, table, comment);
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
 
     @GetMapping(value = "/sessions/sourceCSV")

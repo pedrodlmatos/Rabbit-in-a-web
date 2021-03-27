@@ -7,17 +7,18 @@ export default function Input(props) {
 
     return (
         <TextField 
-            variant="outlined"
-            label={label}
-            placeholder={placeholder}
-            name={name}
-            value={value}
-            fullWidth={fullWidth}
-            rows={rows}
-            size={size}
-            type={type}
-            disabled={disabled}
+            variant={ variant || "outlined" }
+            label={ label }
+            placeholder={ placeholder }
+            name={ name }
+            value={ value }
+            fullWidth={ fullWidth || false }
+            rows={ rows || 1}
+            size={ size || "medium"}
+            type={ type || "string" }
+            disabled={disabled || false}
             onChange={onChange}
+            autoFocus
             {...other}
             {...(error && {error:true, helperText:error })} 
         />

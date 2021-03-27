@@ -34,9 +34,9 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
     SourceFieldService fieldService;
 
     @Override
-    public SourceDatabase createDatabaseFromScanReport(MultipartFile file) {
+    public SourceDatabase createDatabaseFromScanReport(String name, MultipartFile file) {
         SourceDatabase database = new SourceDatabase();
-        database.setDatabaseName("MIMIC");
+        database.setDatabaseName(name);
         database = databaseRepository.save(database);
 
         try {

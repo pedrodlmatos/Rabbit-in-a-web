@@ -5,5 +5,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface SourceDatabaseService {
 
-    SourceDatabase createDatabaseFromScanReport(MultipartFile file);
+    SourceDatabase createDatabaseFromScanReport(String name, MultipartFile file);
 }

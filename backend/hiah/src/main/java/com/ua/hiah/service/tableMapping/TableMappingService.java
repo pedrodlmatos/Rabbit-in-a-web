@@ -15,4 +15,6 @@ public interface TableMappingService {
     List<TableMapping> getTableMappingFromETL(Long etl_id);
 
     TableMapping changeCompletionStatus(Long id, boolean completion);
+
+    TableMapping changeMappingLogic(Long id, String logic);
 }
