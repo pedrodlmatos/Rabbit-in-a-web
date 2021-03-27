@@ -1,10 +1,6 @@
 package com.ua.hiah.controller.target;
 
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetField;
-import com.ua.hiah.service.source.field.SourceFieldService;
-import com.ua.hiah.service.source.table.SourceTableService;
 import com.ua.hiah.service.target.field.TargetFieldService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,16 +31,16 @@ public class TargetFieldController {
     /**
      * Change field comment
      *
-     * @param field Field id
+     * @param field field's id
      * @param comment comment to change to
      * @return altered field
      */
 
-    @Operation(summary = "Change field comment")
+    @Operation(summary = "Change comment of field from the OMOP CDM database")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Changed field comment",
+                    description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TargetField.class)
@@ -52,7 +48,7 @@ public class TargetFieldController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Not found",
+                    description = "Field not found",
                     content = @Content
             )
     })

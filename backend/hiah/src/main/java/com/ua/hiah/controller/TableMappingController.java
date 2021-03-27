@@ -40,7 +40,7 @@ public class TableMappingController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Found the table mapping",
+                    description = "table mapping found",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TableMapping.class)
@@ -55,7 +55,7 @@ public class TableMappingController {
     })
     @GetMapping("/map/{id}")
     public ResponseEntity<?> getTableMapping(@PathVariable Long id) {
-        logger.info("TABLE MAPPING - Requesting table mapping with id " + id);
+        logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + id);
 
         TableMapping response = service.getTableMappingById(id);
 
@@ -80,7 +80,7 @@ public class TableMappingController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Created the table mapping",
+                    description = "Table mapping created",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TableMapping.class)
@@ -99,7 +99,7 @@ public class TableMappingController {
             response = new TableMapping();
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-        logger.info("TABLE MAPPING - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
+        logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -116,7 +116,7 @@ public class TableMappingController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Deleted the table mapping",
+                    description = "Table mapping deleted",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ETL.class)
@@ -196,7 +196,7 @@ public class TableMappingController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Changed completion status",
+                    description = "Completion status changed",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TableMapping.class)

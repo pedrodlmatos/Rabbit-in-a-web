@@ -36,11 +36,11 @@ public class TargetTableController {
      * @return altered ETL session
      */
 
-    @Operation(summary = "Change table comment")
+    @Operation(summary = "Change comment of table from the OMOP CDM database")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Changed table comment",
+                    description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TargetTable.class)
@@ -48,7 +48,7 @@ public class TargetTableController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Not found",
+                    description = "Table not found",
                     content = @Content
             )
     })

@@ -43,7 +43,7 @@ public class ETLController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Retrieve all ETL sessions",
+                    description = "ETL sessions returned",
                     content = { @Content(
                             mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = ETL.class))
@@ -53,7 +53,7 @@ public class ETLController {
     @GetMapping("/sessions")
     @JsonView(Views.ETLSessionsList.class)
     public ResponseEntity<?> getAllETLs() {
-        logger.info("ETL - Requesting all ETL sessions");
+        logger.info("ETL CONTROLLER - Requesting all ETL sessions");
 
         List<ETL> response = etlService.getAllETL();
 
@@ -89,7 +89,7 @@ public class ETLController {
     @GetMapping("/sessions/{id}")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getETLById(@PathVariable Long id) {
-        logger.info("ETL - Requesting ETL session with id " + id);
+        logger.info("ETL CONTROLLER - Requesting ETL session with id " + id);
 
         ETL response = etlService.getETLWithId(id);
 
@@ -106,14 +106,14 @@ public class ETLController {
      *
      * @param file file created by White Rabbit that contains info about EHR database
      * @param cdm OMOP CDM version to use
-     * @return 201 code with ETL session created
+     * @return created session or error
      */
 
     @Operation(summary = "Create an ETL session")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Creates a new ETL session",
+                    description = "ETL session created with success",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ETL.class)
@@ -133,27 +133,40 @@ public class ETLController {
             return new ResponseEntity<>(etl, HttpStatus.BAD_REQUEST);
         }
 
-        logger.info("ETL - Created ETL session with id: " + etl.getId());
+        logger.info("ETL CONTROLLER - Created ETL session with id: " + etl.getId());
         return new ResponseEntity<>(etl, HttpStatus.CREATED);
     }
 
+    // TODO: create ETL session with a custom OMOP CDM file
+
     /**
+     * Changes the OMOP CDM version in a given ETL session
      *
-     * @param etl
-     * @param cdm
-     * @return
+     * @param etl ETL session's id
+     * @param cdm OMOP CDM version to change to
+     * @return altered ETL or error
      */
 
     @Operation(summary = "Change OMOP CDM version in ETL session")
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200"
+                    responseCode = "200",
+                    description = "ETL session changed with success",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ETL.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "OMOP CDM not valid",
+                    content = @Content
             )
     })
     @PutMapping("/sessions/targetDB")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> changeTargetDatabase(@Param(value = "etl") Long etl, @Param(value = "cdm") String cdm) {
-        logger.info("ETL - Change target database of session {} to {}", etl, cdm);
+        logger.info("ETL CONTROLLER - Change target database of session {} to {}", etl, cdm);
 
         ETL response = etlService.changeTargetDatabase(etl, cdm);
         if (response == null) {
@@ -165,9 +178,7 @@ public class ETLController {
     }
 
 
-
-
-
+    // TODO
     @GetMapping(value = "/sessions/sourceCSV")
     public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl") Long etl) {
         logger.info("ETL {} - Download source field list CSV", etl);

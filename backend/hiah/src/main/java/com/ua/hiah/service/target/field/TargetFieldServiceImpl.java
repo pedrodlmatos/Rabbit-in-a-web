@@ -1,6 +1,5 @@
 package com.ua.hiah.service.target.field;
 
-import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.repository.target.TargetFieldRepository;
 import org.springframework.beans.factory.annotation.Autowired;

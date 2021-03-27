@@ -31,16 +31,16 @@ public class SourceTableController {
     /**
      * Change table comment
      *
-     * @param table Table id
+     * @param table table's id
      * @param comment comment to change to
-     * @return altered ETL session
+     * @return altered source table
      */
 
-    @Operation(summary = "Change table comment")
+    @Operation(summary = "Change comment of a table from the EHR database")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Changed table comment",
+                    description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = SourceTable.class)
@@ -48,7 +48,7 @@ public class SourceTableController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Not found",
+                    description = "Table not found",
                     content = @Content
             )
     })

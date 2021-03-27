@@ -3,6 +3,7 @@ package com.ua.hiah.controller;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.service.fieldMapping.FieldMappingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,14 +34,14 @@ public class FieldMappingController {
      * @param tableMap Table mapping id
      * @param source_id Source field id
      * @param target_id Target field id
-     * @return created field mapping
+     * @return created field mapping or error
      */
 
     @Operation(summary = "Creates a field mapping")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Created field mapping",
+                    description = "Field mapping created with success",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = FieldMapping.class)
@@ -60,7 +61,7 @@ public class FieldMappingController {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
 
-        logger.info("FIELD MAPPING - Add field mapping between {} and {} in table mapping {}", source_id, target_id, tableMap);
+        logger.info("FIELD MAPPING CONTROLLER - Add field mapping between {} and {} in table mapping {}", source_id, target_id, tableMap);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -72,6 +73,26 @@ public class FieldMappingController {
      * @param fieldMappingId Field mapping id
      * @return list with other field mappings
      */
+
+    @Operation(summary = "Deletes a field mapping")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Field mapping deleted with success",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FieldMapping.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Field mapping not found",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = FieldMapping.class))
+                    )}
+            )
+    })
     @DeleteMapping("/remove")
     public ResponseEntity<?> removeFieldMapping(@Param(value="tableMappingId") Long tableMappingId, @Param(value="fieldMappingId") Long fieldMappingId) {
         FieldMapping response = service.removeFieldMapping(fieldMappingId);
@@ -79,7 +100,7 @@ public class FieldMappingController {
         if (response == null) {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-        logger.info("FIELD MAPPING - Removed field mapping with id " + fieldMappingId);
+        logger.info("FIELD MAPPING CONTROLLER - Removed field mapping with id " + fieldMappingId);
 
         List<FieldMapping> res = service.getFieldMappingsFromTableMapping(tableMappingId);
         return new ResponseEntity<>(res, HttpStatus.OK);

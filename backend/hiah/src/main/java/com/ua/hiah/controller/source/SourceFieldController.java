@@ -1,9 +1,7 @@
 package com.ua.hiah.controller.source;
 
 import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.service.source.field.SourceFieldService;
-import com.ua.hiah.service.source.table.SourceTableService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,16 +31,16 @@ public class SourceFieldController {
     /**
      * Change field comment
      *
-     * @param field Field id
+     * @param field field's id
      * @param comment comment to change to
-     * @return altered field
+     * @return altered source field
      */
 
-    @Operation(summary = "Change field comment")
+    @Operation(summary = "Change the comment of a field from the EHR database")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Changed field comment",
+                    description = "Comment changed with success",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = SourceField.class)
@@ -50,7 +48,7 @@ public class SourceFieldController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Not found",
+                    description = "Field not found",
                     content = @Content
             )
     })
