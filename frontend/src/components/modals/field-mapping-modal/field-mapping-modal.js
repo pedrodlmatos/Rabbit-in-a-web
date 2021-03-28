@@ -469,6 +469,8 @@ export default function FieldMappingModal(props) {
 
                                 { showFieldInfo ? (
                                     <div>
+                                        <h6><strong>Field name: </strong>{selectedField.name}</h6>
+                                        <h6><strong>Field type: </strong>{selectedField.type}</h6>
                                         <Controls.Input 
                                             value={selectedField.comment === null ? "" : selectedField.comment}
                                             name="comment"
