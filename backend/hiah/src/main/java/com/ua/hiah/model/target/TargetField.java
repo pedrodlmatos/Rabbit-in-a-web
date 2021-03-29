@@ -16,7 +16,7 @@ public class TargetField {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonView(Views.ETLSession.class)
     private Long id;
 
@@ -44,10 +44,12 @@ public class TargetField {
     @JsonIgnore
     private TargetTable table;
 
+    @OneToMany(mappedBy = "field")
+    @Column(name = "concepts")
+    private List<Concept> concepts;
 
     @OneToMany(mappedBy = "target")
     @Column(name = "mappings", nullable = true)
-    @JsonIgnore
     private List<FieldMapping> mappings;
 
 
@@ -112,6 +114,13 @@ public class TargetField {
         this.comment = comment;
     }
 
+    public List<Concept> getConcepts() {
+        return concepts;
+    }
+
+    public void setConcepts(List<Concept> concepts) {
+        this.concepts = concepts;
+    }
 
     public List<FieldMapping> getMappings() {
         return mappings;

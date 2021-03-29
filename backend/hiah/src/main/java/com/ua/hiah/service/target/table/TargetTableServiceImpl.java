@@ -1,7 +1,9 @@
 package com.ua.hiah.service.target.table;
 
+import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.repository.target.TargetTableRepository;
+import com.ua.hiah.service.target.field.TargetFieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +12,9 @@ public class TargetTableServiceImpl implements TargetTableService {
 
     @Autowired
     private TargetTableRepository repository;
+
+    @Autowired
+    private TargetFieldService fieldService;
 
     @Override
     public TargetTable createTargetTable(TargetTable table) {
@@ -31,5 +36,15 @@ public class TargetTableServiceImpl implements TargetTableService {
         }
 
         return null;
+    }
+
+    @Override
+    public void deleteTablesByDatabaseId(Long database_id) {
+        for (TargetTable table : repository.findAllByTargetDatabaseId(database_id)) {
+            for (TargetField field : table.getFields()) {
+                //fieldService.removeField
+            }
+        }
+
     }
 }

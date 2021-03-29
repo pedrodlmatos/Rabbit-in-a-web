@@ -1,5 +1,6 @@
 package com.ua.hiah.service.tableMapping;
 
+import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.repository.TableMappingRepository;
 import com.ua.hiah.service.etl.ETLService;
@@ -7,10 +8,12 @@ import com.ua.hiah.service.source.table.SourceTableService;
 import com.ua.hiah.service.target.table.TargetTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class TableMappingServiceImpl implements TableMappingService {
 
     @Autowired
@@ -76,5 +79,10 @@ public class TableMappingServiceImpl implements TableMappingService {
             return repository.save(mapping);
         }
         return null;
+    }
+
+    @Override
+    public void removeTableMappingsFromETL(long etl_id) {
+        repository.deleteAllByEtl_Id(etl_id);
     }
 }

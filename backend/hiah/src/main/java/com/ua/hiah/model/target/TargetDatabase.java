@@ -7,6 +7,7 @@ import com.ua.hiah.model.ETL;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,7 +16,7 @@ public class TargetDatabase {
 
     @Id
     @Column(name = "id", unique = true)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -30,7 +31,7 @@ public class TargetDatabase {
     @JsonView(Views.ETLSession.class)
     private String conceptIdHintsVocabularyVersion;
 
-    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
     private List<TargetTable> tables;
 
@@ -41,6 +42,7 @@ public class TargetDatabase {
 
     // CONSTRUCTOR
     public TargetDatabase() {
+        this.tables = new ArrayList<>();
     }
 
     public TargetDatabase(String databaseName, ETL etl) {
@@ -69,9 +71,11 @@ public class TargetDatabase {
         return tables;
     }
 
+    /*
     public void setTables(List<TargetTable> tables) {
         this.tables = tables;
     }
+    */
 
     public ETL getEtl() {
         return etl;

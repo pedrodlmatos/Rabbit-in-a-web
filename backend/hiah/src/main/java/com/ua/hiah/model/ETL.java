@@ -6,6 +6,7 @@ import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,15 +28,18 @@ public class ETL {
     @JsonView(Views.ETLSessionsList.class)
     private SourceDatabase sourceDatabase;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id")
     @JsonView(Views.ETLSessionsList.class)
     private TargetDatabase targetDatabase;
 
-    @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
     private List<TableMapping> tableMappings;
 
+    public ETL() {
+        this.tableMappings = new ArrayList<>();
+    }
 
     public Long getId() {
         return id;
@@ -73,9 +77,11 @@ public class ETL {
         return tableMappings;
     }
 
+    /*
     public void setTableMappings(List<TableMapping> tableMappings) {
         this.tableMappings = tableMappings;
     }
+    */
 
     @Override
     public String toString() {

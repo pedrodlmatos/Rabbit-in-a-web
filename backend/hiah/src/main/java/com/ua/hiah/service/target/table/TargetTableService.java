@@ -9,4 +9,6 @@ public interface TargetTableService {
     TargetTable getTableById(Long target_id);
 
     TargetTable changeComment(Long tableId, String comment);
+
+    void deleteTablesByDatabaseId(Long id);
 }

@@ -29,7 +29,7 @@ public class TableMapping {
     @JsonView(Views.ETLSession.class)
     private TargetTable target;
 
-    @OneToMany(mappedBy = "tableMapping", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "tableMapping", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
     private List<FieldMapping> fieldMappings;
 
@@ -87,9 +87,11 @@ public class TableMapping {
         return fieldMappings;
     }
 
+    /*
     public void setFieldMappings(List<FieldMapping> fieldMappings) {
         this.fieldMappings = fieldMappings;
     }
+    */
 
     public boolean isComplete() {
         return complete;

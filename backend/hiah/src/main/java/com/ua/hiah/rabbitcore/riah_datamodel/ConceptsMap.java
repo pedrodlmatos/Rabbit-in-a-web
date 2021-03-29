@@ -8,7 +8,7 @@ import java.util.*;
 
 public class ConceptsMap {
 
-    private Map<String, Map<String, List<Concept>>> conceptMap;
+    private Map<String, Map<String, List<TempConcept>>> conceptMap;
     public String vocabularyVersion;
 
     private ConceptsMap() {
@@ -29,7 +29,7 @@ public class ConceptsMap {
                 String omopTableName = conceptRow.get("omop_cdm_table");
                 String omopFieldName = conceptRow.get("omop_cdm_field");
 
-                Concept concept = new Concept();
+                TempConcept concept = new TempConcept();
                 concept.setConceptId(conceptRow.get("concept_id"));
                 concept.setConceptName(conceptRow.get("concept_name"));
                 concept.setStandardConcept(conceptRow.get("standard_concept"));
@@ -58,18 +58,18 @@ public class ConceptsMap {
         }
     }
 
-    public void put(String targetTableName, String targetFieldName, Concept concept) {
+    public void put(String targetTableName, String targetFieldName, TempConcept concept) {
         this.conceptMap
                 .computeIfAbsent(targetTableName, t -> new HashMap<>())
                 .computeIfAbsent(targetFieldName, t -> new ArrayList<>())
                 .add(concept);
     }
 
-    public List<Concept> get(String targetTable, String targetField) {
+    public List<TempConcept> get(String targetTable, String targetField) {
         return conceptMap.getOrDefault(targetTable, Collections.emptyMap()).get(targetField);
     }
 
-    public static class Concept {
+    public static class TempConcept {
         private String conceptId;
         private String conceptName;
         private String standardConcept;

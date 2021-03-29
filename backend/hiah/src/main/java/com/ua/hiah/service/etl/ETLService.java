@@ -15,8 +15,6 @@ public interface ETLService {
 
     ETL changeTargetDatabase(Long etl_id, String cdm);
 
-    ETL changeComment(Long id, Long tableId, String comment);
-
     byte[] createSourceFieldListCSV(Long id);
 
     void createDocumentationFile(Long id);

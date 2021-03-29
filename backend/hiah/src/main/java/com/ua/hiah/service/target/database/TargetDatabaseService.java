@@ -9,5 +9,5 @@ public interface TargetDatabaseService {
 
     TargetDatabase generateModelFromCSV(CDMVersion version);
 
-    void removeDatabase(TargetDatabase targetDatabase);
+    void removeDatabase(Long id);
 }

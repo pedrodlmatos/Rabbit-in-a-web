@@ -6,6 +6,7 @@ import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,7 +15,7 @@ public class TargetTable {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonView(Views.ETLSession.class)
     private Long id;
 
@@ -31,12 +32,12 @@ public class TargetTable {
     @JsonView(Views.ETLSession.class)
     private String comment;
 
-    @OneToMany(mappedBy = "table", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
     private List<TargetField> fields;
 
 
-    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;
@@ -44,6 +45,8 @@ public class TargetTable {
 
     // CONSTRUCTOR
     public TargetTable() {
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS
@@ -75,10 +78,11 @@ public class TargetTable {
         return fields;
     }
 
+    /*
     public void setFields(List<TargetField> fields) {
         this.fields = fields;
     }
-
+    */
 
     public List<FieldMapping> getMappings() {
         return mappings;

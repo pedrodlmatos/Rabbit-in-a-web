@@ -10,4 +10,6 @@ public interface TargetDatabaseRepository extends JpaRepository<TargetDatabase, 
 
     TargetDatabase findTargetDatabaseByVersion(CDMVersion version);
 
+    void deleteById(Long databaseId);
+
 }

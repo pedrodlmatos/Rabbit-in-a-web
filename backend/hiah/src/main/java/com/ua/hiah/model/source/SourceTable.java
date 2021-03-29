@@ -14,7 +14,7 @@ public class SourceTable {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonView(Views.ETLSession.class)
     private Long id;
 

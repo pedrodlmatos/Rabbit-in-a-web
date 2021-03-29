@@ -10,6 +10,7 @@ import com.ua.hiah.rabbitcore.utilities.files.Row;
 import com.ua.hiah.repository.ETLRepository;
 import com.ua.hiah.service.source.database.SourceDatabaseService;
 import com.ua.hiah.service.source.table.SourceTableService;
+import com.ua.hiah.service.tableMapping.TableMappingService;
 import com.ua.hiah.service.target.database.TargetDatabaseService;
 import com.ua.hiah.service.target.table.TargetTableService;
 import org.slf4j.Logger;
@@ -40,6 +41,9 @@ public class ETLServiceImpl implements ETLService {
     @Autowired
     SourceTableService sourceTableService;
 
+    @Autowired
+    TableMappingService mappingService;
+
     private static final Logger logger = LoggerFactory.getLogger(ETLServiceImpl.class);
 
     @Override
@@ -48,11 +52,21 @@ public class ETLServiceImpl implements ETLService {
     }
 
 
+    /**
+     * Creates a new ETL session
+     *
+     * @param name EHR database name
+     * @param file EHR Scan report
+     * @param cdm OMOP CDM version
+     * @return created ETL session
+     */
+
     @Override
     public ETL createETLSession(String name, MultipartFile file, String cdm) {
         if (targetDatabaseService.CDMExists(cdm)) {
             ETL etl = new ETL();
             etl.setName("ETL session " + etlRepository.count());
+            etl = etlRepository.save(etl);
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
             logger.info("ETL SERVICE - Loaded OMOP CDM database " + cdm);
 
@@ -62,6 +76,14 @@ public class ETLServiceImpl implements ETLService {
         }
         return null;
     }
+
+
+    /**
+     * Retrieves an ETL session by its id
+     *
+     * @param id ETL session's id
+     * @return ETL session
+     */
 
     @Override
     public ETL getETLWithId(Long id) {
@@ -80,6 +102,15 @@ public class ETLServiceImpl implements ETLService {
         return null;
     }
 
+
+    /**
+     * Changes the OMOP CDM version of an ETL session and removes the previous OMOP CDM used
+     *
+     * @param etl_id ETL session's id
+     * @param cdm OMOP CDM version to change to
+     * @return modified ETL session
+     */
+
     @Override
     public ETL changeTargetDatabase(Long etl_id, String cdm) {
         ETL etl = etlRepository.findById(etl_id).orElse(null);
@@ -89,9 +120,12 @@ public class ETLServiceImpl implements ETLService {
 
             // create an OMOP CDM from a different version
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
-            //System.out.println(etl.toString());
 
-            // remove previous
+            // remove previous cdm and mappings
+            //targetDatabaseService.removeDatabase(previous.getId());
+            mappingService.removeTableMappingsFromETL(etl.getId());
+
+
             //targetDatabaseService.removeDatabase(previous);
             // order tables by id
             /*
@@ -108,24 +142,6 @@ public class ETLServiceImpl implements ETLService {
         return null;
     }
 
-    @Override
-    public ETL changeComment(Long id, Long tableId, String comment) {
-        ETL etl = etlRepository.findById(id).orElse(null);
-
-        if (etl != null) {
-            if (sourceTableService.changeComment(tableId, comment) != null) {
-                List<SourceTable> tables = etl.getSourceDatabase().getTables();
-                Collections.sort(tables, Comparator.comparingLong(SourceTable::getId));
-                return etlRepository.save(etl);
-            } else if (targetTableService.changeComment(tableId, comment) != null) {
-                List<TargetTable> tables = etl.getTargetDatabase().getTables();
-                Collections.sort(tables, Comparator.comparingLong(TargetTable::getId));
-                return etlRepository.save(etl);
-            }
-        }
-
-        return etl;
-    }
 
     @Override
     public byte[] createSourceFieldListCSV(Long id) {

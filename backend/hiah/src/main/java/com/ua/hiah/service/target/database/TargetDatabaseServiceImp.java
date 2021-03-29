@@ -1,11 +1,13 @@
 package com.ua.hiah.service.target.database;
 
 import com.ua.hiah.model.CDMVersion;
+import com.ua.hiah.model.target.Concept;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.rabbitcore.riah_datamodel.ConceptsMap;
 import com.ua.hiah.repository.target.TargetDatabaseRepository;
+import com.ua.hiah.service.target.concept.ConceptService;
 import com.ua.hiah.service.target.field.TargetFieldService;
 import com.ua.hiah.service.target.table.TargetTableService;
 import org.apache.commons.csv.CSVFormat;
@@ -33,6 +35,9 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
 
     @Autowired
     private TargetFieldService fieldService;
+
+    @Autowired
+    private ConceptService conceptService;
 
     private static String CONCEPT_ID_HINTS_FILE_NAME = "CDMConceptIDHints_v5.0_02-OCT-19.csv";
 
@@ -103,20 +108,31 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
                 field.setType(row.get(dataTypeColumn));
                 field.setDescription(row.get(descriptionColumn));
                 field.setTable(table);
-                // TODO
-                // field.setConceptIdHints(conceptIdHintsMap.get(table.getName(), field.getName()));
                 field = fieldService.createField(field);
 
+                if (conceptIdHintsMap.get(table.getName(), field.getName()) != null) {
+                    for (ConceptsMap.TempConcept tempConcept : conceptIdHintsMap.get(table.getName(), field.getName())) {
+                        Concept concept = new Concept();
+                        concept.setConceptId(Long.valueOf(tempConcept.getConceptId()));
+                        concept.setConceptName(tempConcept.getConceptName());
+                        concept.setStandardConcept(tempConcept.getStandardConcept());
+                        concept.setDomainId(tempConcept.getDomainId());
+                        concept.setVocabularyId(tempConcept.getVocabularyId());
+                        concept.setConceptClassId(tempConcept.getConceptClassId());
+                        concept.setField(field);
+                        concept = conceptService.saveConcept(concept);
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        database.setTables(tables);
+        database.getTables().addAll(tables);
         return repository.save(database);
     }
 
     @Override
-    public void removeDatabase(TargetDatabase targetDatabase) {
-        repository.delete(targetDatabase);
+    public void removeDatabase(Long id) {
+        repository.deleteById(id);
     }
 }

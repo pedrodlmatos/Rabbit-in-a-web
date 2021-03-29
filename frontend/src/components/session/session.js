@@ -19,6 +19,12 @@ const useStyles = makeStyles(theme => ({
         marginRight: theme.spacing(6),
         marginLeft: theme.spacing(6)
     },
+    databaseNames: {
+        height: 100,
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        position: 'absolute'
+    },
     showFieldsInfo: {
         visibility: 'hidden'
     },
@@ -115,6 +121,7 @@ export default function Session() {
      */
     
     const handleCDMChange = e => {
+        setLoading(true);
         // clean state
         if (selectedTable !== {}) {
             setSelectedTable({});
@@ -125,12 +132,12 @@ export default function Session() {
 
         const cdm = e.target.value;
         ETLService.changeTargetDatabase(etl.id, cdm).then(response => {
-            setLoading(true);
             setEtl({...etl, targetDatabase: response.data.targetDatabase });
             setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name);
             setMappings([]);
             setSelectedMapping({});
-            window.location.href = '/session/' + response.data.id
+            setLoading(false);
+            //window.location.href = '/session/' + response.data.id
         });
     }
 
@@ -480,12 +487,25 @@ export default function Session() {
                         <HelpModal modalIsOpen={showHelpModal} closeModal={() => setShowHelpModal(false)}/>
                     </Grid>
 
+                    <Grid className={classes.databaseName} container>
+                    
+                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                            <h4>{ etl.sourceDatabase.databaseName }</h4>
+                        </Grid>
+                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                            <Controls.Select 
+                                name={omopName} 
+                                label="OMOP CDM" 
+                                value={etl.targetDatabase.databaseName}
+                                onChange={handleCDMChange}
+                                options={CDMVersions} 
+                            />
+                        </Grid>
+                        <Grid item xs={6} sm={6} md={6} lg={6}></Grid>
+                    </Grid>
+
                     <Grid container>
                         <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <div>
-                                <h4>{ etl.sourceDatabase.databaseName }</h4>
-                            </div>
-
                             <div>
                                 { etl.sourceDatabase.tables.map(item => {
                                     return(
@@ -502,14 +522,6 @@ export default function Session() {
                         </Grid>
                             
                         <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <Controls.Select 
-                                name={omopName} 
-                                label="OMOP CDM" 
-                                value={etl.targetDatabase.databaseName}
-                                onChange={handleCDMChange}
-                                options={CDMVersions} 
-                            />
-
                             <div>
                                 { etl.targetDatabase.tables.map(item => {
                                     return(

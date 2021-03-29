@@ -16,7 +16,7 @@ public class SourceField {
 
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonView(Views.ETLSession.class)
     private Long id;
 
@@ -24,9 +24,11 @@ public class SourceField {
     @JsonView(Views.ETLSession.class)
     private String name;
 
+    /*
     @Column(name = "description", columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
     private String description;
+    */
 
     @Column(name = "type")
     @JsonView(Views.ETLSession.class)
@@ -83,6 +85,7 @@ public class SourceField {
         this.name = name;
     }
 
+    /*
     public String getDescription() {
         return description;
     }
@@ -90,6 +93,7 @@ public class SourceField {
     public void setDescription(String description) {
         this.description = description;
     }
+    */
 
     public String getType() {
         return type;
@@ -181,7 +185,7 @@ public class SourceField {
         return "SourceField{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
+                //", description='" + description + '\'' +
                 ", type='" + type + '\'' +
                 ", isNullable=" + isNullable +
                 ", maxLength=" + maxLength +

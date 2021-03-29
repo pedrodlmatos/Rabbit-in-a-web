@@ -37,6 +37,27 @@ export default function FieldMappingModal(props) {
     const [loadingSaveLogic, setLoadingSaveLogic] = useState(false);
     const [showFieldInfo, setShowFieldInfo] = useState(false);
     const [enableEditCommentButton, setEnableEditCommentButton] = useState(true);
+    const [fieldInfo, setFieldInfo] = useState([])
+
+
+    const targetColumns = React.useMemo(() => [
+        {
+            Header: 'Concept ID',
+            accessor: 'conceptId'
+        },
+        {
+            Header: 'Concept Name',
+            accessor: 'conceptName'
+        },
+        {
+            Header: 'Class',
+            accessor: 'conceptClass'
+        },
+        {
+            Header: 'Standard ?',
+            accessor: 'conceptStandard'
+        }
+    ], [])
     
 
     /**
@@ -143,23 +164,6 @@ export default function FieldMappingModal(props) {
         });
     }
 
-    const defineData = (field) => {
-        // TODO
-        setShowFieldInfo(true);
-        /*
-        let data = [];
-        table.fields.forEach(element => {
-            data.push({
-                field: element.name,
-                type: element.type,
-                description: element.description
-            })
-        })
-        setFieldsInfo(data);
-        setShowFieldsInfo(true);
-        */
-    }
-
 
     /**
      * Defines the selected field and changes state of current and previous selected field.
@@ -179,7 +183,7 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromSource(field);
             // define fields info
-            defineData(field);
+            defineSourceFieldData(field);
         } else if (selectedField === field) {
             // select the same table
             // change color of arrows to grey
@@ -188,7 +192,7 @@ export default function FieldMappingModal(props) {
             setSelectedField({});
             setSourceSelected(false);
             setShowFieldInfo(false);
-            //setFieldsInfo(null);
+            setFieldInfo([]);
         } else {
             // select any other source table
             // change color of arrows to grey
@@ -199,7 +203,7 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromSource(field);
             // change content of fields table
-            defineData(field);
+            defineSourceFieldData(field);
         }
     }
 
@@ -212,7 +216,7 @@ export default function FieldMappingModal(props) {
             setSelectedField(field);
             setSourceSelected(false);
             // change content of fields table
-            defineData(field);
+            defineTargetFieldData(field);
         } else if (selectedField === field) {
             // select the same field -> unselect
             // change color of arrows to grey
@@ -221,7 +225,7 @@ export default function FieldMappingModal(props) {
             setSelectedField({});
             setSourceSelected(false);
             setShowFieldInfo(false);
-            //setFieldsInfo(null);
+            setFieldInfo([]);
         } else if (sourceSelected) {
             // source field is selected -> create arrow
             // change arrows color to grey
@@ -233,7 +237,7 @@ export default function FieldMappingModal(props) {
             // clean state
             setSourceSelected(false);
             setShowFieldInfo(false);
-            //setFieldsInfo(null);
+            setFieldInfo([]);
         } else {
             // other target field is selected
             // change color of arrows to grey
@@ -244,7 +248,7 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromTarget(field);
             // change content of fields table
-            defineData(field);
+            defineTargetFieldData(field);
         }
     }
 
@@ -377,6 +381,45 @@ export default function FieldMappingModal(props) {
         }
     }
 
+
+    /**
+     * Defines the content of fields table (field name, type and description)
+     *
+     * @param table table with data
+     */
+
+     const defineSourceFieldData = (field) => {
+        let data = [];
+        /*
+        field.concepts.forEach(element => {
+            data.push({
+                field: element.name,
+                type: element.type,
+                description: element.description
+            })
+        })*/
+        setFieldInfo(data);
+    }
+
+
+    /**
+     * Defines the content of fields table (field name, type and description)
+     *
+     * @param table table with data
+     */
+
+     const defineTargetFieldData = (field) => {
+        let data = [];
+        field.concepts.forEach(element => {
+            data.push({
+                field: element.name,
+                type: element.type,
+                description: element.description
+            })
+        })
+        setFieldInfo(data);
+    }
+
     
     return(
         <Dialog fullScreen open={openModal} onEnter={getInformation} classes={{ paper: classes.dialogWrapper }}>
@@ -471,6 +514,17 @@ export default function FieldMappingModal(props) {
                                     <div>
                                         <h6><strong>Field name: </strong>{selectedField.name}</h6>
                                         <h6><strong>Field type: </strong>{selectedField.type}</h6>
+
+                                        { sourceSelected ? (
+                                            console.log(selectedField)
+                                        ) : (
+                                            console.log(selectedField)
+                                            /*
+                                            <div>
+                                                <h6><strong>Field description: </strong>{selectedField.description}</h6>
+                                            </div>*/
+                                        ) }
+
                                         <Controls.Input 
                                             value={selectedField.comment === null ? "" : selectedField.comment}
                                             name="comment"
