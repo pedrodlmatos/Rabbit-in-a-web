@@ -17,11 +17,11 @@ public class SourceDatabase {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "database_name", nullable = false)
+    @Column(name = "database_name")
     @JsonView(Views.ETLSessionsList.class)
     private String databaseName;
 
-    @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JsonView(Views.ETLSession.class)
     private List<SourceTable> tables;
 
@@ -64,5 +64,14 @@ public class SourceDatabase {
 
     public void setEtl(ETL etl) {
         this.etl = etl;
+    }
+
+    @Override
+    public String toString() {
+        return "SourceDatabase{" +
+                "id=" + id +
+                ", databaseName='" + databaseName + '\'' +
+                ", tables=" + tables +
+                '}';
     }
 }

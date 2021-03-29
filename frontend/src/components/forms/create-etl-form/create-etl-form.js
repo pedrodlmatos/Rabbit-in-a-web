@@ -10,6 +10,7 @@ import { CDMVersions } from '../../session/CDMVersions';
  */
 
 const initialFValues = {
+    ehrName: '',
     ehrFile: '',
     omop: CDMVersions.filter(function(cdm) { return cdm.id === 'CDMV60' })[0].id,
 }
@@ -77,16 +78,26 @@ export default function CreateETLForm(props) {
     return (
         <Form onSubmit={handleSubmit}>
             <Grid container>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Grid item xs={12} sm={6} md={6} lg={6}>
+                    <Controls.Input
+                        label="EHR Name"
+                        placeholder="EHR database name"
+                        name="ehrName"
+                        onChange={handleInputChange}
+                    />
+                </Grid>
+                
+                <Grid item xs={12} sm={6} md={6} lg={6}>
                     <Controls.FileInput
                         name="ehrFile"
                         type="file"
                         placeholder="Upload EHR scan"
                         onChange={handleFileChange} 
                     />
-                    <p>{ values.ehrFile === '' ? "Upload a file" : values.ehrFile.name }</p>    
-                    
+                    <p>{ values.ehrFile === '' ? "Upload a file" : values.ehrFile.name }</p>
+                </Grid>
 
+                <Grid item xs={12} sm={12} md={12} lg={12}>
                     <Controls.Select  name="omop" label="OMOP CDM" value={values.omop} onChange={handleInputChange} options={CDMVersions} errors={errors.departmentId} />
 
                     { loading ? 

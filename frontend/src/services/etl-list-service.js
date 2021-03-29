@@ -48,12 +48,12 @@ class ETLService {
      * @returns created ETL session created
      */
     
-    createETL = async (file, cdm) => {
+    createETL = async (name, file, cdm) => {
         let formData = new FormData();
         formData.append("file", file);
         
         try {
-            return await axios.post(API_URL + "sessions", formData, { headers: authHeaderMultiPart(), params: { cdm: cdm } });
+            return await axios.post(API_URL + "sessions", formData, { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm } });
         } catch (e) {
             console.log(e);
         }
@@ -69,21 +69,11 @@ class ETLService {
      */
 
     changeTargetDatabase(etl, cdm) {
-        return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl.id, cdm: cdm }});
+        return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl, cdm: cdm }});
     }
 
-
-    /**
-     * Sends PUT request to change comment of a table
-     * 
-     * @param {*} etl ETL session's id
-     * @param {*} table table's id
-     * @param {*} comment comment to change to
-     * @returns 
-     */
-    
-    changeComment(etl, table, comment) {
-        return axios.put(API_URL + "sessions/comment", null, { headers: authHeader(), params:{ etl: etl, table: table, comment: comment }});
+    downloadSourceFieldsFile(etl) {
+        return axios.get(API_URL + "sessions/sourceCSV", { headers: authHeader(), params: { etl: etl }})
     }
 }
 

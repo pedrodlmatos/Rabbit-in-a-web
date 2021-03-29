@@ -17,7 +17,7 @@ class Home extends Component {
                     <li>Map field between two tables</li>
                 </ul>
 
-                <p>To check documentation, click <a href="/documentation">here</a></p>
+                <p>To check documentation, click <a href="#">here</a></p>
             </div>
         )
     }

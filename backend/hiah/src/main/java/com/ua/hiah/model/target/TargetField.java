@@ -3,18 +3,11 @@ package com.ua.hiah.model.target;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -42,6 +35,10 @@ public class TargetField {
     @Column(name = "nullable")
     private boolean isNullable;
 
+    @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
+    private String comment;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_table_id")
     @JsonIgnore
@@ -51,6 +48,12 @@ public class TargetField {
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;
+
+    @OneToMany(mappedBy = "field")
+    @Column(name = "concepts")
+    @JsonView(Views.ETLSession.class)
+    private List<Concept> concepts;
+
 
     // CONSTRUCTOR
     public TargetField() {
@@ -105,11 +108,51 @@ public class TargetField {
         this.table = table;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public List<Concept> getConcepts() {
+        return concepts;
+    }
+
+    public void setConcepts(List<Concept> concepts) {
+        this.concepts = concepts;
+    }
+
     public List<FieldMapping> getMappings() {
         return mappings;
     }
 
     public void setMappings(List<FieldMapping> mappings) {
         this.mappings = mappings;
+    }
+
+    /* Adapted from ETL (Rabbit in a hat) */
+    public List<String> getMappingsToTargetField() {
+        List<String> result = new ArrayList<>();
+
+        for (FieldMapping mapping : this.getMappings()) {
+            SourceField sourceField = mapping.getSource();
+            result.add(String.format("%s.%s", sourceField.getTable().getName(), sourceField.getName()));
+        }
+
+        return result;
+    }
+
+
+    @Override
+    public String toString() {
+        return "TargetField{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", isNullable=" + isNullable +
+                '}';
     }
 }

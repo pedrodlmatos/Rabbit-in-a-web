@@ -54,7 +54,20 @@ class TableMappingService {
      */
 
     editCompleteMapping(map_id, complete) {
-        return axios.put(API_URL + "map/" + map_id, null, { headers: authHeader(), params: { completion: complete }})
+        return axios.put(API_URL + "map/" + map_id + "/complete", null, { headers: authHeader(), params: { completion: complete }})
+    }
+
+
+    /**
+     * Sends a PUT request to change table mapping logic
+     * 
+     * @param {*} map_id table mapping id
+     * @param {*} logic mapping logic
+     * @returns table mapping edited
+     */
+
+     editMappingLogic(map_id, logic) {
+        return axios.put(API_URL + "map/" + map_id + "/logic", null, { headers: authHeader(), params: { logic: logic }})
     }
 
 }

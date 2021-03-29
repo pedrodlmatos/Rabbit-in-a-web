@@ -6,14 +6,7 @@ import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "FIELD_MAPPING")
@@ -21,7 +14,7 @@ public class FieldMapping {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.ETLSession.class)
     private Long id;
 
@@ -34,6 +27,10 @@ public class FieldMapping {
     @JoinColumn(name = "target_id", nullable = false)
     @JsonView(Views.ETLSession.class)
     private TargetField target;
+
+    @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
+    private String logic;
 
     @ManyToOne
     @JoinColumn(name = "table_mapping_id", nullable = false)
@@ -75,5 +72,13 @@ public class FieldMapping {
 
     public void setTableMapping(TableMapping tableMapping) {
         this.tableMapping = tableMapping;
+    }
+
+    public String getLogic() {
+        return logic;
+    }
+
+    public void setLogic(String logic) {
+        this.logic = logic;
     }
 }

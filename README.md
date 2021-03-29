@@ -27,4 +27,28 @@ frontend | 3000 | 3000
 Postgres details:
  - User: `postgres`
  - Password: `postgres`
- - Database name: `riah`
+ - Database name: `hiah`
+
+
+## CI/CD Virtual machine
+
+IP Address: `35.195.9.62`
+
+Service | Docker container | Internal port | External port
+--- | ---| --- | ---
+PostgreSQL | yes | 5432 | 5432
+Jenkins | no | - | 8080
+Sonatype/Nexus | yes | 8081 | 8081
+Registry | yes | 5000 | 5000
+
+
+## Runtime Virtual Machine
+
+IP Address: `104.199.21.27`
+
+Service | Internal port | External port
+--- | ---| --- 
+PostgreSQL | 5432 | 5432
+Backend | 8000 | 8100
+Frontend | 30 | 3000
+Nginx | 30 | 

@@ -3,15 +3,22 @@ import { TextField } from '@material-ui/core';
 
 export default function Input(props) {
 
-    const { name, label, value, error=null, onChange, ...other } = props;
+    const { variant, value, name, disabled, fullWidth, label, placeholder, rows, size, type, error=null, onChange, ...other } = props;
 
     return (
         <TextField 
-            variant="outlined"
-            label={label}
-            name={name}
-            value={value}
+            variant={ variant || "outlined" }
+            label={ label }
+            placeholder={ placeholder }
+            name={ name }
+            value={ value }
+            fullWidth={ fullWidth || false }
+            rows={ rows || 1}
+            size={ size || "medium"}
+            type={ type || "string" }
+            disabled={disabled || false}
             onChange={onChange}
+            autoFocus
             {...other}
             {...(error && {error:true, helperText:error })} 
         />

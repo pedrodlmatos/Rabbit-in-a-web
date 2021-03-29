@@ -2,9 +2,9 @@ package com.ua.hiah.service.fieldMapping;
 
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.repository.FieldMappingRepository;
-import com.ua.hiah.service.source.sourceFieldService.SourceFieldService;
+import com.ua.hiah.service.source.field.SourceFieldService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
-import com.ua.hiah.service.target.targetField.TargetFieldService;
+import com.ua.hiah.service.target.field.TargetFieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

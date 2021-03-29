@@ -3,17 +3,11 @@ package com.ua.hiah.model.source;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,9 +24,11 @@ public class SourceField {
     @JsonView(Views.ETLSession.class)
     private String name;
 
+    /*
     @Column(name = "description", columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
     private String description;
+    */
 
     @Column(name = "type")
     @JsonView(Views.ETLSession.class)
@@ -52,6 +48,10 @@ public class SourceField {
 
     @Column(name = "fractionUnique", nullable = true)
     private double fractionUnique;
+
+    @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
+    @JsonView(Views.ETLSession.class)
+    private String comment;
 
     @ManyToOne
     @JoinColumn(name = "source_table_id")
@@ -85,6 +85,7 @@ public class SourceField {
         this.name = name;
     }
 
+    /*
     public String getDescription() {
         return description;
     }
@@ -92,6 +93,7 @@ public class SourceField {
     public void setDescription(String description) {
         this.description = description;
     }
+    */
 
     public String getType() {
         return type;
@@ -149,11 +151,48 @@ public class SourceField {
         this.fractionUnique = fractionUnique;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     public List<FieldMapping> getMappings() {
         return mappings;
     }
 
     public void setMappings(List<FieldMapping> mappings) {
         this.mappings = mappings;
+    }
+
+
+    /* Adapted from ETL (Rabbit in a hat) */
+    public List<String> getMappingsFromSourceField() {
+        List<String> result = new ArrayList<>();
+
+        for (FieldMapping mapping : this.getMappings()) {
+            TargetField targetField = mapping.getTarget();
+            result.add(String.format("%s.%s", targetField.getTable().getName(), targetField.getName()));
+        }
+
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "SourceField{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                //", description='" + description + '\'' +
+                ", type='" + type + '\'' +
+                ", isNullable=" + isNullable +
+                ", maxLength=" + maxLength +
+                ", fractionEmpty=" + fractionEmpty +
+                ", uniqueCount=" + uniqueCount +
+                ", fractionUnique=" + fractionUnique +
+                ", comment='" + comment + '\'' +
+                '}';
     }
 }

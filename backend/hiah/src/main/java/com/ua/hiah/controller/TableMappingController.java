@@ -1,8 +1,10 @@
 package com.ua.hiah.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.service.tableMapping.TableMappingService;
+import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -40,7 +42,7 @@ public class TableMappingController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Found the table mapping",
+                    description = "table mapping found",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TableMapping.class)
@@ -54,8 +56,9 @@ public class TableMappingController {
 
     })
     @GetMapping("/map/{id}")
+    @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getTableMapping(@PathVariable Long id) {
-        logger.info("TABLE MAPPING - Requesting table mapping with id " + id);
+        logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + id);
 
         TableMapping response = service.getTableMappingById(id);
 
@@ -80,7 +83,7 @@ public class TableMappingController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Created the table mapping",
+                    description = "Table mapping created",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TableMapping.class)
@@ -99,7 +102,7 @@ public class TableMappingController {
             response = new TableMapping();
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-        logger.info("TABLE MAPPING - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
+        logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -116,7 +119,7 @@ public class TableMappingController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Deleted the table mapping",
+                    description = "Table mapping deleted",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ETL.class)
@@ -171,10 +174,47 @@ public class TableMappingController {
                     content = @Content
             )
     })
-    @PutMapping("/map/{id}")
+    @PutMapping("/map/{id}/complete")
     public ResponseEntity<?> editCompleteMapping(@PathVariable Long id, @Param(value = "completion") boolean completion) {
         logger.info("TABLE MAPPING - Change completion status of mapping " + id);
         TableMapping response = service.changeCompletionStatus(id, completion);
+
+        if (response == null) {
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    /**
+     * Changes the completion status of a table mapping
+     *
+     * @param id table mapping id
+     * @param logic table mapping logic
+     * @return table mapping altered
+     */
+
+    @Operation(summary = "Change table mapping completion status")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Completion status changed",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TableMapping.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Table mapping not found",
+                    content = @Content
+            )
+    })
+    @PutMapping("/map/{id}/logic")
+    public ResponseEntity<?> editMappingLogic(@PathVariable Long id, @Param(value = "logic") String logic) {
+        logger.info("TABLE MAPPING - Change mapping logic of mapping " + id);
+        TableMapping response = service.changeMappingLogic(id, logic);
 
         if (response == null) {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);

@@ -50,7 +50,7 @@ export default function SessionList() {
 
     const createETLSession = (values, resetForm) => {
         // sends request to API and then redirects to created session
-        ETLService.createETL(values.ehrFile, values.omop).then(res => {
+        ETLService.createETL(values.ehrName, values.ehrFile, values.omop).then(res => {
             window.location.href = '/session/' + res.data.id;
         }).then(res => {
             console.log(res);
@@ -101,7 +101,7 @@ export default function SessionList() {
                     </ETLModal>
                 </div>
             ) : (
-                <CircularProgress color="primary" variant="determinate" size={40} />
+                <CircularProgress color="primary" variant="indeterminate" size={40} />
             )}
         </div>
     )

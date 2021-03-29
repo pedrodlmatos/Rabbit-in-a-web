@@ -6,17 +6,8 @@ import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,27 +20,32 @@ public class TargetDatabase {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "version", unique = true)
+    @Column(name = "version")
     private CDMVersion version;
 
     @Column(name = "database_name", nullable = false)
     @JsonView(Views.ETLSessionsList.class)
     private String databaseName;
 
-    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "vocabulary_version", nullable = true)
+    @JsonView(Views.ETLSession.class)
+    private String conceptIdHintsVocabularyVersion;
+
+    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
     private List<TargetTable> tables;
 
-    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "targetDatabase")
     @JsonIgnore
-    private List<ETL> etl;
+    private ETL etl;
 
 
     // CONSTRUCTOR
     public TargetDatabase() {
+        this.tables = new ArrayList<>();
     }
 
-    public TargetDatabase(String databaseName, List<ETL> etl) {
+    public TargetDatabase(String databaseName, ETL etl) {
         this.databaseName = databaseName;
         this.etl = etl;
     }
@@ -75,15 +71,17 @@ public class TargetDatabase {
         return tables;
     }
 
+    /*
     public void setTables(List<TargetTable> tables) {
         this.tables = tables;
     }
+    */
 
-    public List<ETL> getEtl() {
+    public ETL getEtl() {
         return etl;
     }
 
-    public void setEtl(List<ETL> etl) {
+    public void setEtl(ETL etl) {
         this.etl = etl;
     }
 
@@ -95,5 +93,21 @@ public class TargetDatabase {
         this.version = version;
     }
 
+    public String getConceptIdHintsVocabularyVersion() {
+        return conceptIdHintsVocabularyVersion;
+    }
 
+    public void setConceptIdHintsVocabularyVersion(String conceptIdHintsVocabularyVersion) {
+        this.conceptIdHintsVocabularyVersion = conceptIdHintsVocabularyVersion;
+    }
+
+    @Override
+    public String toString() {
+        return "TargetDatabase{" +
+                "id=" + id +
+                ", version=" + version +
+                ", databaseName='" + databaseName + '\'' +
+                ", tables=" + tables +
+                '}';
+    }
 }
