@@ -1,8 +1,10 @@
 package com.ua.hiah.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.service.tableMapping.TableMappingService;
+import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -54,6 +56,7 @@ public class TableMappingController {
 
     })
     @GetMapping("/map/{id}")
+    @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getTableMapping(@PathVariable Long id) {
         logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + id);
 

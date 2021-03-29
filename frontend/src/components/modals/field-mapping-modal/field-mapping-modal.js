@@ -8,6 +8,7 @@ import EHRTable from '../../session/ehr-table';
 import OMOPTable from '../../session/omop-table';
 import Controls from '../../controls/controls';
 import Xarrow from 'react-xarrows/lib';
+import InfoTable from '../../info-table/info-table';
 
 
 const useStyles = makeStyles(theme => ({
@@ -35,9 +36,10 @@ export default function FieldMappingModal(props) {
     const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
     const [showDeleteButton, setShowDeleteButton] = useState(false);
     const [loadingSaveLogic, setLoadingSaveLogic] = useState(false);
-    const [showFieldInfo, setShowFieldInfo] = useState(false);
     const [enableEditCommentButton, setEnableEditCommentButton] = useState(true);
-    const [fieldInfo, setFieldInfo] = useState([])
+    const [showFieldInfo, setShowFieldInfo] = useState(false);
+    const [fieldInfo, setFieldInfo] = useState([]);
+    const [showTable, setShowTable] = useState(false);
 
 
     const targetColumns = React.useMemo(() => [
@@ -51,11 +53,11 @@ export default function FieldMappingModal(props) {
         },
         {
             Header: 'Class',
-            accessor: 'conceptClass'
+            accessor: 'conceptClassId'
         },
         {
             Header: 'Standard ?',
-            accessor: 'conceptStandard'
+            accessor: 'standardConcept'
         }
     ], [])
     
@@ -183,6 +185,7 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromSource(field);
             // define fields info
+            setShowFieldInfo(true);
             defineSourceFieldData(field);
         } else if (selectedField === field) {
             // select the same table
@@ -203,11 +206,13 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromSource(field);
             // change content of fields table
+            setShowFieldInfo(true);
             defineSourceFieldData(field);
         }
     }
 
     const selectTargetField = (field) => {
+        console.log(field);
         if (selectedField === {}) {
             // no field is selected
             // change color of mappings that goes to the selected field
@@ -216,6 +221,7 @@ export default function FieldMappingModal(props) {
             setSelectedField(field);
             setSourceSelected(false);
             // change content of fields table
+            setShowFieldInfo(true);
             defineTargetFieldData(field);
         } else if (selectedField === field) {
             // select the same field -> unselect
@@ -248,8 +254,54 @@ export default function FieldMappingModal(props) {
             // change color of mappings that comes from the selected table
             selectArrowsFromTarget(field);
             // change content of fields table
+            setShowFieldInfo(true);
             defineTargetFieldData(field);
         }
+    }
+
+    /**
+     * Defines the content of fields table (field name, type and description)
+     *
+     * @param table table with data
+     */
+
+     const defineSourceFieldData = (field) => {
+        let data = [];
+        /*
+        field.concepts.forEach(element => {
+            data.push({
+                field: element.name,
+                type: element.type,
+                description: element.description
+            })
+        })*/
+        setFieldInfo(data);
+    }
+
+
+    /**
+     * Defines the content of fields table (field name, type and description)
+     *
+     * @param table table with data
+     */
+
+     const defineTargetFieldData = (field) => {
+        let data = [];
+        if (field.concepts.length === 0) {
+            setShowTable(false);
+        } else {
+            field.concepts.forEach(element => {
+                data.push({
+                    conceptId: element.conceptId,
+                    conceptName: element.conceptName,
+                    conceptClassId: element.conceptClassId,
+                    standardConcept: element.standardConcept
+                })
+            })
+            setFieldInfo(data);
+            setShowTable(true);
+        }
+        
     }
 
 
@@ -382,43 +434,7 @@ export default function FieldMappingModal(props) {
     }
 
 
-    /**
-     * Defines the content of fields table (field name, type and description)
-     *
-     * @param table table with data
-     */
-
-     const defineSourceFieldData = (field) => {
-        let data = [];
-        /*
-        field.concepts.forEach(element => {
-            data.push({
-                field: element.name,
-                type: element.type,
-                description: element.description
-            })
-        })*/
-        setFieldInfo(data);
-    }
-
-
-    /**
-     * Defines the content of fields table (field name, type and description)
-     *
-     * @param table table with data
-     */
-
-     const defineTargetFieldData = (field) => {
-        let data = [];
-        field.concepts.forEach(element => {
-            data.push({
-                field: element.name,
-                type: element.type,
-                description: element.description
-            })
-        })
-        setFieldInfo(data);
-    }
+    
 
     
     return(
@@ -518,11 +534,16 @@ export default function FieldMappingModal(props) {
                                         { sourceSelected ? (
                                             console.log(selectedField)
                                         ) : (
-                                            console.log(selectedField)
-                                            /*
+                                            
                                             <div>
                                                 <h6><strong>Field description: </strong>{selectedField.description}</h6>
-                                            </div>*/
+                                                { showTable ? (
+                                                    <InfoTable columns={targetColumns} data={fieldInfo}/>
+                                                ) : (
+                                                    <>
+                                                    </>
+                                                ) }
+                                            </div>
                                         ) }
 
                                         <Controls.Input 

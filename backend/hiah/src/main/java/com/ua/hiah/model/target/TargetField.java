@@ -44,13 +44,15 @@ public class TargetField {
     @JsonIgnore
     private TargetTable table;
 
-    @OneToMany(mappedBy = "field")
-    @Column(name = "concepts")
-    private List<Concept> concepts;
-
     @OneToMany(mappedBy = "target")
     @Column(name = "mappings", nullable = true)
+    @JsonIgnore
     private List<FieldMapping> mappings;
+
+    @OneToMany(mappedBy = "field")
+    @Column(name = "concepts")
+    @JsonView(Views.ETLSession.class)
+    private List<Concept> concepts;
 
 
     // CONSTRUCTOR
