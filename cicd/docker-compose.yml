@@ -20,7 +20,6 @@ services:
     volumes:
       - ~/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/local/bin/docker:/usr/local/bin/docker
   registry:
     image: registry
     restart: always
