@@ -101,7 +101,7 @@ pipeline {
                 expression { params.Deploy }
             }
             steps {
-                sshagent(credentials: ['runtime-vm']) {
+                sshagent(credentials: ['runtime-key']) {
                     sh 'ssh -o StrictHostKeyChecking=no -l pedrolopesmatos17 104.199.21.27 "bash -s" < deploy.sh'
                 }
             }

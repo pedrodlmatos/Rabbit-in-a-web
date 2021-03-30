@@ -53,3 +53,9 @@ sudo systemctl restart docker
 
 --- 6 - Create ssh keys ---
 
+cd .ssh/
+ssh-keygen -f jenkins
+Copy jenkins.pun content to runtime vm metadata
+Create credential in Jenkins
+Copy jenkins content to key credential
+Change id in Jenkinsfile
