@@ -32,7 +32,7 @@ Postgres details:
 
 ## CI/CD Virtual machine
 
-IP Address: `35.195.9.62`
+IP Address: `http://35.195.116.140/`
 
 Service | Docker container | Internal port | External port
 --- | ---| --- | ---
