@@ -52,7 +52,7 @@ pipeline {
                     steps {
                         sh '''
                             cd backend/hiah
-                            sudo docker build -t hiah-backend .
+                            docker build -t hiah-backend .
                         '''
                     }
                 }
@@ -61,7 +61,7 @@ pipeline {
                     steps {
                         sh '''
                             cd frontend
-                            sudo docker build -t hiah-frontend .
+                            docker build -t hiah-frontend .
                         '''
                     }
                 }
