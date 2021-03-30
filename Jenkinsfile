@@ -78,8 +78,8 @@ pipeline {
                 stage('Backend project') {
                     steps {
                         sh '''
-                            sudo docker tag hiah-backend 34.118.8.157:5000/v2/hiah-backend:runtime
-                            sudo docker push 34.118.8.157:5000/v2/hiah-backend:runtime
+                            docker tag hiah-backend 34.118.8.157:5000/v2/hiah-backend:runtime
+                            docker push 34.118.8.157:5000/v2/hiah-backend:runtime
                         '''
                     }
                 }
@@ -87,8 +87,8 @@ pipeline {
                 stage('Frontend project') {
                     steps {
                         sh '''
-                            sudo docker tag hiah-frontend 34.118.8.157:5000/v2/hiah-frontend:runtime
-                            sudo docker push 34.118.8.157:5000/v2/hiah-frontend:runtime
+                            docker tag hiah-frontend 34.118.8.157:5000/v2/hiah-frontend:runtime
+                            docker push 34.118.8.157:5000/v2/hiah-frontend:runtime
                         '''
                     }
                 }
