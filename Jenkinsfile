@@ -10,7 +10,7 @@ pipeline {
             parallel {
                 stage('Backend project') {
                     steps {
-                        withMaven(maven: 'maven', mavenSettingsConfig: '36ce45b9-8eb6-4068-b806-04f48c5a0a4f') {
+                        withMaven(maven: 'maven', mavenSettingsConfig: '96263f96-2cb6-43d5-8782-67a07e0f830b') {
                             sh '''
                                 cd backend/hiah
                                 mvn clean package -DskipTest
@@ -30,7 +30,7 @@ pipeline {
             parallel {
                 stage('Backend project') {
                     steps {
-                        withMaven(maven: 'maven', mavenSettingsConfig: '36ce45b9-8eb6-4068-b806-04f48c5a0a4f') {
+                        withMaven(maven: 'maven', mavenSettingsConfig: '96263f96-2cb6-43d5-8782-67a07e0f830b') {
                             sh '''
                                 cd backend/hiah
                                 mvn deploy -DskipTest
@@ -78,8 +78,8 @@ pipeline {
                 stage('Backend project') {
                     steps {
                         sh '''
-                            docker tag hiah-backend 35.195.116.140:5000/v2/hiah-backend:runtime
-                            docker push 35.195.116.140:5000/v2/hiah-backend:runtime
+                            docker tag hiah-backend 34.118.8.157:5000/v2/hiah-backend:runtime
+                            docker push 34.118.8.157:5000/v2/hiah-backend:runtime
                         '''
                     }
                 }
@@ -87,8 +87,8 @@ pipeline {
                 stage('Frontend project') {
                     steps {
                         sh '''
-                            docker tag hiah-frontend 35.195.116.140:5000/v2/hiah-frontend:runtime
-                            docker push 35.195.116.140:5000/v2/hiah-frontend:runtime
+                            docker tag hiah-frontend 34.118.8.157:5000/v2/hiah-frontend:runtime
+                            docker push 34.118.8.157:5000/v2/hiah-frontend:runtime
                         '''
                     }
                 }
@@ -101,7 +101,7 @@ pipeline {
                 expression { params.Deploy }
             }
             steps {
-                sshagent(credentials: ['hiah']) {
+                sshagent(credentials: ['runtime-vm']) {
                     sh 'ssh -o StrictHostKeyChecking=no -l pedrolopesmatos17 104.199.21.27 "bash -s" < deploy.sh'
                 }
             }
