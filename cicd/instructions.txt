@@ -40,6 +40,8 @@ Install Maven Integration plugin
 Create a new settings.xml
 Replace content to stored in settings.xml file
 
+Install SSH Agent plugin
+
 --- 5 - Change docker configs ---
 
 sudo nano /etc/docker/daemon.json
