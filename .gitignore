@@ -1,0 +1,31 @@
+# Backend
+HELP.md
+backend/hiah/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+.classpath
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# Frontend
+frontend/node_modules
+frontend/build
+
+
+# Editors
+.idea
+*.iml
+*.iws
+*.ipr
+*/.vscode
+*/workspace.code-workspace
+
+
+backend/hiah/src/main/resources/Scans/ScanReportCOHORT.xlsx
