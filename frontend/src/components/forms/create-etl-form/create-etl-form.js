@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
-import { Grid, CircularProgress } from '@material-ui/core';
+import { Grid, CircularProgress, makeStyles } from '@material-ui/core';
 import Controls from '../../controls/controls';
 import { useForm, Form } from '../../forms/use-form';
 import { CDMVersions } from '../../../services/CDMVersions';
+
+
+const useStyles = makeStyles()
 
 
 /**
@@ -19,7 +22,6 @@ const initialFValues = {
 export default function CreateETLForm(props) {
     
     const { addSession, close } = props;
-
     const [loading, setLoading] = useState(false);
 
 
@@ -33,7 +35,13 @@ export default function CreateETLForm(props) {
     const validate = (fieldValues = values) => {
         let temp = { ...errors }
 
-        // TODO: Validate from
+        console.log(fieldValues);
+
+        if ('ehrName' in fieldValues) {
+            temp.ehrName = fieldValues.ehrName ? "" : "This field is required"
+        } if ('ehrFile' in fieldValues) {
+            temp.ehrFile = fieldValues.ehrFile.name.endsWith('.xlsx') ? "" : "Invalid extension"
+        }
 
         setErrors({ ...temp })
 
@@ -84,6 +92,7 @@ export default function CreateETLForm(props) {
                         placeholder="EHR database name"
                         name="ehrName"
                         onChange={handleInputChange}
+                        error={errors.ehrName}
                     />
                 </Grid>
                 
@@ -92,13 +101,14 @@ export default function CreateETLForm(props) {
                         name="ehrFile"
                         type="file"
                         placeholder="Upload EHR scan"
+                        error={errors.ehrFile}
                         onChange={handleFileChange} 
                     />
                     <p>{ values.ehrFile === '' ? "Upload a file" : values.ehrFile.name }</p>
                 </Grid>
 
                 <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <Controls.Select  name="omop" label="OMOP CDM" value={values.omop} onChange={handleInputChange} options={CDMVersions} errors={errors.departmentId} />
+                    <Controls.Select name="omop" label="OMOP CDM" value={values.omop} onChange={handleInputChange} options={CDMVersions} errors={errors.departmentId} />
 
                     { loading ? 
                         (

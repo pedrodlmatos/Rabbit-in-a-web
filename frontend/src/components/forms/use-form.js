@@ -41,6 +41,10 @@ export function useForm(initialFValues, validateOnChange = false, validate) {
             ...values,
             [name]: file
         })
+
+        if (validateOnChange) {
+            validate({ [name]: file })
+        }
     }
 
 

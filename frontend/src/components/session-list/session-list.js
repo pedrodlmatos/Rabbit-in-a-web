@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles, Grid, CircularProgress } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import SessionCard from "../sessionCard/session-card";
 import ETLService from "../../services/etl-list-service";
-import ETLModal from "../modals/createETLModal/etl-modal";
+import ETLModal from "../modals/create-etl-modal/etl-modal";
 import Controls from '../controls/controls';
 import CreateETLForm from '../forms/create-etl-form/create-etl-form';
 
@@ -94,11 +95,15 @@ export default function SessionList() {
                         color="primary" 
                         text="Create ETL Session"
                         disabled={disabled}
-                        onClick={() => {setOpenModal(true)}} />
+                        onClick={() => {setOpenModal(true)}}
+                    >
+                        <AddIcon fontSize="large"/>
+                    </Controls.Button>
                     
                     <ETLModal title="Create ETL session" openModal={openModal} setOpenModal={setOpenModal}>
                         <CreateETLForm addSession={createETLSession} close={closeModal} />
                     </ETLModal>
+                    
                 </div>
             ) : (
                 <CircularProgress color="primary" variant="indeterminate" size={40} />

@@ -19,6 +19,6 @@ export default function Button(props) {
             disabled={disabled || false}
             onClick={ onClick }
             { ...other }
-            classes={{ label: classes.label }}>{ text } { children }</MButton>
+            classes={{ label: classes.label }}>{ children } { text }</MButton>
     )
 }
