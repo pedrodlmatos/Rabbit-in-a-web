@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Grid, CircularProgress } from '@material-ui/core';
 import Controls from '../../controls/controls';
 import { useForm, Form } from '../../forms/use-form';
-import { CDMVersions } from '../../session/CDMVersions';
+import { CDMVersions } from '../../../services/CDMVersions';
 
 
 /**

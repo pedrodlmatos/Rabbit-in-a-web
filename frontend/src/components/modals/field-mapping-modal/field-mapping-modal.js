@@ -4,8 +4,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import TableMappingService from '../../../services/table-mapping-service';
 import FieldMappingService from '../../../services/field-mapping-service';
 import FieldService from '../../../services/field-service';
-import EHRTable from '../../session/ehr-table';
-import OMOPTable from '../../session/omop-table';
+import ElementBox from '../../controls/box';
 import Controls from '../../controls/controls';
 import Xarrow from 'react-xarrows/lib';
 import InfoTable from '../../info-table/info-table';
@@ -468,7 +467,7 @@ export default function FieldMappingModal(props) {
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                                 { sourceTable.fields.map(item => {
                                     return(
-                                        <EHRTable 
+                                        <ElementBox
                                             key={item.id} 
                                             id={item.name} 
                                             table={item} 
@@ -482,7 +481,7 @@ export default function FieldMappingModal(props) {
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                             { targetTable.fields.map(item => {
                                     return(
-                                        <OMOPTable 
+                                        <ElementBox
                                             key={item.id} 
                                             id={item.name} 
                                             table={item} 

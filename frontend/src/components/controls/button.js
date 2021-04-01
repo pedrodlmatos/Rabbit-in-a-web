@@ -2,9 +2,6 @@ import React from 'react'
 import { Button as MButton, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
-    root: {
-        margin: theme.spacing(0.5)
-    },
     label: {
         textTransform: 'none'
     }
@@ -22,6 +19,6 @@ export default function Button(props) {
             disabled={disabled || false}
             onClick={ onClick }
             { ...other }
-            classes={{ root: classes.root, label: classes.label }}>{ text } { children }</MButton>
+            classes={{ label: classes.label }}>{ text } { children }</MButton>
     )
 }

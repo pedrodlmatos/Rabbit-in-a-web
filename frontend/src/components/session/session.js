@@ -7,9 +7,8 @@ import TableMappingService from '../../services/table-mapping-service';
 import Controls from '../controls/controls';
 import HelpModal from '../modals/help-modal/help-modal';
 import FieldMappingModal from '../modals/field-mapping-modal/field-mapping-modal';
-import { CDMVersions } from './CDMVersions';
-import EHRTable from './ehr-table';
-import OMOPTable from './omop-table';
+import { CDMVersions } from '../../services/CDMVersions';
+import ElementBox from '../controls/box';
 import InfoTable from '../info-table/info-table';
 
 const useStyles = makeStyles(theme => ({
@@ -23,7 +22,6 @@ const useStyles = makeStyles(theme => ({
         height: 100,
         justifyContent: 'center', 
         alignItems: 'center', 
-        position: 'absolute'
     },
     showFieldsInfo: {
         visibility: 'hidden'
@@ -51,18 +49,9 @@ export default function Session() {
     }
 
     const columns = React.useMemo(() => [
-        {
-            Header: 'Field',
-            accessor: 'field'
-        },
-        {
-            Header: 'Type',
-            accessor: 'type'
-        },
-        {
-            Header: 'Description',
-            accessor: 'description'
-        }
+        { Header: 'Field', accessor: 'field' },
+        { Header: 'Type', accessor: 'type' },
+        { Header: 'Description', accessor: 'description' }
     ], [])
 
     const classes = useStyles();
@@ -103,14 +92,13 @@ export default function Session() {
                     complete: item.complete,
                     color: item.complete ? 'black' : 'grey'
                 }
-                maps = maps.concat(arrow);
+                maps.push(arrow);
             });
             setMappings(maps);    
+            setLoading(false);
         }).catch(res => {
             console.log(res);
         })
-
-        setLoading(false);
     }, []);
 
 
@@ -137,7 +125,6 @@ export default function Session() {
             setMappings([]);
             setSelectedMapping({});
             setLoading(false);
-            //window.location.href = '/session/' + response.data.id
         });
     }
 
@@ -218,10 +205,7 @@ export default function Session() {
 
     const selectArrowsFromTarget = (table) => {
         mappings.forEach(element => {
-            if (element.end.name === table.name)
-                element.color = 'blue';
-            else
-                element.color = 'lightgrey'
+            if (element.end.name === table.name ? element.color = 'blue' : element.color = 'lightgrey');
         })
     }
 
@@ -483,81 +467,9 @@ export default function Session() {
                                 <i className="fa fa-info"/>
                             </Controls.Button>
                         </Grid>
-
                         <HelpModal modalIsOpen={showHelpModal} closeModal={() => setShowHelpModal(false)}/>
-                    </Grid>
 
-                    <Grid className={classes.databaseName} container>
-                    
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <h4>{ etl.sourceDatabase.databaseName }</h4>
-                        </Grid>
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <Controls.Select 
-                                name={omopName} 
-                                label="OMOP CDM" 
-                                value={etl.targetDatabase.databaseName}
-                                onChange={handleCDMChange}
-                                options={CDMVersions} 
-                            />
-                        </Grid>
-                        <Grid item xs={6} sm={6} md={6} lg={6}></Grid>
-                    </Grid>
-
-                    <Grid container>
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <div>
-                                { etl.sourceDatabase.tables.map(item => {
-                                    return(
-                                        <EHRTable 
-                                            key={item.id} 
-                                            id={item.name} 
-                                            table={item} 
-                                            clicked={selectedTable.id === item.id}
-                                            handleSourceTableSelection={selectSourceTable} 
-                                        />
-                                    )
-                                })}
-                            </div>
-                        </Grid>
-                            
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <div>
-                                { etl.targetDatabase.tables.map(item => {
-                                    return(
-                                        <OMOPTable 
-                                            key={item.id} 
-                                            id={item.name} 
-                                            table={item} 
-                                            clicked={item.id === selectedTable.id}
-                                            handleTargetTableSelection={selectTargetTable} />
-                                    )
-                                })}
-                            </div>
-                        </Grid>
-                        { mappings.map((ar, i) => (
-                            <Xarrow key={i}
-                                start={ar.start.name}
-                                end={ar.end.name}
-                                startAnchor="right"
-                                endAnchor="left"
-                                color={ar.color}
-                                strokeWidth={7.5}
-                                curveness={0.5}
-                                passProps={{
-                                    onClick: () => selectArrow(ar),
-                                    onDoubleClick: () => openFieldMappingModal(ar)
-                                }}
-                            />
-                        ))}
-                        <FieldMappingModal 
-                            openModal={showFieldMappingModal}
-                            closeModal={() => setShowFieldMappingModal(false)}
-                            mappingId={selectedMapping.id}
-                            removeTableMapping={removeTableMapping}
-                            changeMappingCompletion={changeCompleteStatus}/>
-                        
-                        <Grid item xs={6} sm={6} md={6} lg={6} className={classes.fieldInfo}>
+                        <Grid item xs={6} sm={6} md={6} lg={6}>
                             { showFieldsInfo && fieldsInfo !== [] ? (
                                 <div>
                                     <h6><strong>Table: </strong>{selectedTable.name}</h6>
@@ -600,6 +512,87 @@ export default function Session() {
                                 <></>
                             )}
                         </Grid>
+                    </Grid>
+
+                    <Grid className={classes.databaseNames} container>
+                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                            <h4>{ etl.sourceDatabase.databaseName }</h4>
+                        </Grid>
+                        
+                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                            <Controls.Select 
+                                name={omopName} 
+                                label="OMOP CDM" 
+                                value={etl.targetDatabase.databaseName}
+                                onChange={handleCDMChange}
+                                options={CDMVersions} 
+                            />
+                        </Grid>
+
+                        <Grid item xs={6} sm={6} md={6} lg={6}></Grid>
+                    </Grid>
+
+                    <Grid container>
+                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                            <div>
+                                { etl.sourceDatabase.tables.map(item => {
+                                    return(
+                                        <ElementBox
+                                            key={item.id} 
+                                            id={item.name} 
+                                            table={item} 
+                                            clicked={selectedTable.id === item.id}
+                                            color={(Object.keys(selectedTable).length === 0 || selectedTable.id === item.id) ? '#FF9224' : '#FFD3A6'}
+                                            border="#A10000"
+                                            handleSelection={selectSourceTable} 
+                                        />
+                                    )
+                                })}
+                            </div>
+                        </Grid>
+                            
+                        <Grid item xs={3} sm={3} md={3} lg={3}>
+                            <div>
+                                { etl.targetDatabase.tables.map(item => {
+                                    return(
+                                        <ElementBox
+                                            key={item.id} 
+                                            id={item.name} 
+                                            table={item} 
+                                            clicked={item.id === selectedTable.id}
+                                            color="#53ECEC"
+                                            border="#000F73"
+                                            handleSelection={selectTargetTable} 
+                                        />
+                                    )
+                                })}
+                            </div>
+                        </Grid>
+                        { mappings.map((ar, i) => (
+                            <Xarrow key={i}
+                                start={ar.start.name}
+                                end={ar.end.name}
+                                startAnchor="right"
+                                endAnchor="left"
+                                color={ar.color}
+                                strokeWidth={7.5}
+                                curveness={0.5}
+                                passProps={{
+                                    onClick: () => selectArrow(ar),
+                                    onDoubleClick: () => openFieldMappingModal(ar)
+                                }}
+                            />
+                        ))}
+                        <FieldMappingModal 
+                            openModal={showFieldMappingModal}
+                            closeModal={() => setShowFieldMappingModal(false)}
+                            mappingId={selectedMapping.id}
+                            removeTableMapping={removeTableMapping}
+                            changeMappingCompletion={changeCompleteStatus}/>
+                        
+                        <Grid item xs={6} sm={6} md={6} lg={6}></Grid>
+                        
+                        
                     </Grid>
                 </div>
             )}
