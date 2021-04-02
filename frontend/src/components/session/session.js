@@ -23,19 +23,14 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'center', 
         alignItems: 'center', 
     },
-    showFieldsInfo: {
-        visibility: 'hidden'
-    },
-    hideFieldsInfo: {
-        visibility: 'false'
-    },
-    fieldInfo: {
+    tableDetails: {
         marginLeft: theme.spacing(-20)
     },
     hiddenButton: {
         visibility: 'hidden'
     },
     showButton: {
+        marginTop: theme.spacing(1),
         visibility: 'false'
     }
 }))
@@ -57,14 +52,17 @@ export default function Session() {
     const classes = useStyles();
     const [loading, setLoading] = useState(true);
     const [etl, setEtl] = useState(initialETLValues);
+    const [omopName, setOmopName] = useState('');
     const [mappings, setMappings] = useState([]);
     const [selectedMapping, setSelectedMapping] = useState({});
-    const [omopName, setOmopName] = useState('');
     const [showHelpModal, setShowHelpModal] = useState(false); 
-    const [showFieldsInfo, setShowFieldsInfo] = useState(false);
-    const [fieldsInfo, setFieldsInfo] = useState([]);
+    
     const [selectedTable, setSelectedTable] = useState({})
     const [sourceSelected, setSourceSelected] = useState(false);
+    const [showTableDetails, setShowTableDetails] = useState(false);
+    const [tableDetails, setTableDetails] = useState([]);
+    
+    
     const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
     const [enableEditCommentButton, setEnableEditCommentButton] = useState(true);    
 
@@ -114,8 +112,8 @@ export default function Session() {
         if (selectedTable !== {}) {
             setSelectedTable({});
             setSourceSelected(false);
-            setShowFieldsInfo(false);
-            setFieldsInfo([]);
+            setShowTableDetails(false);
+            setTableDetails([]);
         }
 
         const cdm = e.target.value;
@@ -188,10 +186,7 @@ export default function Session() {
 
     const selectArrowsFromSource = (table) => {
         mappings.forEach(element => {
-            if (element.start.name === table.name)
-                element.color = 'orange';
-            else
-                element.color = 'lightgrey'
+            if (element.start.name === table.name ? element.color = 'orange' : element.color = 'lightgrey');
         })
     }
 
@@ -285,8 +280,8 @@ export default function Session() {
                 description: element.description
             })
         })
-        setFieldsInfo(data);
-        setShowFieldsInfo(true);
+        setTableDetails(data);
+        setShowTableDetails(true);
     }
 
 
@@ -302,7 +297,7 @@ export default function Session() {
 
     const selectSourceTable = (table) => {
         setEnableEditCommentButton(true);        
-        if (selectedTable === {}) {
+        if (Object.keys(selectedTable).length === 0) {
             // all tables are unselected
             setSelectedTable(table);
             setSourceSelected(true);
@@ -317,8 +312,8 @@ export default function Session() {
             // unselect
             setSelectedTable({});
             setSourceSelected(false);
-            setShowFieldsInfo(false);
-            setFieldsInfo(null);
+            setShowTableDetails(false);
+            setTableDetails(null);
         } else {
             // select any other source table
             // change color of arrows to grey
@@ -347,7 +342,7 @@ export default function Session() {
 
     const selectTargetTable = (table) => {
         setEnableEditCommentButton(true);
-        if (selectedTable === {}) {
+        if (Object.keys(selectedTable).length === 0) {
             // no table is selected
             // change color of mappings that goes to the selected table
             selectArrowsFromTarget(table);
@@ -363,8 +358,8 @@ export default function Session() {
             // unselect
             setSelectedTable({});
             setSourceSelected(false);
-            setShowFieldsInfo(false);
-            setFieldsInfo(null);
+            setShowTableDetails(false);
+            setTableDetails(null);
         } else if (sourceSelected) {
             // source table is selected -> create arrow
             // change arrows color to grey
@@ -375,8 +370,8 @@ export default function Session() {
             setSelectedTable({});
             // clean state
             setSourceSelected(false);
-            setShowFieldsInfo(false);
-            setFieldsInfo(null);
+            setShowTableDetails(false);
+            setTableDetails(null);
         } else {
             // other target table is selected
             // change color of arrows to grey
@@ -452,89 +447,57 @@ export default function Session() {
 
 
     return(
-        <div>
+        <div className={classes.tablesArea}>
             { loading ? (
                 <CircularProgress color="primary" variant="indeterminate" size={40} />
             ) : (
-                <div className={classes.tablesArea}>
-                    <Grid container>
-                        <Grid item xs={4} sm={4} md={4} lg={4}>
-                            <h1>{ etl.name }</h1>
-                        </Grid>
+                <Grid container>
+                    <Grid item xs={6} sm={6} md={6} lg={6}>
+                        <Grid container>
+                            <Grid item xs={6} sm={6} md={6} lg={6}>
+                                <h1>{ etl.name }</h1>
+                            </Grid>
 
-                        <Grid item xs={1} sm={1} md={1} lg={1}>
-                            <Controls.Button variant="contained" size="medium" color="primary" text="Help " onClick={() => setShowHelpModal(true)}>
-                                <i className="fa fa-info"/>
-                            </Controls.Button>
-                        </Grid>
-                        <HelpModal modalIsOpen={showHelpModal} closeModal={() => setShowHelpModal(false)}/>
+                            <Grid item xs={1} sm={1} md={1} lg={1}>
+                                <Controls.Button variant="contained" size="medium" color="primary" text="Help " onClick={() => setShowHelpModal(true)}>
+                                    <i className="fa fa-info"/>
+                                </Controls.Button>
+                                <HelpModal modalIsOpen={showHelpModal} closeModal={() => setShowHelpModal(false)}/>
+                            </Grid>
 
-                        <Grid item xs={6} sm={6} md={6} lg={6}>
-                            { showFieldsInfo && fieldsInfo !== [] ? (
-                                <div>
-                                    <h6><strong>Table: </strong>{selectedTable.name}</h6>
-
-                                    <InfoTable columns={columns} data={fieldsInfo}/>
-                                    <br />
-
-                                    <Controls.Input 
-                                        variant="outlined" 
-                                        value={selectedTable.comment === null ? "" : selectedTable.comment}
-                                        name="comment"
-                                        disabled={enableEditCommentButton}
-                                        fullWidth={true}
-                                        label="Comment"
-                                        placeholder="Edit table comment"
-                                        rows={3}
-                                        size="medium"
-                                        type="string" 
-                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
+                            { Object.keys(selectedMapping).length !== 0 ? (
+                                <Grid item xs={3} sm={3} md={3} lg={3}>
+                                    <Controls.Button 
+                                        variant="contained" 
+                                        size="medium" 
+                                        color="secondary" 
+                                        text="Remove table mapping" 
+                                        onClick={removeTableMapping} 
                                     />
-                                    <Controls.Button
-                                        className={enableEditCommentButton ? classes.showButton : classes.hiddenButton}
-                                        text="Edit comment"
-                                        size="medium"
-                                        color="primary"
-                                        variant="contained"
-                                        onClick={() => setEnableEditCommentButton(false)}
-                                    />
-
-                                    <Controls.Button
-                                        className={enableEditCommentButton ? classes.hiddenButton : classes.showButton}
-                                        text="Save"
-                                        size="medium"
-                                        color="primary"
-                                        variant="contained"
-                                        onClick={saveComment}
-                                    />
-                                </div>
+                                </Grid>
                             ) : (
                                 <></>
-                            )}
+                            ) }
                         </Grid>
-                    </Grid>
-
-                    <Grid className={classes.databaseNames} container>
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <h4>{ etl.sourceDatabase.databaseName }</h4>
+                            
+                        <Grid className={classes.databaseNames} container>
+                            <Grid item xs={6} sm={6} md={6} lg={6}>
+                                <h4>{ etl.sourceDatabase.databaseName }</h4>
+                            </Grid>
+                            
+                            <Grid item xs={6} sm={6} md={6} lg={6}>
+                                <Controls.Select 
+                                    name={omopName} 
+                                    label="OMOP CDM" 
+                                    value={etl.targetDatabase.databaseName}
+                                    onChange={handleCDMChange}
+                                    options={CDMVersions} 
+                                />
+                            </Grid>
                         </Grid>
-                        
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <Controls.Select 
-                                name={omopName} 
-                                label="OMOP CDM" 
-                                value={etl.targetDatabase.databaseName}
-                                onChange={handleCDMChange}
-                                options={CDMVersions} 
-                            />
-                        </Grid>
 
-                        <Grid item xs={6} sm={6} md={6} lg={6}></Grid>
-                    </Grid>
-
-                    <Grid container>
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <div>
+                        <Grid container>
+                            <Grid item xs={6} sm={6} md={6} lg={6}>                                
                                 { etl.sourceDatabase.tables.map(item => {
                                     return(
                                         <ElementBox
@@ -548,11 +511,9 @@ export default function Session() {
                                         />
                                     )
                                 })}
-                            </div>
-                        </Grid>
+                            </Grid>
                             
-                        <Grid item xs={3} sm={3} md={3} lg={3}>
-                            <div>
+                            <Grid item xs={6} sm={6} md={6} lg={6}>                               
                                 { etl.targetDatabase.tables.map(item => {
                                     return(
                                         <ElementBox
@@ -566,35 +527,85 @@ export default function Session() {
                                         />
                                     )
                                 })}
-                            </div>
-                        </Grid>
-                        { mappings.map((ar, i) => (
-                            <Xarrow key={i}
-                                start={ar.start.name}
-                                end={ar.end.name}
-                                startAnchor="right"
-                                endAnchor="left"
-                                color={ar.color}
-                                strokeWidth={7.5}
-                                curveness={0.5}
-                                passProps={{
-                                    onClick: () => selectArrow(ar),
-                                    onDoubleClick: () => openFieldMappingModal(ar)
-                                }}
+                            </Grid>
+                            { mappings.map((ar, i) => (
+                                <Xarrow key={i}
+                                    start={ar.start.name}
+                                    end={ar.end.name}
+                                    startAnchor="right"
+                                    endAnchor="left"
+                                    color={ar.color}
+                                    strokeWidth={7.5}
+                                    curveness={0.5}
+                                    passProps={{
+                                        onClick: () => selectArrow(ar),
+                                        onDoubleClick: () => openFieldMappingModal(ar)
+                                    }}
+                                />
+                            ))}
+                            <FieldMappingModal 
+                                openModal={showFieldMappingModal}
+                                closeModal={() => setShowFieldMappingModal(false)}
+                                mappingId={selectedMapping.id}
+                                removeTableMapping={removeTableMapping}
+                                changeMappingCompletion={changeCompleteStatus}
                             />
-                        ))}
-                        <FieldMappingModal 
-                            openModal={showFieldMappingModal}
-                            closeModal={() => setShowFieldMappingModal(false)}
-                            mappingId={selectedMapping.id}
-                            removeTableMapping={removeTableMapping}
-                            changeMappingCompletion={changeCompleteStatus}/>
-                        
-                        <Grid item xs={6} sm={6} md={6} lg={6}></Grid>
-                        
-                        
+                        </Grid>
                     </Grid>
-                </div>
+
+                    <Grid className={classes.tableDetails} item xs={6} sm={6} md={6} lg={6}>
+                        { showTableDetails ? (
+                            <div>
+                                <h6><strong>Table: </strong>{selectedTable.name}</h6>
+
+                                { sourceSelected ? (
+                                    <h6><strong>Number of rows &gt;= </strong>{selectedTable.rowCount === null ? 0 : selectedTable.rowCount}</h6>
+                                ) : (
+                                    <>
+                                    </>
+                                ) }
+
+                                <InfoTable columns={columns} data={tableDetails}/>
+                                
+                                <Controls.Input
+                                    value={selectedTable.comment === null ? "" : selectedTable.comment}
+                                    name="comment"
+                                    disabled={enableEditCommentButton}
+                                    fullWidth={true}
+                                    label="Comment"
+                                    placeholder="Edit table comment"
+                                    rows={5}
+                                    onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
+                                />
+                                <Controls.Button
+                                    className={enableEditCommentButton ? classes.showButton : classes.hiddenButton}
+                                    text="Edit comment"
+                                    size="medium"
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={() => setEnableEditCommentButton(false)}
+                                />
+                                <Controls.Button
+                                    className={enableEditCommentButton ? classes.hiddenButton : classes.showButton}
+                                    text="Save"
+                                    size="medium"
+                                    color="primary"
+                                    variant="contained"
+                                    onClick={saveComment}
+                                />
+
+                                <Controls.RadioGroup  
+                                    name="test" 
+                                    label="Link to"
+                                    items={etl.targetDatabase.tables}>
+
+                                </Controls.RadioGroup>
+                            </div>
+                        ) : (
+                            <></>
+                        )}
+                    </Grid>
+                </Grid>
             )}
         </div>
     )

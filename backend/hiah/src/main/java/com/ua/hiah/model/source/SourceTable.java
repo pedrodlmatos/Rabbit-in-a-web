@@ -32,6 +32,7 @@ public class SourceTable {
     private String comment;
 
     @Column(name = "rowCount", nullable = true)
+    @JsonView(Views.ETLSession.class)
     private int rowCount;
 
     @Column(name = "rowsCheckedCount", nullable = true)

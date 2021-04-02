@@ -6,7 +6,8 @@ export default function Input(props) {
     const { variant, value, name, disabled, fullWidth, label, placeholder, rows, size, type, error=null, onChange, ...other } = props;
 
     return (
-        <TextField 
+        <TextField
+            multiline
             variant={ variant || "outlined" }
             label={ label }
             placeholder={ placeholder }

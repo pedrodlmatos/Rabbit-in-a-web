@@ -5,9 +5,6 @@ import { useForm, Form } from '../../forms/use-form';
 import { CDMVersions } from '../../../services/CDMVersions';
 
 
-const useStyles = makeStyles()
-
-
 /**
  * Initial values of the form
  */
