@@ -4,6 +4,7 @@ import Button from './button';
 import Input from './input';
 import RadioGroup from './radio-group';
 import Select from './select';
+import DropdownCheckbox from './dropdown-checkbox';
 
 const Controls = {
     FileInput,
@@ -11,7 +12,8 @@ const Controls = {
     Button,
     Input,
     RadioGroup,
-    Select
+    Select,
+    DropdownCheckbox
 }
 
 export default Controls;

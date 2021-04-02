@@ -1,18 +1,31 @@
 import React from 'react'
-import { FormControl, FormLabel, RadioGroup as MRadioGroup, FormControlLabel, Radio } from '@material-ui/core';
+import { FormControl, InputLabel, Select as MSelect, MenuItem, Checkbox, ListItemText, makeStyles } from '@material-ui/core';
 
-export default function DropdownCheckbox(props) {
+const useStyles = makeStyles(theme => ({
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 200,
+        maxWidth: 400,
+    }
+}))
 
-    const { name, label, value, onChange, items } = props;
+
+export default function DropdownCheckBox(props) {
+
+    const { value, label, error=null, onChange, options, verifyMapping } = props;
+    const classes = useStyles();
 
     return (
-        <FormControl>
-            <FormLabel>{ label }</FormLabel>
-            <MRadioGroup row name={name} value={value} onChange={onChange}>
-                { items.map(item => (
-                    <FormControlLabel key={item.id} value={item.id} control={ <Radio /> } label={item.title} />
+        <FormControl className={classes.formControl} variant="filled" {...(error && {error:true})}>
+            <InputLabel>{ label }</InputLabel>
+            <MSelect multiple value={value} label={label} onChange={onChange}>
+                { options.map(item => (
+                    <MenuItem key={item.id} value={item.id}>
+                        <ListItemText primary={item.name} />
+                        <Checkbox checked={verifyMapping(item)} />
+                    </MenuItem>
                 ))}
-            </MRadioGroup>
+            </MSelect>
         </FormControl>
     )
 }

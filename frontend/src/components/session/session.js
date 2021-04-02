@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center', 
     },
     tableDetails: {
-        marginLeft: theme.spacing(-20)
+        //marginLeft: theme.spacing(-20)
     },
     hiddenButton: {
         visibility: 'hidden'
@@ -37,6 +37,8 @@ const useStyles = makeStyles(theme => ({
 
 
 export default function Session() {
+    const classes = useStyles();
+
     const initialETLValues = {
         id: null, name: null,
         targetDatabase: { id: null, tables: [], databaseName: '' },
@@ -49,7 +51,6 @@ export default function Session() {
         { Header: 'Description', accessor: 'description' }
     ], [])
 
-    const classes = useStyles();
     const [loading, setLoading] = useState(true);
     const [etl, setEtl] = useState(initialETLValues);
     const [omopName, setOmopName] = useState('');
@@ -83,12 +84,20 @@ export default function Session() {
             // table mappings
             let maps = [];
             res.data.tableMappings.forEach(function(item) {
+                let color = 'grey';
+                if (Object.keys(selectedTable).length === 0)
+                    color = item.complete ? 'black' : 'grey'
+                else if (selectedTable.id === item.source.id)
+                    color = 'orange';
+                else if (selectedTable.id === item.target.id)
+                    color = 'blue';
+
                 const arrow = {
                     id: item.id,
                     start: item.source,
                     end: item.target,
                     complete: item.complete,
-                    color: item.complete ? 'black' : 'grey'
+                    color: color
                 }
                 maps.push(arrow);
             });
@@ -134,14 +143,22 @@ export default function Session() {
      * @param targetTable table from OMOP CDM database
      */
 
-    const createArrow = (sourceTable, targetTable) => {
-        TableMappingService.addTableMapping(etl.id, sourceTable.id, targetTable.id).then(res => {
+    const createArrow = (sourceTable_id, targetTable_id) => {
+        TableMappingService.addTableMapping(etl.id, sourceTable_id, targetTable_id).then(res => {
+            let color = 'grey';
+            if (Object.keys(selectedTable).length === 0)
+                color = res.data.complete ? 'black' : 'grey'
+            else if (selectedTable.id === res.data.source.id)
+                color = 'orange';
+            else if (selectedTable.id === res.data.target.id)
+                color = 'blue';
+
             const arrow = {
                 id: res.data.id,
-                start: sourceTable,
-                end: targetTable,
+                start: res.data.source,
+                end: res.data.target,
                 complete: res.data.complete,
-                color: res.data.complete ? 'black' : 'grey'
+                color: color
             }
             setMappings(mappings.concat(arrow));
         }).catch(err => {
@@ -365,7 +382,7 @@ export default function Session() {
             // change arrows color to grey
             resetArrowsColor();
             // create arrow
-            createArrow(selectedTable, table)
+            createArrow(selectedTable.id, table.id)
             // unselects tables
             setSelectedTable({});
             // clean state
@@ -443,6 +460,32 @@ export default function Session() {
                 console.log(error);
             });
         }
+    }
+
+
+    /**
+     * 
+     * @param {*} targetTable 
+     * @returns 
+     */
+    const tablesConnected = (targetTable) => {
+        let result = false;
+        mappings.forEach(item => {
+            if (item.end.id === targetTable.id && item.start.id === selectedTable.id) {
+                result = true;
+            }
+        })
+        return result;
+    }
+
+
+    /**
+     * 
+     * @param {*} e 
+     */
+    const checkTable = e => {
+        const targetTable_id = e.target.value[0];
+        createArrow(selectedTable.id, targetTable_id);
     }
 
 
@@ -594,12 +637,13 @@ export default function Session() {
                                     onClick={saveComment}
                                 />
 
-                                <Controls.RadioGroup  
-                                    name="test" 
-                                    label="Link to"
-                                    items={etl.targetDatabase.tables}>
-
-                                </Controls.RadioGroup>
+                                <Controls.DropdownCheckbox
+                                    value={[]}
+                                    label="Connect to"
+                                    options={etl.targetDatabase.tables}
+                                    verifyMapping={tablesConnected}
+                                    onChange={checkTable}
+                                />                                
                             </div>
                         ) : (
                             <></>
