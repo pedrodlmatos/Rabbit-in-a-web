@@ -5,6 +5,8 @@ import Input from './input';
 import RadioGroup from './radio-group';
 import Select from './select';
 import DropdownCheckbox from './dropdown-checkbox';
+import TooltipBox from './box';
+import ElementBox from './elementBox';
 
 const Controls = {
     FileInput,
@@ -13,7 +15,9 @@ const Controls = {
     Input,
     RadioGroup,
     Select,
-    DropdownCheckbox
+    DropdownCheckbox,
+    TooltipBox,
+    ElementBox
 }
 
 export default Controls;

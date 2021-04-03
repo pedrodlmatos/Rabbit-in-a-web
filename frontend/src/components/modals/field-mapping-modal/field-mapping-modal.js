@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, DialogActions, Typography, CircularProgress, Grid, FormGroup, FormControlLabel, Switch } from '@material-ui/core';
+import { makeStyles, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Grid, FormGroup, FormControlLabel, Switch } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import TableMappingService from '../../../services/table-mapping-service';
 import FieldMappingService from '../../../services/field-mapping-service';
 import FieldService from '../../../services/field-service';
-import ElementBox from '../../controls/box';
 import Controls from '../../controls/controls';
 import Xarrow from 'react-xarrows/lib';
 import InfoTable from '../../info-table/info-table';
@@ -25,8 +24,8 @@ export default function FieldMappingModal(props) {
     const { openModal, closeModal, mappingId, removeTableMapping, changeMappingCompletion } = props;
     const classes = useStyles();
     const [loading, setLoading] = useState(true);
-    const [sourceTable, setSourceTable] = useState(null);
-    const [targetTable, setTargetTable] = useState(null);
+    const [sourceTable, setSourceTable] = useState({});
+    const [targetTable, setTargetTable] = useState({});
     const [fieldMappings, setFieldMappings] = useState([]);
     const [complete, setComplete] = useState(false);
     const [logic, setLogic] = useState('');
@@ -42,22 +41,10 @@ export default function FieldMappingModal(props) {
 
 
     const targetColumns = React.useMemo(() => [
-        {
-            Header: 'Concept ID',
-            accessor: 'conceptId'
-        },
-        {
-            Header: 'Concept Name',
-            accessor: 'conceptName'
-        },
-        {
-            Header: 'Class',
-            accessor: 'conceptClassId'
-        },
-        {
-            Header: 'Standard ?',
-            accessor: 'standardConcept'
-        }
+        { Header: 'Concept ID', accessor: 'conceptId' },
+        { Header: 'Concept Name', accessor: 'conceptName' },
+        { Header: 'Class', accessor: 'conceptClassId' },
+        { Header: 'Standard ?', accessor: 'standardConcept' }
     ], [])
     
 
@@ -83,7 +70,7 @@ export default function FieldMappingModal(props) {
             setComplete(res.data.complete);
             setLogic(res.data.logic);
             setLoading(false);
-        })
+        });
     }
 
 
@@ -211,7 +198,6 @@ export default function FieldMappingModal(props) {
     }
 
     const selectTargetField = (field) => {
-        console.log(field);
         if (selectedField === {}) {
             // no field is selected
             // change color of mappings that goes to the selected field
@@ -443,10 +429,37 @@ export default function FieldMappingModal(props) {
             ) : (
                 <div>
                     <DialogTitle>
-                        <div style={{ display: 'flex' }}>
-                            <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
-                                { sourceTable.name } <i className="fa fa-long-arrow-alt-right" /> { targetTable.name }
-                            </Typography>
+                        <div>
+                            <Grid container>
+                                <Grid item xs={3} sm={3} md={3} lg={3}>
+                                    <Controls.ElementBox
+                                        id={sourceTable.name + 't'}
+                                        element={sourceTable}
+                                        color='#FF9224'
+                                        border="#A10000"
+                                    />
+                                </Grid>
+
+                                <Grid item xs={3} sm={3} md={3} lg={3}>
+                                    <Controls.ElementBox
+                                        id={targetTable.name + 't'}
+                                        element={targetTable}
+                                        color="#53ECEC"
+                                        border="#000F73"
+                                    />
+                                </Grid>
+
+                                <Xarrow
+                                    start={sourceTable.name + 't'}
+                                    end={targetTable.name + 't'}
+                                    startAnchor="right"
+                                    endAnchor="left"
+                                    color={complete ? 'black' : 'grey'}
+                                    strokeWidth={7.5}
+                                    curveness={0.5}
+                                />
+                            </Grid>
+                            
 
                             <Controls.ActionButton color="secondary" onClick={closeModal}>
                                 <CloseIcon />
@@ -461,18 +474,20 @@ export default function FieldMappingModal(props) {
                             </FormGroup>
                         </div>
                     </DialogTitle>
-
+                    
                     <DialogContent>
                         <Grid container>
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                                 { sourceTable.fields.map(item => {
                                     return(
-                                        <ElementBox
+                                        <Controls.TooltipBox
                                             key={item.id} 
                                             id={item.name} 
                                             table={item} 
                                             clicked={selectedField.id === item.id}
-                                            handleSourceTableSelection={selectSourceField} 
+                                            color='#FFE3C6'
+                                            border="#A10000"
+                                            handleSelection={selectSourceField} 
                                         />
                                     )
                                 })}
@@ -481,12 +496,14 @@ export default function FieldMappingModal(props) {
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                             { targetTable.fields.map(item => {
                                     return(
-                                        <ElementBox
+                                        <Controls.TooltipBox
                                             key={item.id} 
                                             id={item.name} 
                                             table={item} 
                                             clicked={selectedField.id === item.id}
-                                            handleTargetTableSelection={selectTargetField} 
+                                            color="#D5FFFF"
+                                            border="#000F73"
+                                            handleSelection={selectTargetField} 
                                         />
                                     )
                                 })}
@@ -531,6 +548,7 @@ export default function FieldMappingModal(props) {
                                         <h6><strong>Field type: </strong>{selectedField.type}</h6>
 
                                         { sourceSelected ? (
+                                            // TODO
                                             console.log(selectedField)
                                         ) : (
                                             
@@ -581,7 +599,7 @@ export default function FieldMappingModal(props) {
                             </Grid>
                         </Grid>
                     </DialogContent>
-
+                                  
                     <DialogActions>
                         <Controls.Button 
                             text="Close"

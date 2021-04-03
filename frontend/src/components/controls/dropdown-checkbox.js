@@ -22,7 +22,7 @@ export default function DropdownCheckBox(props) {
                 { options.map(item => (
                     <MenuItem key={item.id} value={item.id}>
                         <ListItemText primary={item.name} />
-                        <Checkbox checked={verifyMapping(item)} />
+                        <Checkbox checked={verifyMapping(item.id)} />
                     </MenuItem>
                 ))}
             </MSelect>

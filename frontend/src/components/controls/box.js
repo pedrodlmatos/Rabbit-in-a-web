@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-export default function ElementBox(props) {
+export default function TooltipBox(props) {
     const { id, table, clicked, handleSelection } = props;
     const classes = useStyles(props);
 
