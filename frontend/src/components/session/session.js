@@ -8,7 +8,6 @@ import Controls from '../controls/controls';
 import HelpModal from '../modals/help-modal/help-modal';
 import FieldMappingModal from '../modals/field-mapping-modal/field-mapping-modal';
 import { CDMVersions } from '../../services/CDMVersions';
-import ElementBox from '../controls/box';
 import InfoTable from '../info-table/info-table';
 
 const useStyles = makeStyles(theme => ({
@@ -62,10 +61,8 @@ export default function Session() {
     const [sourceSelected, setSourceSelected] = useState(false);
     const [showTableDetails, setShowTableDetails] = useState(false);
     const [tableDetails, setTableDetails] = useState([]);
-    
-    
-    const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
-    const [enableEditCommentButton, setEnableEditCommentButton] = useState(true);    
+      
+    const [showFieldMappingModal, setShowFieldMappingModal] = useState(false); 
 
     
     useEffect(() => {
@@ -109,9 +106,8 @@ export default function Session() {
      * @param table selected source table
      */
 
-    const selectSourceTable = (table) => {
-        setEnableEditCommentButton(true);                                           // clean state
-        setSelectedMapping({});
+    const selectSourceTable = (table) => {                       
+        setSelectedMapping({});                                                     // clean state
         if (Object.keys(selectedTable).length === 0) {                              // all tables are unselected
             setSelectedTable(table);
             setSourceSelected(true);
@@ -145,7 +141,6 @@ export default function Session() {
      */
 
     const selectTargetTable = (table) => {
-        setEnableEditCommentButton(true);
         setSelectedMapping({});
         if (Object.keys(selectedTable).length === 0) {                              // no table is selected
             selectArrowsFromTarget(table);                                          // change color of mappings that goes to the selected table
@@ -404,7 +399,6 @@ export default function Session() {
      */
 
     const saveComment = () => {
-        setEnableEditCommentButton(true);
         let tables = []
         if (sourceSelected) {
             TableService.changeSourceTableComment(selectedTable.id, selectedTable.comment).then(response => {
@@ -504,9 +498,7 @@ export default function Session() {
 
                             { Object.keys(selectedMapping).length !== 0 ? (
                                 <Grid item xs={3} sm={3} md={3} lg={3}>
-                                    <Controls.Button 
-                                        variant="contained" 
-                                        size="medium" 
+                                    <Controls.Button  
                                         color="secondary" 
                                         text="Remove" 
                                         onClick={removeTableMapping} 
@@ -607,7 +599,6 @@ export default function Session() {
                                 <Controls.Input
                                     value={selectedTable.comment === null ? "" : selectedTable.comment}
                                     name="comment"
-                                    disabled={enableEditCommentButton}
                                     fullWidth={true}
                                     label="Comment"
                                     placeholder="Edit table comment"
@@ -615,19 +606,8 @@ export default function Session() {
                                     onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
                                 />
                                 <Controls.Button
-                                    className={enableEditCommentButton ? classes.showButton : classes.hiddenButton}
-                                    text="Edit comment"
-                                    size="medium"
-                                    color="primary"
-                                    variant="contained"
-                                    onClick={() => setEnableEditCommentButton(false)}
-                                />
-                                <Controls.Button
-                                    className={enableEditCommentButton ? classes.hiddenButton : classes.showButton}
+                                    className={classes.showButton}
                                     text="Save"
-                                    size="medium"
-                                    color="primary"
-                                    variant="contained"
                                     onClick={saveComment}
                                 />
 

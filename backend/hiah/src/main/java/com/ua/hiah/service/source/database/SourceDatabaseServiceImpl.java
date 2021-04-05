@@ -92,10 +92,9 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                     field.setTable(table);
                     field.setType(row.getByHeaderName(ScanFieldName.TYPE));
                     field.setMaxLength(row.getIntByHeaderName(ScanFieldName.MAX_LENGTH));
-                    //field.setDescription(row.getStringByHeaderName(ScanFieldName.DESCRIPTION));
                     field.setFractionEmpty(row.getDoubleByHeaderName(ScanFieldName.FRACTION_EMPTY));
-                    field.setUniqueCount(row.getIntByHeaderName(ScanFieldName.UNIQUE_COUNT));
-                    field.setFractionUnique(row.getDoubleByHeaderName(ScanFieldName.FRACTION_UNIQUE));
+                    field.setUniqueCount(row.getIntByHeaderName(ScanFieldName.UNIQUE_COUNT) == null ? -1 : row.getIntByHeaderName(ScanFieldName.UNIQUE_COUNT));
+                    field.setFractionUnique(row.getDoubleByHeaderName(ScanFieldName.FRACTION_UNIQUE) == null ? -1 : row.getDoubleByHeaderName(ScanFieldName.FRACTION_UNIQUE));
                     //field.setValueCounts(getValueCounts(workbook, tableName, fieldName));
                     field = fieldService.createField(field);
                 }

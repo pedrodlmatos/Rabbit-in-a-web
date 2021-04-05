@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { makeStyles, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Grid, FormGroup, FormControlLabel, Switch } from '@material-ui/core';
+import { makeStyles, Dialog, DialogTitle, DialogContent, CircularProgress, Grid, FormGroup, FormControlLabel, Switch } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import TableMappingService from '../../../services/table-mapping-service';
 import FieldMappingService from '../../../services/field-mapping-service';
@@ -10,31 +10,45 @@ import InfoTable from '../../info-table/info-table';
 
 
 const useStyles = makeStyles(theme => ({
+    header: {
+        height: 100,
+        position: 'flex'
+    },
     hiddenButton: {
         visibility: 'hidden'
     },
     showButton: {
         visibility: 'false'
+    },
+    button: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(2),
+    },
+    fieldDetails: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     }
-
 }))
 
 export default function FieldMappingModal(props) {
-
-    const { openModal, closeModal, mappingId, removeTableMapping, changeMappingCompletion } = props;
     const classes = useStyles();
+    const { openModal, closeModal, mappingId, removeTableMapping, changeMappingCompletion } = props;
+    
     const [loading, setLoading] = useState(true);
     const [sourceTable, setSourceTable] = useState({});
     const [targetTable, setTargetTable] = useState({});
-    const [fieldMappings, setFieldMappings] = useState([]);
     const [complete, setComplete] = useState(false);
     const [logic, setLogic] = useState('');
+    const [fieldMappings, setFieldMappings] = useState([]);
+    
+    
     const [selectedField, setSelectedField] = useState({});
     const [sourceSelected, setSourceSelected] = useState(false);
+
     const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
+    
     const [showDeleteButton, setShowDeleteButton] = useState(false);
     const [loadingSaveLogic, setLoadingSaveLogic] = useState(false);
-    const [enableEditCommentButton, setEnableEditCommentButton] = useState(true);
     const [showFieldInfo, setShowFieldInfo] = useState(false);
     const [fieldInfo, setFieldInfo] = useState([]);
     const [showTable, setShowTable] = useState(false);
@@ -374,8 +388,6 @@ export default function FieldMappingModal(props) {
      */
 
     const saveComment = () => {
-        setEnableEditCommentButton(true);
-
         if (sourceSelected) {
             FieldService.changeSourceTableComment(selectedField.id, selectedField.comment).then(response => {
                 let fields = []
@@ -429,26 +441,22 @@ export default function FieldMappingModal(props) {
             ) : (
                 <div>
                     <DialogTitle>
-                        <div>
-                            <Grid container>
-                                <Grid item xs={3} sm={3} md={3} lg={3}>
-                                    <Controls.ElementBox
-                                        id={sourceTable.name + 't'}
-                                        element={sourceTable}
-                                        color='#FF9224'
-                                        border="#A10000"
-                                    />
-                                </Grid>
-
-                                <Grid item xs={3} sm={3} md={3} lg={3}>
-                                    <Controls.ElementBox
-                                        id={targetTable.name + 't'}
-                                        element={targetTable}
-                                        color="#53ECEC"
-                                        border="#000F73"
-                                    />
-                                </Grid>
-
+                        <Grid container>
+                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                                <Controls.ElementBox
+                                    id={sourceTable.name + 't'}
+                                    element={sourceTable}
+                                    color='#FF9224'
+                                    border="#A10000"
+                                />
+                            </Grid>
+                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                                <Controls.ElementBox
+                                    id={targetTable.name + 't'}
+                                    element={targetTable}
+                                    color="#53ECEC"
+                                    border="#000F73"
+                                />
                                 <Xarrow
                                     start={sourceTable.name + 't'}
                                     end={targetTable.name + 't'}
@@ -459,22 +467,41 @@ export default function FieldMappingModal(props) {
                                     curveness={0.5}
                                 />
                             </Grid>
-                            
-
-                            <Controls.ActionButton color="secondary" onClick={closeModal}>
-                                <CloseIcon />
-                            </Controls.ActionButton>
-                            <br />
-
-                            <FormGroup>
-                                <FormControlLabel 
-                                    control={<Switch checked={complete} onChange={handleCompletionChange} color='primary'/>}
-                                    label="Complete"
+                            <Grid item xs={1} sm={1} md={1} lg={1}>
+                                <FormGroup>
+                                    <FormControlLabel 
+                                        control={<Switch checked={complete} onChange={handleCompletionChange} color='primary'/>}
+                                        label="Complete"
+                                    />
+                                </FormGroup>
+                            </Grid>
+                            <Grid item xs={2} sm={2} md={2} lg={2}>
+                                <Controls.Button 
+                                    text="Remove table mapping"
+                                    size="medium"
+                                    color="secondary"
+                                    variant="contained"
+                                    onClick={removeTableMapping}
                                 />
-                            </FormGroup>
-                        </div>
+                            </Grid>
+                            <Grid item xs={2} sm={2} md={2} lg={2}>
+                                <Controls.Button 
+                                    text="Remove field mapping"
+                                    size="medium"
+                                    color="secondary"
+                                    variant="contained"
+                                    disabled={!showDeleteButton}
+                                    onClick={deleteFieldMapping}
+                                />
+                            </Grid>
+                            <Grid item xs={1} sm={1} md={1} lg={1}>
+                                <Controls.ActionButton color="secondary" onClick={closeModal}>
+                                    <CloseIcon />
+                                </Controls.ActionButton>
+                            </Grid>
+                        </Grid>
                     </DialogTitle>
-                    
+
                     <DialogContent>
                         <Grid container>
                             <Grid item xs={3} sm={3} md={3} lg={3}>
@@ -528,25 +555,22 @@ export default function FieldMappingModal(props) {
                                     value={logic === null ? '' : logic}
                                     name="comment"
                                     fullWidth={true}
-                                    label="Logic"
+                                    label="Table mapping logic"
                                     placeholder="Edit mapping logic"
                                     rows={3} 
                                     onChange={(e) => setLogic(e.target.value)}
                                 />
                                 <Controls.Button
+                                    className={classes.button}
                                     text="Save"
-                                    size="medium"
-                                    color="primary"
-                                    variant="contained"
                                     disabled={loadingSaveLogic}
                                     onClick={saveLogic}
                                 />
 
                                 { showFieldInfo ? (
-                                    <div>
+                                    <div className={classes.fieldDetails}>
                                         <h6><strong>Field name: </strong>{selectedField.name}</h6>
                                         <h6><strong>Field type: </strong>{selectedField.type}</h6>
-
                                         { sourceSelected ? (
                                             // TODO
                                             console.log(selectedField)
@@ -566,66 +590,26 @@ export default function FieldMappingModal(props) {
                                         <Controls.Input 
                                             value={selectedField.comment === null ? "" : selectedField.comment}
                                             name="comment"
-                                            disabled={enableEditCommentButton}
                                             fullWidth={true}
                                             label="Comment"
                                             placeholder="Edit table comment"
                                             rows={3} 
                                             onChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
                                         />
-                                        <Controls.Button
-                                            className={enableEditCommentButton ? classes.showButton : classes.hiddenButton}
-                                            text="Edit comment"
-                                            size="medium"
-                                            color="primary"
-                                            variant="contained"
-                                            onClick={() => setEnableEditCommentButton(false)}
-                                        />
 
                                         <Controls.Button
-                                            className={enableEditCommentButton ? classes.hiddenButton : classes.showButton}
+                                            className={classes.button}
                                             text="Save"
-                                            size="medium"
-                                            color="primary"
-                                            variant="contained"
                                             onClick={saveComment}
                                         />
                                     </div>
                                 ) : (
                                     <>
                                     </>
-                                ) }
-                                
+                                ) }    
                             </Grid>
                         </Grid>
                     </DialogContent>
-                                  
-                    <DialogActions>
-                        <Controls.Button 
-                            text="Close"
-                            size="medium"
-                            color="secondary"
-                            variant="contained"
-                            onClick={closeModal}
-                        />
-
-                        <Controls.Button 
-                            text="Remove table mapping"
-                            size="medium"
-                            color="secondary"
-                            variant="contained"
-                            onClick={removeTableMapping}
-                        />
-
-                        <Controls.Button 
-                            text="Remove field mapping"
-                            size="medium"
-                            color="secondary"
-                            variant="contained"
-                            disabled={!showDeleteButton}
-                            onClick={deleteFieldMapping}
-                        />
-                    </DialogActions>
                 </div>
             )}
         </Dialog>
