@@ -3,6 +3,7 @@ package com.ua.hiah.service.source.database;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.source.SourceTable;
+import com.ua.hiah.model.source.ValueCount;
 import com.ua.hiah.rabbitcore.utilities.ScanFieldName;
 import com.ua.hiah.rabbitcore.utilities.ScanSheetName;
 import com.ua.hiah.rabbitcore.utilities.files.QuickAndDirtyXlsxReader;
@@ -11,6 +12,7 @@ import com.ua.hiah.rabbitcore.utilities.files.QuickAndDirtyXlsxReader.Sheet;
 import com.ua.hiah.repository.source.SourceDatabaseRepository;
 import com.ua.hiah.service.source.field.SourceFieldService;
 import com.ua.hiah.service.source.table.SourceTableService;
+import com.ua.hiah.service.source.valueCounts.ValueCountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +34,9 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
 
     @Autowired
     SourceFieldService fieldService;
+
+    @Autowired
+    ValueCountService valueCountService;
 
     @Override
     public SourceDatabase createDatabaseFromScanReport(String name, MultipartFile file) {
@@ -97,9 +102,29 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                     field.setFractionUnique(row.getDoubleByHeaderName(ScanFieldName.FRACTION_UNIQUE) == null ? -1 : row.getDoubleByHeaderName(ScanFieldName.FRACTION_UNIQUE));
                     //field.setValueCounts(getValueCounts(workbook, tableName, fieldName));
                     field = fieldService.createField(field);
+
+                    Map<String, Integer> valueCounts = getValueCounts(workbook, table, row.getStringByHeaderName(ScanFieldName.FIELD));
+                    if (valueCounts != null) {
+                        int totalCount = valueCounts.values().stream().reduce(0, Integer::sum);
+                        //List<ValueCount> valueCountsList = new ArrayList<>();
+
+                        for (Map.Entry<String, Integer> entry : valueCounts.entrySet()) {
+                            System.out.println(entry.getKey());
+                            ValueCount valueCount = new ValueCount();
+                            valueCount.setValue(entry.getKey());
+                            valueCount.setFrequency(entry.getValue());
+                            valueCount.setPercentage(entry.getValue() / (double) totalCount);
+                            valueCount.setField(field);
+                            //valueCountsList.add(valueCount);
+                            valueCount = valueCountService.createValueCount(valueCount);
+                        }
+                        //valueCountService.createAll(valueCountsList);
+                    }
                 }
             }
             database.setTables(tables);
+
+            scanTemp.delete();
             return database;
         } catch (IOException e) {
             e.printStackTrace();
@@ -144,5 +169,52 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
 
         database.setTables(tables);
         return nameToTable;
+    }
+
+    /* Adapted from Database (rabbit-core) */
+    private static Map<String, Integer> getValueCounts(QuickAndDirtyXlsxReader workbook, SourceTable table, String fieldName) {
+        String targetSheetName = table.createSheetNameFromTableName(table.getName());
+        System.out.println(targetSheetName);
+        Sheet tableSheet = workbook.getByName(targetSheetName);
+
+        if (tableSheet == null) {
+            return null;
+        }
+
+        Map<String, Integer> valueCounts = new HashMap<>();
+        Iterator<Row> iterator = tableSheet.iterator();
+        Row header = iterator.next();
+        System.out.println(header.toString());
+        int index = header.indexOf(fieldName);
+        System.out.println(index);
+
+        if (index != -1) {
+            while (iterator.hasNext()) {
+                Row row = iterator.next();
+                if (row.size() > index) {
+                    String value = row.get(index);
+                    System.out.println("Val " + value);
+                    String count;
+
+                    if (row.size() > index + 1) {
+                        count = row.get(index + 1);
+                    } else {
+                        count = "";
+                    }
+
+                    if (value.equals("") && count.equals("")){
+                        break;
+                    }
+
+                    try {
+                        valueCounts.put(value, (int) Double.parseDouble(count));
+                    } catch (NumberFormatException e) {
+
+                    }
+                }
+            }
+        }
+
+        return valueCounts;
     }
 }

@@ -129,4 +129,18 @@ public class SourceTable {
                 ", fields=" + fields +
                 '}';
     }
+
+    /* Adapted from Table (rabbit-core) */
+    public String createSheetNameFromTableName(String tableName) {
+        String name = tableName;
+
+        // Excel sheet names have a maximum of 31 characters
+        if (name.length() > 31) {
+            name = name.substring(0, 31);
+        }
+
+        // Backslash causes issues in excel
+        name = name.replace('/','_');
+        return name;
+    }
 }

@@ -60,6 +60,12 @@ export default function FieldMappingModal(props) {
         { Header: 'Class', accessor: 'conceptClassId' },
         { Header: 'Standard ?', accessor: 'standardConcept' }
     ], [])
+
+    const sourceColumns = React.useMemo(() => [
+        { Header: 'Value', accessor: 'value' },
+        { Header: 'Frequency', accessor: 'frequency' },
+        { Header: 'Percentage', accessor: 'percentage'}
+    ], [])
     
 
     /**
@@ -266,15 +272,19 @@ export default function FieldMappingModal(props) {
 
      const defineSourceFieldData = (field) => {
         let data = [];
-        /*
-        field.concepts.forEach(element => {
-            data.push({
-                field: element.name,
-                type: element.type,
-                description: element.description
+        if (field.valueCounts.length === 0) {
+            setShowTable(false);
+        } else {
+            field.valueCounts.forEach(element => {
+                data.push({
+                    value: element.value,
+                    frequency: element.frequency,
+                    percentage: element.percentage
+                })
             })
-        })*/
-        setFieldInfo(data);
+            setFieldInfo(data);
+            setShowTable(true);
+        }
     }
 
 
@@ -572,8 +582,13 @@ export default function FieldMappingModal(props) {
                                         <h6><strong>Field name: </strong>{selectedField.name}</h6>
                                         <h6><strong>Field type: </strong>{selectedField.type}</h6>
                                         { sourceSelected ? (
-                                            // TODO
-                                            console.log(selectedField)
+                                            <div>
+                                                { showTable ? (
+                                                    <InfoTable columns={sourceColumns} data={fieldInfo} />
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
                                         ) : (
                                             
                                             <div>
