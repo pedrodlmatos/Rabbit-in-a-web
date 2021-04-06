@@ -8,4 +8,4 @@ docker stop hiah-frontend && docker rm hiah-frontend || echo "Frontend project n
 docker image rm 34.118.8.157:5000/v2/hiah-frontend:runtime
 docker run -p 3000:80 -d --name=hiah-frontend 34.118.8.157:5000/v2/hiah-frontend:runtime
 
-docker start pedrolopesmatos17_postgres_1
+docker start postgres
