@@ -5,6 +5,7 @@ services:
     ports:
       - 5432:5432
     restart: always
+    container_name: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -24,10 +25,12 @@ services:
   registry:
     image: registry
     restart: always
+    container_name: registry
     ports:
       - 5000:5000
   nexus:
     image: sonatype/nexus
+    container_name: nexus
     volumes:
       - "nexus-data:/sonatype-work"
     ports:

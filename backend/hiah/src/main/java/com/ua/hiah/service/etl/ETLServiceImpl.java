@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -67,11 +69,18 @@ public class ETLServiceImpl implements ETLService {
             ETL etl = new ETL();
             etl.setName("ETL session " + etlRepository.count());
             etl = etlRepository.save(etl);
-            etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
-            logger.info("ETL SERVICE - Loaded OMOP CDM database " + cdm);
 
+            Instant start = Instant.now();
+            etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
+            Instant end = Instant.now();
+            Duration duration = Duration.between(start, end);
+            logger.info("ETL SERVICE - Loaded OMOP CDM database {} in {} seconds", cdm, duration.getSeconds());
+
+            start = Instant.now();
             etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromScanReport(name, file));
-            logger.info("ETL SERVICE - Loaded EHR database");
+            end = Instant.now();
+            duration = Duration.between(start, end);
+            logger.info("ETL SERVICE - Loaded EHR database in {} seconds", duration.getSeconds());
             return etlRepository.save(etl);
         }
         return null;

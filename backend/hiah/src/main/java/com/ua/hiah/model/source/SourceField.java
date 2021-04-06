@@ -63,6 +63,11 @@ public class SourceField {
     @JsonIgnore
     private List<FieldMapping> mappings;
 
+    @OneToMany(mappedBy = "field")
+    @Column(name = "valueCount")
+    @JsonView(Views.ETLSession.class)
+    private List<ValueCount> valueCounts;
+
 
     // CONSTRUCTOR
     public SourceField() {

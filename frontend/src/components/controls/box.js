@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Tooltip } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
     unselected: {
@@ -7,9 +7,9 @@ const useStyles = makeStyles(theme => ({
         height: 50,
         position: 'relative',
         marginTop: theme.spacing(1),
-        borderColor: 'darkred',
+        borderColor: props => props.border,
         borderStyle: 'solid',
-        backgroundColor: 'orange',
+        backgroundColor: props => props.color,
         fontSize: 15,
         display: 'flex',
         justifyContent: 'center',
@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
         marginTop: theme.spacing(1),
         borderColor: 'black',
         borderStyle: 'dashed',
-        backgroundColor: 'orange',
+        backgroundColor: props => props.color,
         fontSize: 15,
         display: 'flex',
         justifyContent: 'center',
@@ -37,18 +37,24 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-export default function EHRTable(props) {
-    const classes = useStyles();
-    const { id, table, clicked, handleSourceTableSelection } = props;
+export default function TooltipBox(props) {
+    const { id, table, clicked, handleSelection } = props;
+    const classes = useStyles(props);
 
     const selectTable = () => {
-        handleSourceTableSelection(table);
+        handleSelection(table);
     }
 
 
     return(
-        <div id={id} className={clicked ? classes.selected : classes.unselected} onClick={selectTable}>
-            { table.name }
-        </div>    
+        <Tooltip 
+            title="Select first an EHR table and then an OMOP CDM table" 
+            placement="right-end"
+            enterDelay={1000}
+        >
+            <div id={id} className={clicked ? classes.selected : classes.unselected} onClick={selectTable}>
+                { table.name }
+            </div> 
+        </Tooltip>     
     )
 }

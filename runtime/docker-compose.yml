@@ -1,0 +1,12 @@
+version: '3.2'
+services: 
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    restart: always
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hiah

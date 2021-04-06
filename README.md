@@ -34,12 +34,12 @@ Postgres details:
 
 IP Address: `34.118.8.157`
 
-Service | Docker container | Internal port | External port
---- | ---| --- | ---
-PostgreSQL | yes | 5432 | 5432
-Jenkins | no | - | 8080
-Sonatype/Nexus | yes | 8081 | 8081
-Registry | yes | 5000 | 5000
+Service | Internal port | External port
+--- | --- | ---
+PostgreSQL | 5432 | 5432
+Jenkins | 8080 | 8080
+Sonatype/Nexus | 8081 | 8081
+Registry | 5000 | 5000
 
 
 ## Runtime Virtual Machine
@@ -47,7 +47,7 @@ Registry | yes | 5000 | 5000
 IP Address: `104.199.21.27`
 
 Service | Internal port | External port
---- | ---| --- 
+--- | ---| -
 PostgreSQL | 5432 | 5432
 Backend | 8000 | 8100
 Frontend | 30 | 3000

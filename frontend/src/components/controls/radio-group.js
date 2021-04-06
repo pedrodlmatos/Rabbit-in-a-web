@@ -10,7 +10,7 @@ export default function RadioGroup(props) {
             <FormLabel>{ label }</FormLabel>
             <MRadioGroup row name={name} value={value} onChange={onChange}>
                 { items.map(item => (
-                    <FormControlLabel key={item.id} value={item.id} control={ <Radio /> } label={item.title} />
+                    <FormControlLabel key={item.id} value={item.id} control={ <Radio /> } label={item.name} />
                 ))}
             </MRadioGroup>
         </FormControl>

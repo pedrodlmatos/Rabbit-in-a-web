@@ -20,12 +20,14 @@ const StyledTableRow = withStyles((theme) => ({
     }
 }))(TableRow)
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     table: {
         maxHeight: 500,
-        minWidth: 700
+        minWidth: 700,
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(5)
     }
-})
+}))
 
 export default function InfoTable({ columns, data }) {
     const classes = useStyles();
