@@ -1,0 +1,12 @@
+TODO 13/04
+
+ - Mudar as cores das tabelas EHR apenas quando selecionar tabelas EHR
+ - Alterar o dropodown checkbox para as tabelas OMOP
+ - Definir o estado de complete quando se muda
+ - Corrigir os placeholders
+ - Mudar para vazio o mapping selecionado quando se sai do field mapping modal
+ - Mudar nomes dos títulos
+ - Marcar pontos nas tabelas para fazer drag and drop
+ - Ficheiros de resumo
+
+
