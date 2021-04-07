@@ -6,6 +6,7 @@ import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -51,6 +52,15 @@ public class SourceTable {
 
     // CONSTRUCTOR
     public SourceTable() {
+    }
+
+    public SourceTable(String tableName, int rowCount, int rowsCheckedCount, SourceDatabase database) {
+        this.name = tableName;
+        this.rowCount = rowCount;
+        this.rowsCheckedCount = rowsCheckedCount;
+        this.sourceDatabase = database;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS

@@ -36,6 +36,13 @@ public class ValueCount {
     public ValueCount() {
     }
 
+    public ValueCount(String value, Integer frequency, double percentage, SourceField field) {
+        this.value = value;
+        this.frequency = frequency;
+        this.percentage = percentage;
+        this.field = field;
+    }
+
     public Long getId() {
         return id;
     }

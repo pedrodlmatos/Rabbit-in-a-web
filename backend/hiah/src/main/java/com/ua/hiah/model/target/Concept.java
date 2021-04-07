@@ -49,11 +49,20 @@ public class Concept {
 
     @ManyToOne
     @JoinColumn(name = "field_id", nullable = false)
-    //@JsonView(Views.ETLSession.class)
     @JsonIgnore
     private TargetField field;
 
-    public Concept() {
+
+    public Concept() { }
+
+    public Concept(Long conceptId, String conceptName, String standardConcept, String domainId, String vocabularyId, String conceptClassId, TargetField field) {
+        this.conceptId = conceptId;
+        this.conceptName = conceptName;
+        this.standardConcept = standardConcept;
+        this.domainId = domainId;
+        this.vocabularyId = vocabularyId;
+        this.conceptClassId = conceptClassId;
+        this.field = field;
     }
 
     public Long getId() {

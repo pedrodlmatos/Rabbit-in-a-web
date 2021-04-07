@@ -7,15 +7,11 @@ import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.rabbitcore.riah_datamodel.ConceptsMap;
 import com.ua.hiah.repository.target.TargetDatabaseRepository;
-import com.ua.hiah.service.target.concept.ConceptService;
-import com.ua.hiah.service.target.field.TargetFieldService;
-import com.ua.hiah.service.target.table.TargetTableService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,15 +26,6 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
     @Autowired
     private TargetDatabaseRepository repository;
 
-    @Autowired
-    private TargetTableService tableService;
-
-    @Autowired
-    private TargetFieldService fieldService;
-
-    @Autowired
-    private ConceptService conceptService;
-
     private static String CONCEPT_ID_HINTS_FILE_NAME = "CDMConceptIDHints_v5.0_02-OCT-19.csv";
 
     @Override
@@ -50,23 +37,20 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
         return false;
     }
 
+
     @Override
     public TargetDatabase generateModelFromCSV(CDMVersion version) {
-        TargetDatabase database = new TargetDatabase();
-        database.setDatabaseName(version.toString());
-        database.setVersion(version);
-        database = repository.save(database);
-
+        ConceptsMap conceptIdHintsMap = new ConceptsMap(CONCEPT_ID_HINTS_FILE_NAME);
+        TargetDatabase database = new TargetDatabase(
+            version.toString(),
+            version,
+            conceptIdHintsMap.vocabularyVersion
+        );
         Map<String, TargetTable> nameToTable = new HashMap<>();
         List<TargetTable> tables = new ArrayList<>();
 
         try {
-            File file = new File(version.fileName);
-            FileInputStream fileInputStream = new FileInputStream(file);
-
-            ConceptsMap conceptIdHintsMap = new ConceptsMap(CONCEPT_ID_HINTS_FILE_NAME);
-            database.setConceptIdHintsVocabularyVersion(conceptIdHintsMap.vocabularyVersion);
-
+            FileInputStream fileInputStream = new FileInputStream(version.fileName);
             for (CSVRecord row : CSVFormat.RFC4180.withHeader().parse(new InputStreamReader(fileInputStream))) {
                 String tableNameColumn;
                 String fieldNameColumn;
@@ -92,44 +76,45 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
                 TargetTable table = nameToTable.get(row.get(tableNameColumn).toLowerCase());
 
                 if (table == null) {
-                    table = new TargetTable();
-                    table.setTargetDatabase(database);
-                    table.setName(row.get(tableNameColumn).toLowerCase());
-                    table = tableService.createTargetTable(table);
-
+                    table = new TargetTable(
+                        row.get(tableNameColumn).toLowerCase(),
+                        database
+                    );
                     nameToTable.put(row.get(tableNameColumn).toLowerCase(), table);
                     tables.add(table);
                 }
 
-
-                TargetField field = new TargetField();
-                field.setName(row.get(fieldNameColumn).toLowerCase());
-                field.setNullable(row.get(isNullableColumn).equals(nullableValue));
-                field.setType(row.get(dataTypeColumn));
-                field.setDescription(row.get(descriptionColumn));
-                field.setTable(table);
-                field = fieldService.createField(field);
+                TargetField field = new TargetField(
+                    row.get(fieldNameColumn).toLowerCase(),
+                    row.get(isNullableColumn).equals(nullableValue),
+                    row.get(dataTypeColumn),
+                    row.get(descriptionColumn),
+                    table
+                );
+                table.getFields().add(field);
 
                 if (conceptIdHintsMap.get(table.getName(), field.getName()) != null) {
                     for (ConceptsMap.TempConcept tempConcept : conceptIdHintsMap.get(table.getName(), field.getName())) {
-                        Concept concept = new Concept();
-                        concept.setConceptId(Long.valueOf(tempConcept.getConceptId()));
-                        concept.setConceptName(tempConcept.getConceptName());
-                        concept.setStandardConcept(tempConcept.getStandardConcept());
-                        concept.setDomainId(tempConcept.getDomainId());
-                        concept.setVocabularyId(tempConcept.getVocabularyId());
-                        concept.setConceptClassId(tempConcept.getConceptClassId());
-                        concept.setField(field);
-                        concept = conceptService.saveConcept(concept);
+                        Concept concept = new Concept(
+                                Long.valueOf(tempConcept.getConceptId()),
+                                tempConcept.getConceptName(),
+                                tempConcept.getStandardConcept(),
+                                tempConcept.getDomainId(),
+                                tempConcept.getVocabularyId(),
+                                tempConcept.getConceptClassId(),
+                                field
+                        );
+                        field.getConcepts().add(concept);
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        database.getTables().addAll(tables);
+        database.setTables(tables);
         return repository.save(database);
     }
+
 
     @Override
     public void removeDatabase(Long id) {

@@ -50,6 +50,12 @@ public class TargetDatabase {
         this.etl = etl;
     }
 
+    public TargetDatabase(String databaseName, CDMVersion version, String vocabularyVersion) {
+        this.databaseName = databaseName;
+        this.version = version;
+        this.conceptIdHintsVocabularyVersion = vocabularyVersion;
+    }
+
     // GETTERS AND SETTERS
     public Long getId() {
         return id;
@@ -71,11 +77,11 @@ public class TargetDatabase {
         return tables;
     }
 
-    /*
+
     public void setTables(List<TargetTable> tables) {
         this.tables = tables;
     }
-    */
+
 
     public ETL getEtl() {
         return etl;

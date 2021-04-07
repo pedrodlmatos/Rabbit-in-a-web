@@ -49,7 +49,7 @@ public class TargetField {
     @JsonIgnore
     private List<FieldMapping> mappings;
 
-    @OneToMany(mappedBy = "field")
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
     @Column(name = "concepts")
     @JsonView(Views.ETLSession.class)
     private List<Concept> concepts;
@@ -57,6 +57,16 @@ public class TargetField {
 
     // CONSTRUCTOR
     public TargetField() {
+    }
+
+    public TargetField(String name, boolean isNullable, String type, String description, TargetTable table) {
+        this.name = name;
+        this.isNullable = isNullable;
+        this.type = type;
+        this.description = description;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.concepts = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS

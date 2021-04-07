@@ -21,7 +21,7 @@ public class SourceDatabase {
     @JsonView(Views.ETLSessionsList.class)
     private String databaseName;
 
-    @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonView(Views.ETLSession.class)
     private List<SourceTable> tables;
 
@@ -31,6 +31,10 @@ public class SourceDatabase {
 
     // CONSTRUCTOR
     public SourceDatabase() {
+    }
+
+    public SourceDatabase(String name) {
+        this.databaseName = name;
     }
 
     // GETTER AND SETTER

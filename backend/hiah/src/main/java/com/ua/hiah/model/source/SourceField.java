@@ -63,7 +63,7 @@ public class SourceField {
     @JsonIgnore
     private List<FieldMapping> mappings;
 
-    @OneToMany(mappedBy = "field")
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
     @Column(name = "valueCount")
     @JsonView(Views.ETLSession.class)
     private List<ValueCount> valueCounts;
@@ -71,6 +71,18 @@ public class SourceField {
 
     // CONSTRUCTOR
     public SourceField() {
+    }
+
+    public SourceField(String name, String type, int maxLength, double fractionEmpty, int uniqueCount, double fractionUnique, SourceTable table) {
+        this.name = name;
+        this.type = type;
+        this.maxLength = maxLength;
+        this.fractionEmpty = fractionEmpty;
+        this.uniqueCount = uniqueCount;
+        this.fractionUnique = fractionUnique;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.valueCounts = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS
@@ -172,6 +184,13 @@ public class SourceField {
         this.mappings = mappings;
     }
 
+    public List<ValueCount> getValueCounts() {
+        return valueCounts;
+    }
+
+    public void setValueCounts(List<ValueCount> valueCounts) {
+        this.valueCounts = valueCounts;
+    }
 
     /* Adapted from ETL (Rabbit in a hat) */
     public List<String> getMappingsFromSourceField() {
