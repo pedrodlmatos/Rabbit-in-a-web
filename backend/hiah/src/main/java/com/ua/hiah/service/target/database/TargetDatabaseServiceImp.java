@@ -11,6 +11,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,12 +22,21 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class TargetDatabaseServiceImp implements TargetDatabaseService{
 
     @Autowired
     private TargetDatabaseRepository repository;
 
     private static String CONCEPT_ID_HINTS_FILE_NAME = "CDMConceptIDHints_v5.0_02-OCT-19.csv";
+
+
+    /**
+     * Verifies if a given OMOP CDM version exists
+     *
+     * @param cdm OMOP CDM version
+     * @return true if exists, false otherwise
+     */
 
     @Override
     public boolean CDMExists(String cdm) {
@@ -38,8 +48,16 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
     }
 
 
+    /**
+     * Persists OMOP CDM database (and tables, fields, concepts) from a file
+     *
+     * @param version OMOP CDM version
+     * @return persisted database
+     */
+
     @Override
     public TargetDatabase generateModelFromCSV(CDMVersion version) {
+        /* Adapted from Database (rabbit-core) */
         ConceptsMap conceptIdHintsMap = new ConceptsMap(CONCEPT_ID_HINTS_FILE_NAME);
         TargetDatabase database = new TargetDatabase(
             version.toString(),
@@ -96,13 +114,13 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
                 if (conceptIdHintsMap.get(table.getName(), field.getName()) != null) {
                     for (ConceptsMap.TempConcept tempConcept : conceptIdHintsMap.get(table.getName(), field.getName())) {
                         Concept concept = new Concept(
-                                Long.valueOf(tempConcept.getConceptId()),
-                                tempConcept.getConceptName(),
-                                tempConcept.getStandardConcept(),
-                                tempConcept.getDomainId(),
-                                tempConcept.getVocabularyId(),
-                                tempConcept.getConceptClassId(),
-                                field
+                            Long.valueOf(tempConcept.getConceptId()),
+                            tempConcept.getConceptName(),
+                            tempConcept.getStandardConcept(),
+                            tempConcept.getDomainId(),
+                            tempConcept.getVocabularyId(),
+                            tempConcept.getConceptClassId(),
+                            field
                         );
                         field.getConcepts().add(concept);
                     }
@@ -115,6 +133,12 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
         return repository.save(database);
     }
 
+
+    /**
+     * Removes a database given its id
+     *
+     * @param id database's id
+     */
 
     @Override
     public void removeDatabase(Long id) {

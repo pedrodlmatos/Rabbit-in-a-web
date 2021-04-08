@@ -4,5 +4,4 @@ import com.ua.hiah.model.target.Concept;
 
 public interface ConceptService {
 
-    Concept saveConcept(Concept concept);
 }

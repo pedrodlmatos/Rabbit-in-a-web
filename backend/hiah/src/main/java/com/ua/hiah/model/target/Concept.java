@@ -20,31 +20,31 @@ public class Concept {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private Long id;
 
     @Column(name = "concept_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private Long conceptId;
 
     @Column(name = "concept_name", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String conceptName;
 
     @Column(name = "standard_concept", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String standardConcept;
 
     @Column(name = "domain_id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String domainId;
 
     @Column(name = "vocabulary_id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String vocabularyId;
 
     @Column(name = "concept_class_id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String conceptClassId;
 
     @ManyToOne

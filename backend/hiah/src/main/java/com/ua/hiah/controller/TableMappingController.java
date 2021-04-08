@@ -56,7 +56,7 @@ public class TableMappingController {
 
     })
     @GetMapping("/map/{id}")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     public ResponseEntity<?> getTableMapping(@PathVariable Long id) {
         logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + id);
 

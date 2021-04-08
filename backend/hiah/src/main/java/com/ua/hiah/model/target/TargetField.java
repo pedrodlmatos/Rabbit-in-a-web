@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -17,26 +20,26 @@ public class TargetField {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String description;
 
     @Column(name = "type")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String type;
 
     @Column(name = "nullable")
     private boolean isNullable;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,14 +47,14 @@ public class TargetField {
     @JsonIgnore
     private TargetTable table;
 
-    @OneToMany(mappedBy = "target")
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;
 
-    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "concepts")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private List<Concept> concepts;
 
 

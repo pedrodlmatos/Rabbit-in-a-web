@@ -48,10 +48,7 @@ public class ETLServiceImpl implements ETLService {
 
     private static final Logger logger = LoggerFactory.getLogger(ETLServiceImpl.class);
 
-    @Override
-    public List<ETL> getAllETL() {
-        return etlRepository.findAll();
-    }
+
 
 
     /**
@@ -84,6 +81,18 @@ public class ETLServiceImpl implements ETLService {
             return etlRepository.save(etl);
         }
         return null;
+    }
+
+
+    /**
+     * Retrieve all ETL sessions
+     *
+     * @return list with ETL sessions
+     */
+
+    @Override
+    public List<ETL> getAllETL() {
+        return etlRepository.findAll();
     }
 
 
@@ -126,14 +135,11 @@ public class ETLServiceImpl implements ETLService {
 
         if (etl != null) {
             TargetDatabase previous = etl.getTargetDatabase();
-
             // create an OMOP CDM from a different version
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
-
             // remove previous cdm and mappings
-            //targetDatabaseService.removeDatabase(previous.getId());
             mappingService.removeTableMappingsFromETL(etl.getId());
-
+            targetDatabaseService.removeDatabase(previous.getId());
 
             //targetDatabaseService.removeDatabase(previous);
             // order tables by id
@@ -143,9 +149,7 @@ public class ETLServiceImpl implements ETLService {
 
             List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
             Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
-
              */
-
             return etlRepository.save(etl);
         }
         return null;

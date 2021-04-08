@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -28,8 +30,9 @@ public class ETL {
     @JsonView(Views.ETLSessionsList.class)
     private SourceDatabase sourceDatabase;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonView(Views.ETLSessionsList.class)
     private TargetDatabase targetDatabase;
 

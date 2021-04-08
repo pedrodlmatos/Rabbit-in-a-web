@@ -8,6 +8,8 @@ TODO 13/04
  - Mudar nomes dos títulos
  - Marcar pontos nas tabelas para fazer drag and drop
  - Ficheiros de resumo
- - Json View para field mapping
+
+ - Json View para field mapping (done)
+ - Delete on cascade (done)
 
 

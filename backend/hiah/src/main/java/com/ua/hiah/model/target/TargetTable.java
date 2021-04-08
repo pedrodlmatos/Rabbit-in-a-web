@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -16,11 +19,11 @@ public class TargetTable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String name;
 
     @ManyToOne
@@ -33,7 +36,7 @@ public class TargetTable {
     private String comment;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private List<TargetField> fields;
 
 

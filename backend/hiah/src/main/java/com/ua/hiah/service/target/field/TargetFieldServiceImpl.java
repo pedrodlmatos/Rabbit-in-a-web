@@ -12,25 +12,33 @@ public class TargetFieldServiceImpl implements TargetFieldService {
     private TargetFieldRepository repository;
 
 
-    @Override
-    public TargetField createField(TargetField field) {
-        return repository.save(field);
-    }
-
+    /**
+     * Retrieves field from OMOP CDM database by id
+     *
+     * @param target_id field's id
+     * @return retrieved field if found, null otherwise
+     */
     @Override
     public TargetField getFieldById(Long target_id) {
         return repository.findById(target_id).orElse(null);
     }
 
+
+    /**
+     * Changes comment of a field from the OMOP CDM database
+     *
+     * @param fieldId field's id
+     * @param comment comment to change to
+     * @return altered field
+     */
+
     @Override
     public TargetField changeComment(Long fieldId, String comment) {
         TargetField field = repository.findById(fieldId).orElse(null);
-
         if (field != null) {
             field.setComment(comment);
             return repository.save(field);
         }
-
         return null;
     }
 }

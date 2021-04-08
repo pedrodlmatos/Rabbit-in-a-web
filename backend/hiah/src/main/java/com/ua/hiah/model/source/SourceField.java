@@ -17,11 +17,11 @@ public class SourceField {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String name;
 
     /*
@@ -31,7 +31,7 @@ public class SourceField {
     */
 
     @Column(name = "type")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String type;
 
     @Column(name = "nullable")
@@ -50,7 +50,7 @@ public class SourceField {
     private double fractionUnique;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String comment;
 
     @ManyToOne
@@ -65,7 +65,7 @@ public class SourceField {
 
     @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
     @Column(name = "valueCount")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private List<ValueCount> valueCounts;
 
 

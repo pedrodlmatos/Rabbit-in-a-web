@@ -4,11 +4,33 @@ import com.ua.hiah.model.target.TargetTable;
 
 public interface TargetTableService {
 
-    TargetTable createTargetTable(TargetTable table);
+
+    /**
+     * Retrieves table from OMOP CDM database given its id
+     *
+     * @param target_id table's id
+     * @return retrieved table if found, null otherwise
+     */
 
     TargetTable getTableById(Long target_id);
 
+
+    /**
+     * Changes comment of a table from the OMOP CDM database
+     *
+     * @param tableId table's id
+     * @param comment comment to change tp
+     * @return altered table
+     */
+
     TargetTable changeComment(Long tableId, String comment);
+
+
+    /**
+     * Deletes
+     *
+     * @param id database's id
+     */
 
     void deleteTablesByDatabaseId(Long id);
 }

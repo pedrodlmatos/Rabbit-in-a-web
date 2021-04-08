@@ -16,11 +16,11 @@ public class SourceTable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String name;
 
     @ManyToOne
@@ -40,7 +40,7 @@ public class SourceTable {
     private int rowsCheckedCount;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private List<SourceField> fields;
 
 

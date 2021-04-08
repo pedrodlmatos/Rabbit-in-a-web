@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -31,7 +34,7 @@ public class TargetDatabase {
     @JsonView(Views.ETLSession.class)
     private String conceptIdHintsVocabularyVersion;
 
-    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
     private List<TargetTable> tables;
 

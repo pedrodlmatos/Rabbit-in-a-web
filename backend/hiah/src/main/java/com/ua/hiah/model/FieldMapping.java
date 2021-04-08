@@ -15,21 +15,21 @@ public class FieldMapping {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "source_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private SourceField source;
 
     @ManyToOne
     @JoinColumn(name = "target_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private TargetField target;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String logic;
 
     @ManyToOne

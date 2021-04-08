@@ -16,29 +16,29 @@ public class TableMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "source_table_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private SourceTable source;
 
     @ManyToOne
     @JoinColumn(name = "target_table_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private TargetTable target;
 
     @OneToMany(mappedBy = "tableMapping", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private List<FieldMapping> fieldMappings;
 
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     @Column(name = "complete", nullable = false)
     private boolean complete;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private String logic;
 
     @ManyToOne
