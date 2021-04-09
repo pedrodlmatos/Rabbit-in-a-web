@@ -72,8 +72,21 @@ class ETLService {
         return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl, cdm: cdm }});
     }
 
-    downloadSourceFieldsFile(etl) {
-        return axios.get(API_URL + "sessions/sourceCSV", { headers: authHeader(), params: { etl: etl }})
+
+    /**
+     * Sends GET request to retrieve data from source fields summary file
+     * 
+     * @param {*} etl etl's id
+     * @returns 
+     */
+
+    downloadSourceFieldsFile = async (etl) => {
+        return await axios.get(API_URL + "sessions/sourceCSV", { headers: authHeader(), params: { etl: etl }})
+    }
+
+
+    downloadTargetFieldsFile = async (etl) => {
+        return await axios.get(API_URL + "sessions/targetCSV", { headers: authHeader(), params: { etl: etl }})
     }
 }
 

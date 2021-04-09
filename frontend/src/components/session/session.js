@@ -9,6 +9,8 @@ import HelpModal from '../modals/help-modal/help-modal';
 import FieldMappingModal from '../modals/field-mapping-modal/field-mapping-modal';
 import { CDMVersions } from '../../services/CDMVersions';
 import InfoTable from '../info-table/info-table';
+import TableMappingLogic from './table-mapping-logic';
+import FilesModal from '../modals/files-modal/files-modal';
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -55,15 +57,17 @@ export default function Session() {
     const [omopName, setOmopName] = useState('');
     const [mappings, setMappings] = useState([]);
     const [selectedMapping, setSelectedMapping] = useState({});
-    const [showHelpModal, setShowHelpModal] = useState(false); 
+    const [showHelpModal, setShowHelpModal] = useState(false);
+    const [showFilesModal, setShowFilesModal] = useState(false);
     
     const [selectedTable, setSelectedTable] = useState({})
     const [sourceSelected, setSourceSelected] = useState(false);
     const [showTableDetails, setShowTableDetails] = useState(false);
     const [tableDetails, setTableDetails] = useState([]);
       
-    const [showFieldMappingModal, setShowFieldMappingModal] = useState(false); 
+    const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
 
+    const [loadingSaveLogic, setLoadingSaveLogic] = useState(false);
     
     useEffect(() => {
         const session_id = window.location.pathname.toString().replace("/session/", "");
@@ -79,11 +83,13 @@ export default function Session() {
             // table mappings
             let maps = [];
             res.data.tableMappings.forEach(function(item) {
+                console.log(item);
                 const arrow = {
                     id: item.id,
                     start: item.source,
                     end: item.target,
                     complete: item.complete,
+                    logic: item.logic,
                     color: defineArrowColor(item)
                 }
                 maps.push(arrow);
@@ -154,12 +160,13 @@ export default function Session() {
             setShowTableDetails(false);
             setTableDetails(null);
         } else if (sourceSelected) {                                                // source table is selected -> create arrow
-            resetArrowsColor();                                                     // change arrows color to grey
-            createArrow(selectedTable.id, table.id);                                // create arrow
-            setSelectedTable({});                                                   // unselects tables
-            setSourceSelected(false);                                               // clean state
-            setShowTableDetails(false);
-            setTableDetails(null);
+            const source_id = selectedTable.id;
+            //resetArrowsColor();                                                     // change arrows color to grey
+            //setSelectedTable({})                                                  // unselects tables
+            createArrow(source_id, table.id);                                       // create arrow
+            //setSourceSelected(false);                                               // clean state
+            //setShowTableDetails(false);
+            //setTableDetails(null);
         } else {                                                                    // other target table is selected
             resetArrowsColor();                                                     // change color of arrows to grey
             setSelectedTable(table);                                                // change select table information
@@ -267,7 +274,7 @@ export default function Session() {
         setShowTableDetails(false);
         setTableDetails([]);
         const index = mappings.indexOf(arrow);
-        if (selectedMapping === {}) {                                               // no arrow is selected
+        if (Object.keys(selectedMapping).length === 0) {                            // no arrow is selected
             let arrows = mappings;
             arrows[index].color = "red";
             setSelectedMapping(arrow);
@@ -300,12 +307,14 @@ export default function Session() {
                 start: res.data.source,
                 end: res.data.target,
                 complete: res.data.complete,
+                logic: res.data.logic,
                 color: defineArrowColor(res.data)
             }
-            setMappings(mappings.concat(arrow));
+            setMappings([arrow].concat(mappings));
         }).catch(err => {
             console.log(err);
         })
+        console.log(mappings);
     }
 
 
@@ -477,6 +486,26 @@ export default function Session() {
     }
 
 
+    /**
+     * 
+     */
+
+    const saveTableMappingLogic = () => {
+        console.log(selectedMapping.logic);
+        setLoadingSaveLogic(true);
+        
+        // make request to API
+        TableMappingService.editMappingLogic(selectedMapping.id, selectedMapping.logic).then(response => {
+            console.log(response.data);
+            let index = mappings.findIndex(x => x.id === response.data.id);
+            mappings[index].logic = response.data.logic;
+            setLoadingSaveLogic(false);
+        }).catch(error => {
+            console.log(error);
+        });
+    }
+
+
     return(
         <div className={classes.tablesArea}>
             { loading ? (
@@ -489,15 +518,21 @@ export default function Session() {
                                 <h1>{ etl.name }</h1>
                             </Grid>
 
-                            <Grid item xs={1} sm={1} md={1} lg={1}>
-                                <Controls.Button variant="contained" size="medium" color="primary" text="Help " onClick={() => setShowHelpModal(true)}>
+                            <Grid item xs={2} sm={2} md={2} lg={2}>
+                                <Controls.Button text="Help " onClick={() => setShowHelpModal(true)}>
                                     <i className="fa fa-info"/>
                                 </Controls.Button>
                                 <HelpModal modalIsOpen={showHelpModal} closeModal={() => setShowHelpModal(false)}/>
                             </Grid>
 
+                            <Grid item xs={2} sm={2} md={2} lg={2}>
+                                <Controls.Button text="Files" onClick={() => setShowFilesModal(true)} />
+                                <FilesModal etl_id={etl.id} openModal={showFilesModal} closeModal={() => setShowFilesModal(false)} />
+                            </Grid>
+
+
                             { Object.keys(selectedMapping).length !== 0 ? (
-                                <Grid item xs={3} sm={3} md={3} lg={3}>
+                                <Grid item xs={2} sm={2} md={2} lg={2}>
                                     <Controls.Button  
                                         color="secondary" 
                                         text="Remove" 
@@ -622,6 +657,18 @@ export default function Session() {
                         ) : (
                             <></>
                         )}
+
+                        { Object.keys(selectedMapping).length !== 0 ? (
+                            <TableMappingLogic
+                                value={selectedMapping.logic === null ? '' : selectedMapping.logic}
+                                disabled={loadingSaveLogic}
+                                onChange={(e) => setSelectedMapping({...selectedMapping, logic: e.target.value})}
+                                save={saveTableMappingLogic}
+                            />
+                        ) : (
+                            <>
+                            </>
+                        ) }
                     </Grid>
                 </Grid>
             )}

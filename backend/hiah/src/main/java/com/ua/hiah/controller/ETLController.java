@@ -172,13 +172,30 @@ public class ETLController {
     }
 
 
-    // TODO
+
     @GetMapping(value = "/sessions/sourceCSV")
     public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download source field list CSV of session {}", etl);
 
         byte[] content = etlService.createSourceFieldListCSV(etl);
         String filename = "sourceList.csv";
+
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.parseMediaType("application/csv"));
+        header.setContentDispositionFormData(filename, filename);
+        header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+        return new ResponseEntity<byte[]>(content, header, HttpStatus.OK);
+
+    }
+
+
+    @GetMapping(value = "/sessions/targetCSV")
+    public ResponseEntity<?> getTargetFieldListCSV(@Param(value = "etl") Long etl) {
+        logger.info("ETL CONTROLLER - Download target field list CSV of session {}", etl);
+
+        byte[] content = etlService.createTargetFieldListCSV(etl);
+        String filename = "targetList.csv";
 
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.parseMediaType("application/csv"));

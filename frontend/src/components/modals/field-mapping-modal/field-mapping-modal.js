@@ -7,6 +7,7 @@ import FieldService from '../../../services/field-service';
 import Controls from '../../controls/controls';
 import Xarrow from 'react-xarrows/lib';
 import InfoTable from '../../info-table/info-table';
+import TableMappingLogic from '../../session/table-mapping-logic';
 
 
 const useStyles = makeStyles(theme => ({
@@ -380,7 +381,7 @@ export default function FieldMappingModal(props) {
      * 
      */
 
-    const saveLogic = () => {
+    const saveTableMappingLogic = () => {
         setLoadingSaveLogic(true);
 
         // make request to API
@@ -561,20 +562,11 @@ export default function FieldMappingModal(props) {
                             ))}
 
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <Controls.Input 
+                                <TableMappingLogic
                                     value={logic === null ? '' : logic}
-                                    name="comment"
-                                    fullWidth={true}
-                                    label="Table mapping logic"
-                                    placeholder="Edit mapping logic"
-                                    rows={3} 
-                                    onChange={(e) => setLogic(e.target.value)}
-                                />
-                                <Controls.Button
-                                    className={classes.button}
-                                    text="Save"
                                     disabled={loadingSaveLogic}
-                                    onClick={saveLogic}
+                                    onChange={(e) => setLogic(e.target.value)}
+                                    save={saveTableMappingLogic}
                                 />
 
                                 { showFieldInfo ? (

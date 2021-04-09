@@ -50,5 +50,9 @@ public interface ETLService {
 
     byte[] createSourceFieldListCSV(Long id);
 
+    byte[] createTargetFieldListCSV(Long etl);
+
     void createDocumentationFile(Long id);
+
+
 }

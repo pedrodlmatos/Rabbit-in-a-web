@@ -169,6 +169,19 @@ public class ETLServiceImpl implements ETLService {
         return null;
     }
 
+    @Override
+    public byte[] createTargetFieldListCSV(Long id) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            List<Row> rows = ETLSummaryGenerator.createTargetFieldList(etl);
+            byte[] outputStream = ETLSummaryGenerator.writeCSV("targetList.csv", rows);
+
+            return outputStream;
+        }
+        return null;
+    }
+
 
     @Override
     public void createDocumentationFile(Long id) {

@@ -38,7 +38,7 @@ public class TableMapping {
     private boolean complete;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private String logic;
 
     @ManyToOne

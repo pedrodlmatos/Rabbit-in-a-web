@@ -27,8 +27,8 @@ class TableMappingService {
      * @returns table mapping created
      */
 
-    addTableMapping(etl, source, target) {
-        return axios.post(API_URL + "map", {}, { headers: authHeader(), params: { etl_id: etl, source_id: source, target_id: target } });
+    addTableMapping = async (etl, source, target) => {
+        return await axios.post(API_URL + "map", {}, { headers: authHeader(), params: { etl_id: etl, source_id: source, target_id: target } });
     }
 
 

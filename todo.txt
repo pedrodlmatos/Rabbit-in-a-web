@@ -7,7 +7,7 @@ TODO 13/04
  - Mudar para vazio o mapping selecionado quando se sai do field mapping modal
  - Mudar nomes dos títulos
  - Marcar pontos nas tabelas para fazer drag and drop
- - Ficheiros de resumo
+ - Ficheiros de resumo (done)
 
  - Json View para field mapping (done)
  - Delete on cascade (done)
