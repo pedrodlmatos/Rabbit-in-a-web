@@ -40,20 +40,19 @@ export default function FieldMappingModal(props) {
     const [sourceTable, setSourceTable] = useState({});
     const [targetTable, setTargetTable] = useState({});
     const [complete, setComplete] = useState(false);
-    const [tableMappingLogic, setTableMappingLogic] = useState('');
     const [fieldMappings, setFieldMappings] = useState([]);
-    
+
+    const [tableMappingLogic, setTableMappingLogic] = useState('');
+    const [loadingSaveTableMappingLogic, setLoadingSaveTableMappingLogic] = useState(false);
     
     const [selectedField, setSelectedField] = useState({});
     const [sourceSelected, setSourceSelected] = useState(false);
-
-    const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
-    
-    const [showDeleteButton, setShowDeleteButton] = useState(false);
-    const [loadingSaveLogic, setLoadingSaveLogic] = useState(false);
     const [showFieldInfo, setShowFieldInfo] = useState(false);
     const [fieldInfo, setFieldInfo] = useState([]);
     const [showTable, setShowTable] = useState(false);
+
+    const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
+    const [showDeleteFieldMappingButton, setShowDeleteFieldMappingButton] = useState(false);
 
     const [showFieldMappingLogic, setShowFieldMappingLogic] = useState(false);
     const [savingFieldMappingLogic, setSavingFieldMappingLogic] = useState(false);
@@ -111,6 +110,22 @@ export default function FieldMappingModal(props) {
         }).catch(res => {
             console.log(res);
         })
+    }
+
+    
+    /**
+     * Save the logic from the table mapping
+     */
+
+    const saveTableMappingLogic = () => {
+        setLoadingSaveTableMappingLogic(true);
+        // make request to API
+        TableMappingService.editMappingLogic(mappingId, tableMappingLogic).then(response => {
+            setTableMappingLogic(response.data.logic);
+            setLoadingSaveTableMappingLogic(false);
+        }).catch(error => {
+            console.log(error);
+        });
     }
 
 
@@ -189,6 +204,56 @@ export default function FieldMappingModal(props) {
         }
     }
 
+    
+    /**
+     * Defines the content of fields table (field name, type, description and value counts)
+     *
+     * @param field selected field
+     */
+
+    const defineSourceFieldData = (field) => {
+        let data = [];
+        if (field.valueCounts.length === 0) {
+            setShowTable(false);
+        } else {
+            field.valueCounts.forEach(element => {
+                data.push({
+                    value: element.value,
+                    frequency: element.frequency,
+                    percentage: element.percentage
+                })
+            })
+            setFieldInfo(data);
+            setShowTable(true);
+        }
+    }
+
+
+    /**
+     * Defines the content of fields table (field name, type, description and list os concepts)
+     *
+     * @param field selected field
+     */
+
+    const defineTargetFieldData = (field) => {
+        let data = [];
+        if (field.concepts.length === 0) {
+            setShowTable(false);
+        } else {
+            field.concepts.forEach(element => {
+                data.push({
+                    conceptId: element.conceptId,
+                    conceptName: element.conceptName,
+                    conceptClassId: element.conceptClassId,
+                    standardConcept: element.standardConcept
+                })
+            })
+            setFieldInfo(data);
+            setShowTable(true);
+        }
+        
+    }
+
 
     /**
      * Changes color from arrows that start in selected field and makes the
@@ -197,7 +262,7 @@ export default function FieldMappingModal(props) {
      * @param {*} table selected table
      */
 
-     const selectArrowsFromSource = (field) => { 
+    const selectArrowsFromSource = (field) => { 
         fieldMappings.forEach(element => {
             element.color = element.start === field.name ? 'orange' : 'lightgrey';
         })
@@ -267,12 +332,12 @@ export default function FieldMappingModal(props) {
             arrows[index].color = "red";
             setSelectedFieldMapping(mapping);
             setFieldMappings(arrows);
-            setShowDeleteButton(true);
+            setShowDeleteFieldMappingButton(true);
             setShowFieldMappingLogic(true);
-        } else if(selectedFieldMapping === mapping) {                          // select the arrow previous selected to unselect
+        } else if(selectedFieldMapping === mapping) {                               // select the arrow previous selected to unselect
             resetArrowsColor();
             setSelectedFieldMapping({});
-            setShowDeleteButton(false);
+            setShowDeleteFieldMappingButton(false);
             setShowFieldMappingLogic(false);
         } else {                                                                    // select any other unselected arrow         
             resetArrowsColor();                                                     // unselect previous
@@ -280,7 +345,7 @@ export default function FieldMappingModal(props) {
             arrows[index].color = "red";
             setSelectedFieldMapping(mapping);                                       // select a new one
             setFieldMappings(arrows);
-            setShowDeleteButton(true);
+            setShowDeleteFieldMappingButton(true);
             setShowFieldMappingLogic(true);
         }
     }
@@ -295,92 +360,17 @@ export default function FieldMappingModal(props) {
             const index = fieldMappings.findIndex(x => x.id === selectedFieldMapping.id);
             fieldMappings.splice(index);
             setSelectedFieldMapping({});
-            setShowDeleteButton(false);
+            setShowDeleteFieldMappingButton(false);
         })
     }
 
 
     
-
-    
-
-    /**
-     * Defines the content of fields table (field name, type and description)
-     *
-     * @param table table with data
-     */
-
-     const defineSourceFieldData = (field) => {
-        let data = [];
-        if (field.valueCounts.length === 0) {
-            setShowTable(false);
-        } else {
-            field.valueCounts.forEach(element => {
-                data.push({
-                    value: element.value,
-                    frequency: element.frequency,
-                    percentage: element.percentage
-                })
-            })
-            setFieldInfo(data);
-            setShowTable(true);
-        }
-    }
-
-
-    /**
-     * Defines the content of fields table (field name, type and description)
-     *
-     * @param table table with data
-     */
-
-     const defineTargetFieldData = (field) => {
-        let data = [];
-        if (field.concepts.length === 0) {
-            setShowTable(false);
-        } else {
-            field.concepts.forEach(element => {
-                data.push({
-                    conceptId: element.conceptId,
-                    conceptName: element.conceptName,
-                    conceptClassId: element.conceptClassId,
-                    standardConcept: element.standardConcept
-                })
-            })
-            setFieldInfo(data);
-            setShowTable(true);
-        }
-        
-    }
-
-
-    
-
-
-    
-
-
     /**
      * 
      */
 
-    const saveTableMappingLogic = () => {
-        setLoadingSaveLogic(true);
-        // make request to API
-        TableMappingService.editMappingLogic(mappingId, tableMappingLogic).then(response => {
-            setTableMappingLogic(response.data.logic);
-            setLoadingSaveLogic(false);
-        }).catch(error => {
-            console.log(error);
-        });
-    }
-
-
-    /**
-     * 
-     */
-
-    const saveComment = () => {
+    const saveFieldComment = () => {
         if (sourceSelected) {
             FieldService.changeSourceTableComment(selectedField.id, selectedField.comment).then(response => {
                 let fields = []
@@ -501,7 +491,7 @@ export default function FieldMappingModal(props) {
                                     size="medium"
                                     color="secondary"
                                     variant="contained"
-                                    disabled={!showDeleteButton}
+                                    disabled={!showDeleteFieldMappingButton}
                                     onClick={deleteFieldMapping}
                                 />
                             </Grid>
@@ -564,7 +554,7 @@ export default function FieldMappingModal(props) {
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <TableMappingLogic
                                     value={tableMappingLogic === null ? '' : tableMappingLogic}
-                                    disabled={loadingSaveLogic}
+                                    disabled={loadingSaveTableMappingLogic}
                                     onChange={(e) => setTableMappingLogic(e.target.value)}
                                     save={saveTableMappingLogic}
                                 />
@@ -607,7 +597,7 @@ export default function FieldMappingModal(props) {
                                         <Controls.Button
                                             className={classes.button}
                                             text="Save"
-                                            onClick={saveComment}
+                                            onClick={saveFieldComment}
                                         />
                                     </div>
                                 ) : (

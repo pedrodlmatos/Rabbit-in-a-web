@@ -64,10 +64,11 @@ export default function Session() {
     const [sourceSelected, setSourceSelected] = useState(false);
     const [showTableDetails, setShowTableDetails] = useState(false);
     const [tableDetails, setTableDetails] = useState([]);
+    const [loadingSaveTableComment, setLoadingSaveTableComment] = useState(false);
       
     const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
 
-    const [loadingSaveLogic, setLoadingSaveLogic] = useState(false);
+    const [loadingSaveTableMappingLogic, setLoadingSaveTableMappingLogic] = useState(false);
     
     useEffect(() => {
         const session_id = window.location.pathname.toString().replace("/session/", "");
@@ -410,43 +411,24 @@ export default function Session() {
      */
 
     const saveComment = () => {
-        let tables = []
+        setLoadingSaveTableComment(true);
         if (sourceSelected) {
             TableService.changeSourceTableComment(selectedTable.id, selectedTable.comment).then(response => {
-                etl.sourceDatabase.tables.forEach(item => {
-                    if (item.id === response.data.id) {
-                        tables = tables.concat(response.data)
-                    } else {
-                        tables = tables.concat(item)
-                    }
-                })
-                etl.sourceDatabase.tables = tables;
-
-                setEtl({
-                    ...etl,
-                    sourceDatabase: etl.sourceDatabase
-                })
+                const index = etl.sourceDatabase.tables.findIndex(x => x.id === response.data.id);
+                etl.sourceDatabase.tables[index].comment = response.data.comment;
+                setLoadingSaveTableComment(false);
             }).catch(error => {
                 console.log(error);
             });
         } else {
             TableService.changeTargetTableComment(selectedTable.id, selectedTable.comment).then(response => {
-                etl.targetDatabase.tables.forEach(item => {
-                    if (item.id === response.data.id) {
-                        tables = tables.concat(response.data)
-                    } else {
-                        tables = tables.concat(item)
-                    }
-                })
-                etl.targetDatabase.tables = tables;
-                setEtl({
-                    ...etl,
-                    targetDatabase: etl.targetDatabase
-                })
+                const index = etl.targetDatabase.tables.findIndex(x => x.id === response.data.id);
+                etl.targetDatabase.tables[index].comment = response.data.comment;
+                setLoadingSaveTableComment(false);
             }).catch(error => {
                 console.log(error);
             });
-        }
+        }   
     }
 
 
@@ -489,22 +471,37 @@ export default function Session() {
 
 
     /**
-     * 
+     * Saves changed table mapping logic
      */
 
     const saveTableMappingLogic = () => {
-        console.log(selectedMapping.logic);
-        setLoadingSaveLogic(true);
-        
+        setLoadingSaveTableMappingLogic(true);
         // make request to API
         TableMappingService.editMappingLogic(selectedMapping.id, selectedMapping.logic).then(response => {
-            console.log(response.data);
             let index = mappings.findIndex(x => x.id === response.data.id);
             mappings[index].logic = response.data.logic;
-            setLoadingSaveLogic(false);
+            setLoadingSaveTableMappingLogic(false);
         }).catch(error => {
             console.log(error);
         });
+    }
+
+
+    const defineSourceTableColor = (table) => {
+        // '#FF9224' : '#FFD3A6'
+        if (!sourceSelected && Object.keys(selectedTable).length !== 0) {
+            // table from target db selected
+            return "#FF9224";
+        } else if (sourceSelected && selectedTable.id === table.id) {
+            // source table selected
+            return "#FF9224";
+        } else if (sourceSelected && selectedTable.id !== table.id) {
+            return "#FFD3A6";
+        } else {
+            // nothing is selected
+            return "#FF9224";
+        }
+        
     }
 
 
@@ -571,7 +568,8 @@ export default function Session() {
                                             id={item.name} 
                                             table={item} 
                                             clicked={selectedTable.id === item.id}
-                                            color={(Object.keys(selectedTable).length === 0 || selectedTable.id === item.id) ? '#FF9224' : '#FFD3A6'}
+                                            //color={sourceSelected && (Object.keys(selectedTable).length === 0 || selectedTable.id === item.id) ? '#FF9224' : '#FFD3A6'}
+                                            color={defineSourceTableColor(item)}
                                             border="#A10000"
                                             handleSelection={selectSourceTable} 
                                         />
@@ -644,6 +642,7 @@ export default function Session() {
                                 />
                                 <Controls.Button
                                     className={classes.showButton}
+                                    disabled={loadingSaveTableComment}
                                     text="Save"
                                     onClick={saveComment}
                                 />
@@ -663,9 +662,9 @@ export default function Session() {
                         { Object.keys(selectedMapping).length !== 0 ? (
                             <TableMappingLogic
                                 value={selectedMapping.logic === null ? '' : selectedMapping.logic}
-                                disabled={loadingSaveLogic}
+                                disabled={loadingSaveTableMappingLogic}
                                 onChange={(e) => setSelectedMapping({...selectedMapping, logic: e.target.value})}
-                                save={saveTableMappingLogic}
+                                save={() => saveTableMappingLogic()}
                             />
                         ) : (
                             <>
