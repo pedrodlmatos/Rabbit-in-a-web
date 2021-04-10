@@ -66,7 +66,7 @@ class TableMappingService {
      * @returns table mapping edited
      */
 
-     editMappingLogic(map_id, logic) {
+    editMappingLogic(map_id, logic) {
         return axios.put(API_URL + "map/" + map_id + "/logic", null, { headers: authHeader(), params: { logic: logic }})
     }
 

@@ -11,4 +11,6 @@ public interface FieldMappingService {
     FieldMapping removeFieldMapping(Long fieldMappingId);
 
     List<FieldMapping> getFieldMappingsFromTableMapping(Long tableMappingId);
+
+    FieldMapping changeMappingLogic(Long id, String logic);
 }

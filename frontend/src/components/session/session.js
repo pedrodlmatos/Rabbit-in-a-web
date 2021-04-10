@@ -266,6 +266,8 @@ export default function Session() {
      *  - If no arrow is previously selected, only selects an arrow
      *  - If selects the arrow previously selected, unselect it
      *  - If selects other arrow, unselects previous and selects the new one
+     * 
+     *  @param {*} arrow selected table mapping
      */
 
     const selectArrow = (arrow) => {
