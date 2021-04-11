@@ -16,6 +16,7 @@
     "react-bootstrap": "^1.4.0",
     "react-csv": "^2.0.3",
     "react-dom": "^17.0.1",
+    "react-draggable": "^4.4.3",
     "react-dropzone": "^11.2.4",
     "react-file-picker": "0.0.6",
     "react-loader-spinner": "^4.0.0",

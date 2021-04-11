@@ -388,6 +388,16 @@ export default function Session() {
 
 
     /**
+     * Closes the field mapping modal and cleans state
+     */
+
+    const closeFieldMappingModal = () => {
+        setShowFieldMappingModal(false)
+        setSelectedMapping({});
+    }
+
+
+    /**
      * 
      * @param {*} tableMappingId 
      * @param {*} completion 
@@ -614,11 +624,13 @@ export default function Session() {
                                         <Controls.TooltipBox
                                             key={item.id} 
                                             id={item.name} 
-                                            table={item} 
+                                            table={item}
+                                            handler="right"
                                             clicked={selectedTable.id === item.id}
                                             color={defineSourceTableColor(item)}
                                             border="#A10000"
-                                            handleSelection={selectSourceTable} 
+                                            handleSelection={selectSourceTable}
+                                            createMapping={createArrow} 
                                         />
                                     )
                                 })}
@@ -630,11 +642,13 @@ export default function Session() {
                                         <Controls.TooltipBox
                                             key={item.id} 
                                             id={item.name} 
-                                            table={item} 
+                                            table={item}
+                                            handler="left" 
                                             clicked={item.id === selectedTable.id}
                                             color="#53ECEC"
                                             border="#000F73"
-                                            handleSelection={selectTargetTable} 
+                                            handleSelection={selectTargetTable}
+                                            createMapping={createArrow} 
                                         />
                                     )
                                 })}
@@ -656,7 +670,7 @@ export default function Session() {
                             ))}
                             <FieldMappingModal 
                                 openModal={showFieldMappingModal}
-                                closeModal={() => setShowFieldMappingModal(false)}
+                                closeModal={closeFieldMappingModal}
                                 mappingId={selectedMapping.id}
                                 removeTableMapping={removeTableMapping}
                                 changeMappingCompletion={changeCompleteStatus}
