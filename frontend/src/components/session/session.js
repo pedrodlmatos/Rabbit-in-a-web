@@ -8,9 +8,10 @@ import Controls from '../controls/controls';
 import HelpModal from '../modals/help-modal/help-modal';
 import FieldMappingModal from '../modals/field-mapping-modal/field-mapping-modal';
 import { CDMVersions } from '../../services/CDMVersions';
-import InfoTable from '../info-table/info-table';
 import TableMappingLogic from './table-mapping-logic';
 import FilesModal from '../modals/files-modal/files-modal';
+import SourceTableDetails from './source-table-details';
+import TargetTableDetails from './target-table-details';
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -84,14 +85,13 @@ export default function Session() {
             // table mappings
             let maps = [];
             res.data.tableMappings.forEach(function(item) {
-                console.log(item);
                 const arrow = {
                     id: item.id,
                     start: item.source,
                     end: item.target,
                     complete: item.complete,
                     logic: item.logic,
-                    color: defineArrowColor(item)
+                    color: item.complete ? "black" : "grey"
                 }
                 maps.push(arrow);
             });
@@ -101,6 +101,32 @@ export default function Session() {
             console.log(res);
         })
     }, []);
+
+
+    /**
+     * Defines the color of a table from the EHR database according to table selection
+     *  - If no table is selected -> color = orange
+     *  - If a table from the OMOP CDM is selected -> color = orange
+     *  - If the table from the EHR database is selected:
+     *    - selected table -> color = orange
+     *    - other tables -> color = light orange
+     */
+
+    const defineSourceTableColor = (table) => {
+        if (!sourceSelected && Object.keys(selectedTable).length !== 0) {
+            // table from target db selected
+            return "#FF9224";
+        } else if (sourceSelected && selectedTable.id === table.id) {
+            // source table selected
+            return "#FF9224";
+        } else if (sourceSelected && selectedTable.id !== table.id) {
+            // others source tables
+            return "#FFD3A6";
+        } else {
+            // nothing is selected
+            return "#FF9224";
+        }  
+    }
 
 
     /**
@@ -370,7 +396,8 @@ export default function Session() {
     const changeCompleteStatus = (tableMappingId, completion) => {
         mappings.forEach(map => {
             if (map.id === tableMappingId) {
-                map.color = completion ? "black" : "grey"
+                map.color = completion ? "black" : "grey";
+                map.complete = completion;
             }
         })
     }
@@ -439,7 +466,7 @@ export default function Session() {
      * @returns true if are connect, false otherwise
      */
 
-    const tablesConnected = (targetTable_id) => {
+    const connectedToTarget = (targetTable_id) => {
         let result = false;
         mappings.forEach(item => {
             if (item.end.id === targetTable_id && item.start.id === selectedTable.id) {
@@ -455,10 +482,11 @@ export default function Session() {
      * 
      * @param {*} e check event
      */
-    const checkTable = e => {
+
+    const connectToTargetTable = e => {
         const targetTable_id = e.target.value[0];
         
-        if (tablesConnected(targetTable_id)) {
+        if (connectedToTarget(targetTable_id)) {
             mappings.forEach(item => {
                 if (item.end.id === targetTable_id && item.start.id === selectedTable.id) {
                     removeMapping(etl.id, item.id);
@@ -466,6 +494,44 @@ export default function Session() {
             })
         } else {
             createArrow(selectedTable.id, targetTable_id);
+        }
+    }
+
+
+    /**
+     * Verifies if a target table is connected to a source table
+     * 
+     * @param {*} sourceTable_id source table id
+     * @returns true if they are connected, false otherwise
+     */
+    const connectedToSource = (sourceTable_id) => {
+        let result = false;
+        mappings.forEach(item => {
+            if (item.start.id === sourceTable_id && item.end.id === selectedTable.id) {
+                result = true;
+            }
+        })
+        return result;
+    }
+
+
+    /**
+     * Creates a table mapping between two tables or removes it if already exists
+     * 
+     * @param {*} e check event
+     */
+
+    const connectToSourceTable = e => {
+        const sourceTable_id = e.target.value[0];
+        
+        if (connectedToSource(sourceTable_id)) {
+            mappings.forEach(item => {
+                if (item.start.id === sourceTable_id && item.end.id === selectedTable.id) {
+                    removeMapping(etl.id, item.id);
+                }
+            })
+        } else {
+            createArrow(sourceTable_id, selectedTable.id);
         }
     }
 
@@ -484,24 +550,6 @@ export default function Session() {
         }).catch(error => {
             console.log(error);
         });
-    }
-
-
-    const defineSourceTableColor = (table) => {
-        // '#FF9224' : '#FFD3A6'
-        if (!sourceSelected && Object.keys(selectedTable).length !== 0) {
-            // table from target db selected
-            return "#FF9224";
-        } else if (sourceSelected && selectedTable.id === table.id) {
-            // source table selected
-            return "#FF9224";
-        } else if (sourceSelected && selectedTable.id !== table.id) {
-            return "#FFD3A6";
-        } else {
-            // nothing is selected
-            return "#FF9224";
-        }
-        
     }
 
 
@@ -568,7 +616,6 @@ export default function Session() {
                                             id={item.name} 
                                             table={item} 
                                             clicked={selectedTable.id === item.id}
-                                            //color={sourceSelected && (Object.keys(selectedTable).length === 0 || selectedTable.id === item.id) ? '#FF9224' : '#FFD3A6'}
                                             color={defineSourceTableColor(item)}
                                             border="#A10000"
                                             handleSelection={selectSourceTable} 
@@ -620,40 +667,32 @@ export default function Session() {
                     <Grid className={classes.tableDetails} item xs={6} sm={6} md={6} lg={6}>
                         { showTableDetails ? (
                             <div>
-                                <h6><strong>Table: </strong>{selectedTable.name}</h6>
-
                                 { sourceSelected ? (
-                                    <h6><strong>Number of rows &gt;= </strong>{selectedTable.rowCount === null ? 0 : selectedTable.rowCount}</h6>
+                                    <SourceTableDetails
+                                        table={selectedTable}
+                                        columns={columns}
+                                        data={tableDetails}
+                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
+                                        disabled={loadingSaveTableComment}
+                                        save={saveComment}
+                                        omopTables={etl.targetDatabase.tables}
+                                        verify={connectedToTarget}
+                                        connect={connectToTargetTable}
+                                    />
                                 ) : (
-                                    <>
-                                    </>
+                                    <TargetTableDetails
+                                        table={selectedTable}
+                                        columns={columns}
+                                        data={tableDetails}
+                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
+                                        disabled={loadingSaveTableComment}
+                                        save={saveComment}
+                                        ehrTables={etl.sourceDatabase.tables}
+                                        verify={connectedToSource}
+                                        connect={connectToSourceTable}
+                                    />
+                                    
                                 ) }
-
-                                <InfoTable columns={columns} data={tableDetails}/>
-                                
-                                <Controls.Input
-                                    value={selectedTable.comment === null ? "" : selectedTable.comment}
-                                    name="comment"
-                                    fullWidth={true}
-                                    label="Comment"
-                                    placeholder="Edit table comment"
-                                    rows={5}
-                                    onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
-                                />
-                                <Controls.Button
-                                    className={classes.showButton}
-                                    disabled={loadingSaveTableComment}
-                                    text="Save"
-                                    onClick={saveComment}
-                                />
-
-                                <Controls.DropdownCheckbox
-                                    value={[]}
-                                    label="Connect to"
-                                    options={etl.targetDatabase.tables}
-                                    verifyMapping={tablesConnected}
-                                    onChange={checkTable}
-                                />                                
                             </div>
                         ) : (
                             <></>
@@ -667,8 +706,7 @@ export default function Session() {
                                 save={() => saveTableMappingLogic()}
                             />
                         ) : (
-                            <>
-                            </>
+                            <></>
                         ) }
                     </Grid>
                 </Grid>

@@ -1,7 +1,7 @@
 TODO 13/04
 
- - Mudar as cores das tabelas EHR apenas quando selecionar tabelas EHR
- - Alterar o dropodown checkbox para as tabelas OMOP
+ - Mudar as cores das tabelas EHR apenas quando selecionar tabelas EHR (done)
+ - Alterar o dropodown checkbox para as tabelas OMOP (done)
  - Definir o estado de complete quando se muda
  - Corrigir os placeholders
  - Mudar para vazio o mapping selecionado quando se sai do field mapping modal

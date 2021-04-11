@@ -33,7 +33,7 @@ public class TableMapping {
     @JsonView(Views.TableMapping.class)
     private List<FieldMapping> fieldMappings;
 
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     @Column(name = "complete", nullable = false)
     private boolean complete;
 
