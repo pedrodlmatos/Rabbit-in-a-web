@@ -55,4 +55,5 @@ public interface ETLService {
     void createDocumentationFile(Long id);
 
 
+    byte[] save(String filename, Long id);
 }

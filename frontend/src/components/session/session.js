@@ -343,7 +343,6 @@ export default function Session() {
         }).catch(err => {
             console.log(err);
         })
-        console.log(mappings);
     }
 
 
@@ -623,10 +622,11 @@ export default function Session() {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id} 
-                                            id={item.name} 
-                                            table={item}
+                                            element={item}
                                             handler="right"
                                             clicked={selectedTable.id === item.id}
+                                            help="Select first an EHR table and then an OMOP CDM table" 
+                                            position="right-end"
                                             color={defineSourceTableColor(item)}
                                             border="#A10000"
                                             handleSelection={selectSourceTable}
@@ -641,10 +641,11 @@ export default function Session() {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id} 
-                                            id={item.name} 
-                                            table={item}
+                                            element={item}
                                             handler="left" 
                                             clicked={item.id === selectedTable.id}
+                                            help="Select first an EHR table and then an OMOP CDM table" 
+                                            position="right-end"
                                             color="#53ECEC"
                                             border="#000F73"
                                             handleSelection={selectTargetTable}

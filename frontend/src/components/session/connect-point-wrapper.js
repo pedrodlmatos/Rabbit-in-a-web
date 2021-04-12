@@ -12,7 +12,7 @@ const connectPointStyle = {
 }
 
 const connectPointOffset = {
-    "left": { left: 0, top: "50%", transform: "translate(-50%, -50%)" },
+    left: { left: 0, top: "50%", transform: "translate(-50%, -50%)" },
     right: { left: "100%", top: "50%", transform: "translate(-50%, -50%)" },
     top: { left: "50%", top: 0, transform: "translate(-50%, -50%)" },
     bottom: { left: "50%", top: "100%", transform: "translate(-50%, -50%)" }
@@ -21,7 +21,7 @@ const connectPointOffset = {
 
 export default function ConnectPointsWrapper(props) {
 
-    const { id, tableId, handler, dragRef, boxRef } = props;
+    const { id, name, handler } = props;
     const ref1 = useRef();
     const [position, setPosition] = useState({});
     const [beingDragged, setBeingDragged] = useState(false);
@@ -36,16 +36,13 @@ export default function ConnectPointsWrapper(props) {
                 onMouseDown={e => e.stopPropagation()}
                 onDragStart={e => {
                     setBeingDragged(true);
-                    e.dataTransfer.setData("arrow", id);
-                    e.dataTransfer.setData("table", tableId);
+                    e.dataTransfer.setData("source", id);
                 }}
                 onDrag={e => {
-                    const {offsetTop, offsetLeft } = boxRef.current;
-                    const { x, y } = dragRef.current.state;
                     setPosition({
                         position: "fixed",
-                        left: e.clientX - x - offsetLeft,
-                        top: e.clientY - y - offsetTop,
+                        left: e.clientX,
+                        top: e.clientY,
                         transform: "none",
                         opacity: 0
                     });
@@ -55,7 +52,7 @@ export default function ConnectPointsWrapper(props) {
                     setBeingDragged(false);
                 }}
             />
-            {beingDragged ? <Xarrow start={id} end={ref1} color="grey" /> : null}
+            {beingDragged ? <Xarrow start={name} end={ref1} color="grey" /> : null}
         </Fragment>
     )
     

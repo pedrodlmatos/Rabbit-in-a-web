@@ -32,6 +32,23 @@ export default function FilesModal(props) {
         target_csvLink.current.link.click();
     }
 
+
+    const fetchSaveFile = () => {
+        ETLService.downloadSaveFile(etl_id).then(response => {
+            console.log(response);
+            const filename = response.headers.get('Content-Disposition').split('filename=')[1];
+            console.log(filename);
+            response.blob().then(blob => {
+                let url = window.URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+            })
+        })
+    }
+
+
     return(
         <Dialog open={openModal} classes={{ paper: classes.dialogWrapper }}>
             <DialogTitle>
@@ -58,6 +75,10 @@ export default function FilesModal(props) {
                         ref={target_csvLink}
                         target="_blank"
                     />
+                </div>
+                <br />
+                <div>
+                    <Controls.Button text="Save" onClick={fetchSaveFile}/>
                 </div>
 
 

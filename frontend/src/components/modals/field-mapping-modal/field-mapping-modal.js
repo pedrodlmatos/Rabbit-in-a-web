@@ -300,12 +300,12 @@ export default function FieldMappingModal(props) {
      * @param {*} endField 
      */
 
-    const createFieldMapping = (startField, endField) => {
-        FieldMappingService.addFieldMapping(mappingId, startField.id, endField.id).then(res => {
+    const createFieldMapping = (startField_id, endField_id) => {
+        FieldMappingService.addFieldMapping(mappingId, startField_id, endField_id).then(res => {
             const arrow = {
                 id: res.data.id,
-                start: startField.name,
-                end: endField.name,
+                start: res.data.source.name,
+                end: res.data.target.name,
                 logic: res.data.logic,
                 color: 'grey',
             }
@@ -510,12 +510,15 @@ export default function FieldMappingModal(props) {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id} 
-                                            id={item.name} 
-                                            table={item} 
+                                            element={item}
+                                            handler="right"
                                             clicked={selectedField.id === item.id}
+                                            help="Select first an EHR field and then an OMOP CDM field" 
+                                            position="right-end"
                                             color='#FFE3C6'
                                             border="#A10000"
-                                            handleSelection={selectSourceField} 
+                                            handleSelection={selectSourceField}
+                                            createMapping={createFieldMapping} 
                                         />
                                     )
                                 })}
@@ -526,12 +529,15 @@ export default function FieldMappingModal(props) {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id} 
-                                            id={item.name} 
-                                            table={item} 
+                                            element={item}
+                                            handler="left" 
                                             clicked={selectedField.id === item.id}
+                                            help="Select first an EHR field and then an OMOP CDM field" 
+                                            position="right-end"
                                             color="#D5FFFF"
                                             border="#000F73"
-                                            handleSelection={selectTargetField} 
+                                            handleSelection={selectTargetField}
+                                            createMapping={createFieldMapping} 
                                         />
                                     )
                                 })}

@@ -203,6 +203,19 @@ public class ETLController {
         header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
         return new ResponseEntity<byte[]>(content, header, HttpStatus.OK);
+    }
 
+
+    @GetMapping(value = "/sessions/save")
+    public ResponseEntity<?> getSaveFile(@Param(value = "etl") Long etl) {
+        logger.info("ETL CONTROLLER - Download save file of session {}", etl);
+
+        byte[] content = etlService.save("Scan.json", etl);
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.APPLICATION_JSON);
+        header.setContentLength(content.length);
+        header.set("Content-Disposition", "attachment; filename=Scan.json");
+        logger.info("DONE");
+        return new ResponseEntity<>(content, header, HttpStatus.OK);
     }
 }

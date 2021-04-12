@@ -19,11 +19,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import com.cedarsoftware.util.io.JsonWriter;
 
 @Service
 public class ETLServiceImpl implements ETLService {
@@ -193,5 +199,26 @@ public class ETLServiceImpl implements ETLService {
             generator.generateWordDocument(etl);
         }
          */
+    }
+
+    @Override
+    public byte[] save(String filename, Long id) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            try {
+                String etlJsonStr = JsonWriter.formatJson(JsonWriter.objectToJson(etl));
+
+                FileOutputStream fileOutputStream = new FileOutputStream(filename);
+                //GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);
+                OutputStreamWriter out = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
+                out.write(etlJsonStr);
+
+                return etlJsonStr.getBytes(StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
