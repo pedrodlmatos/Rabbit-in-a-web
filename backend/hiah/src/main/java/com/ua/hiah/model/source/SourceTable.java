@@ -69,6 +69,16 @@ public class SourceTable {
         this.mappings = new ArrayList<>();
     }
 
+    public SourceTable(String name, int rowCount, int rowsCheckedCount, String comment, SourceDatabase sourceDatabase) {
+        this.name = name;
+        this.sourceDatabase = sourceDatabase;
+        this.comment = comment;
+        this.rowCount = rowCount;
+        this.rowsCheckedCount = rowsCheckedCount;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+    }
+
     // GETTERS AND SETTERS
     public Long getId() {
         return id;

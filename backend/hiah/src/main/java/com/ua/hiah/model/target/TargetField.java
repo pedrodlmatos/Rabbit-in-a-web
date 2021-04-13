@@ -79,6 +79,17 @@ public class TargetField {
         this.concepts = new ArrayList<>();
     }
 
+    public TargetField(String name, boolean nullable, String type, String description, String comment, TargetTable table) {
+        this.name = name;
+        this.isNullable = nullable;
+        this.type = type;
+        this.description = description;
+        this.comment = comment;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.concepts = new ArrayList<>();
+    }
+
     // GETTERS AND SETTERS
     public Long getId() {
         return id;

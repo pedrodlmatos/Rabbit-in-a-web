@@ -95,6 +95,19 @@ public class SourceField {
         this.valueCounts = new ArrayList<>();
     }
 
+    public SourceField(String name, String type, int maxLength, double fractionEmpty, int uniqueCount, double fractionUnique, String comment, SourceTable table) {
+        this.name = name;
+        this.type = type;
+        this.maxLength = maxLength;
+        this.fractionEmpty = fractionEmpty;
+        this.uniqueCount = uniqueCount;
+        this.fractionUnique = fractionUnique;
+        this.comment = comment;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.valueCounts = new ArrayList<>();
+    }
+
     // GETTERS AND SETTERS
     public Long getId() {
         return id;

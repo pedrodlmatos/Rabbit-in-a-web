@@ -1,6 +1,9 @@
 package com.ua.hiah.service.target.database;
 
 import com.ua.hiah.model.CDMVersion;
+import com.ua.hiah.model.source.SourceField;
+import com.ua.hiah.model.source.SourceTable;
+import com.ua.hiah.model.source.ValueCount;
 import com.ua.hiah.model.target.Concept;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetField;
@@ -143,5 +146,51 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
     @Override
     public void removeDatabase(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public TargetDatabase createDatabaseFromJSON(TargetDatabase targetDatabase) {
+        TargetDatabase responseDatabase = new TargetDatabase(
+            targetDatabase.getDatabaseName(),
+            targetDatabase.getVersion(),
+            targetDatabase.getConceptIdHintsVocabularyVersion()
+        );
+        List<TargetTable> tables = new ArrayList<>();
+        for (TargetTable table : targetDatabase.getTables()) {
+            TargetTable responseTable = new TargetTable(
+                table.getName(),
+                table.getComment(),
+                responseDatabase
+            );
+            tables.add(responseTable);
+
+            for (TargetField field : table.getFields()) {
+                TargetField responseField = new TargetField(
+                    field.getName(),
+                    field.isNullable(),
+                    field.getType(),
+                    field.getDescription(),
+                    field.getComment(),
+                    responseTable
+                );
+                responseTable.getFields().add(responseField);
+
+                for (Concept concept : field.getConcepts()) {
+                    Concept responseConcept = new Concept(
+                        concept.getConceptId(),
+                        concept.getConceptName(),
+                        concept.getStandardConcept(),
+                        concept.getDomainId(),
+                        concept.getVocabularyId(),
+                        concept.getConceptClassId(),
+                        responseField
+                    );
+                    responseField.getConcepts().add(responseConcept);
+                }
+            }
+        }
+
+        responseDatabase.setTables(tables);
+        return repository.save(responseDatabase);
     }
 }

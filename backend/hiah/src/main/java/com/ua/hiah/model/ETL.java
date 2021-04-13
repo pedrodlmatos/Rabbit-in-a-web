@@ -84,20 +84,20 @@ public class ETL {
         return tableMappings;
     }
 
-    /*
+
     public void setTableMappings(List<TableMapping> tableMappings) {
         this.tableMappings = tableMappings;
     }
-    */
+
 
     @Override
     public String toString() {
-        return "ETL{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                //", sourceDatabase=" + sourceDatabase +
-                ", targetDatabase=" + targetDatabase +
-                ", tableMappings=" + tableMappings +
-                '}';
+        return String.format("ETL{" +
+                "\tid=%s,\n" +
+                "\tname=%s,\n" +
+                "\tsourceDatabase=%s,\n" +
+                "\ttargetDatabase=%s,\n" +
+                "\ttableMappings=%s\n" +
+                "}", id, name, sourceDatabase, targetDatabase, tableMappings);
     }
 }

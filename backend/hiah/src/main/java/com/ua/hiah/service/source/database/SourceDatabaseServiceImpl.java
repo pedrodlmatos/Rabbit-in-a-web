@@ -115,6 +115,49 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
         return null;
     }
 
+    @Override
+    public SourceDatabase createDatabaseFromJSON(SourceDatabase sourceDatabase) {
+        SourceDatabase response = new SourceDatabase(sourceDatabase.getDatabaseName());
+        List<SourceTable> tables = new ArrayList<>();
+        for (SourceTable table : sourceDatabase.getTables()) {
+            SourceTable responseTable = new SourceTable(
+                table.getName(),
+                table.getRowCount(),
+                table.getRowsCheckedCount(),
+                table.getComment(),
+                response
+            );
+            tables.add(responseTable);
+
+            for (SourceField field : table.getFields()) {
+                SourceField responseField = new SourceField(
+                    field.getName(),
+                    field.getType(),
+                    field.getMaxLength(),
+                    field.getFractionEmpty(),
+                    field.getUniqueCount(),
+                    field.getFractionUnique(),
+                    field.getComment(),
+                    responseTable
+                );
+                responseTable.getFields().add(responseField);
+
+                for (ValueCount valueCount : field.getValueCounts()) {
+                    ValueCount responseValue = new ValueCount(
+                            valueCount.getValue(),
+                            valueCount.getFrequency(),
+                            valueCount.getPercentage(),
+                            responseField
+                    );
+                    responseField.getValueCounts().add(responseValue);
+                }
+            }
+        }
+
+        response.setTables(tables);
+        return databaseRepository.save(response);
+    }
+
 
     /**
      * Create source database tables

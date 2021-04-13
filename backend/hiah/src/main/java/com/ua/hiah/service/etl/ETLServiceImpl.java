@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
+import com.ua.hiah.model.TableMapping;
+import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetTable;
@@ -26,6 +28,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -104,10 +107,28 @@ public class ETLServiceImpl implements ETLService {
 
             FileInputStream inputStream = new FileInputStream(scanTemp);
             InputStreamReader reader = new InputStreamReader(inputStream);
-
             JsonReader jsonReader = new JsonReader(reader);
+            Gson gson = new Gson();
+            ETL request = gson.fromJson(jsonReader, ETL.class);
+
+            ETL response = new ETL();
+            response.setName("ETL session " + etlRepository.count());
+            response = etlRepository.save(response);
+
+            // create source database
+            SourceDatabase source = sourceDatabaseService.createDatabaseFromJSON(request.getSourceDatabase());
+            response.setSourceDatabase(source);
+
+            // create target database
+            TargetDatabase target = targetDatabaseService.createDatabaseFromJSON(request.getTargetDatabase());
+            response.setTargetDatabase(target);
+
+            // create mappings
+            List<TableMapping> mappings = mappingService.getTableMappingsFromJSON(response, request.getTableMappings(), source, target);
+            response.setTableMappings(mappings);
 
             scanTemp.delete();
+            return etlRepository.save(response);
         } catch (IOException e) {
             e.printStackTrace();
         }

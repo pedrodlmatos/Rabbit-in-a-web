@@ -33,4 +33,6 @@ public interface TargetDatabaseService {
      */
 
     void removeDatabase(Long id);
+
+    TargetDatabase createDatabaseFromJSON(TargetDatabase targetDatabase);
 }

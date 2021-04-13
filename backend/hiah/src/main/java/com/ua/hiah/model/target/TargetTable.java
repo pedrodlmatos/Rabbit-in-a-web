@@ -63,6 +63,14 @@ public class TargetTable {
         this.mappings = new ArrayList<>();
     }
 
+    public TargetTable(String name, String comment, TargetDatabase targetDatabase) {
+        this.name = name;
+        this.comment = comment;
+        this.targetDatabase = targetDatabase;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+    }
+
     // GETTERS AND SETTERS
     public Long getId() {
         return id;

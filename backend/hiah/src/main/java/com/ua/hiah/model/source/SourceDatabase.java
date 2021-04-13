@@ -75,10 +75,10 @@ public class SourceDatabase {
 
     @Override
     public String toString() {
-        return "SourceDatabase{" +
-                "id=" + id +
-                ", databaseName='" + databaseName + '\'' +
-                ", tables=" + tables +
-                '}';
+        return String.format("SourceDatabase{\n" +
+                "\tid=%s,\n" +
+                "\tdatabaseName=%s,\n" +
+                "\ttables=%s\n" +
+                "}", id, databaseName, tables);
     }
 }

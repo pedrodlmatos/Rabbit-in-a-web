@@ -8,6 +8,7 @@ import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -54,6 +55,14 @@ public class TableMapping {
 
     // CONSTRUCTOR
     public TableMapping() {
+    }
+
+    public TableMapping(ETL etl, SourceTable sourceTable, TargetTable targetTable, String logic) {
+        this.etl = etl;
+        this.source = sourceTable;
+        this.target = targetTable;
+        this.logic = logic;
+        this.fieldMappings = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS

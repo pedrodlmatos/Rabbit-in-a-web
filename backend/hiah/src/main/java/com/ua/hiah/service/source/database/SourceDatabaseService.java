@@ -14,4 +14,6 @@ public interface SourceDatabaseService {
      */
 
     SourceDatabase createDatabaseFromScanReport(String name, MultipartFile file);
+
+    SourceDatabase createDatabaseFromJSON(SourceDatabase sourceDatabase);
 }
