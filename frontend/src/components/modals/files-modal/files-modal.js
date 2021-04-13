@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogTitle, makeStyles } from '@material-ui/cor
 import Controls from '../../controls/controls';
 import ETLService from '../../../services/etl-list-service';
 import { CSVLink } from 'react-csv';
+import { saveAs } from 'file-saver';
 
 const useStyles = makeStyles(theme => ({ }))
 
@@ -36,15 +37,10 @@ export default function FilesModal(props) {
     const fetchSaveFile = () => {
         ETLService.downloadSaveFile(etl_id).then(response => {
             console.log(response);
-            const filename = response.headers.get('Content-Disposition').split('filename=')[1];
-            console.log(filename);
-            response.blob().then(blob => {
-                let url = window.URL.createObjectURL(blob);
-                let a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.click();
-            })
+            //const filename = response.headers.get('Content-Disposition').split('filename=')[1];
+            //console.log(filename);
+            let blob = new Blob([JSON.stringify(response.data)], { type: 'application/json', name: 'Scan.json' });
+            saveAs(blob, 'Scan.json');
         })
     }
 
@@ -78,7 +74,7 @@ export default function FilesModal(props) {
                 </div>
                 <br />
                 <div>
-                    <Controls.Button text="Save" onClick={fetchSaveFile}/>
+                    <Controls.Button text="Save" onClick={fetchSaveFile} />
                 </div>
 
 

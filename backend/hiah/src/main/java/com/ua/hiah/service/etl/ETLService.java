@@ -19,6 +19,8 @@ public interface ETLService {
     ETL createETLSession(String name, MultipartFile file, String cdm);
 
 
+    ETL createETLSessionFromFile(MultipartFile saveFile);
+
     /**
      * Retrieve all ETL sessions
      *

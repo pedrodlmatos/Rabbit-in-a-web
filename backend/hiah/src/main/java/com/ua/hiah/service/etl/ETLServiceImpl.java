@@ -1,5 +1,8 @@
 package com.ua.hiah.service.etl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.source.SourceTable;
@@ -19,9 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -88,6 +89,31 @@ public class ETLServiceImpl implements ETLService {
         }
         return null;
     }
+    
+
+    @Override
+    public ETL createETLSessionFromFile(MultipartFile saveFile) {
+        try {
+            // write content in a file
+            File scanTemp = new File("scanTemp.xlsx");
+            if(scanTemp.createNewFile()) {
+                OutputStream os = new FileOutputStream(scanTemp);
+                os.write(saveFile.getBytes());
+                os.close();
+            }
+
+            FileInputStream inputStream = new FileInputStream(scanTemp);
+            InputStreamReader reader = new InputStreamReader(inputStream);
+
+            JsonReader jsonReader = new JsonReader(reader);
+
+            scanTemp.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 
     /**
@@ -207,7 +233,9 @@ public class ETLServiceImpl implements ETLService {
 
         if (etl != null) {
             try {
-                String etlJsonStr = JsonWriter.formatJson(JsonWriter.objectToJson(etl));
+                //String etlJsonStr = JsonWriter.formatJson(JsonWriter.objectToJson(etl));
+                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                String etlJsonStr = gson.toJson(etl);
 
                 FileOutputStream fileOutputStream = new FileOutputStream(filename);
                 //GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);

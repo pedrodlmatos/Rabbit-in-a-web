@@ -135,6 +135,18 @@ public class ETLController {
         return new ResponseEntity<>(etl, HttpStatus.CREATED);
     }
 
+
+    @PostMapping(value = "/sessions/save", consumes = "multipart/form-data")
+    public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file) {
+        logger.info("ETL CONTROLLER - Creating ETL session from file");
+        ETL etl = etlService.createETLSessionFromFile(file);
+
+        if (etl == null)
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
+        return new ResponseEntity<>(etl, HttpStatus.CREATED);
+    }
+
     // TODO: create ETL session with a custom OMOP CDM file
 
     /**

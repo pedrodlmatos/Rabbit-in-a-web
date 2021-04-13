@@ -1,6 +1,7 @@
 package com.ua.hiah.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.views.Views;
@@ -23,21 +24,24 @@ public class ETL {
 
     @Column(name = "name", nullable = false)
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private String name;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id")
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private SourceDatabase sourceDatabase;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private TargetDatabase targetDatabase;
 
     @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private List<TableMapping> tableMappings;
 
     public ETL() {

@@ -2,6 +2,7 @@ package com.ua.hiah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.Column;
@@ -25,26 +26,32 @@ public class Concept {
 
     @Column(name = "concept_id", nullable = false)
     @JsonView(Views.TableMapping.class)
+    @Expose
     private Long conceptId;
 
     @Column(name = "concept_name", nullable = false)
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String conceptName;
 
     @Column(name = "standard_concept", nullable = false)
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String standardConcept;
 
     @Column(name = "domain_id")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String domainId;
 
     @Column(name = "vocabulary_id")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String vocabularyId;
 
     @Column(name = "concept_class_id")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String conceptClassId;
 
     @ManyToOne

@@ -2,6 +2,7 @@ package com.ua.hiah.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.views.Views;
@@ -21,15 +22,18 @@ public class FieldMapping {
     @ManyToOne
     @JoinColumn(name = "source_id", nullable = false)
     @JsonView(Views.TableMapping.class)
+    @Expose
     private SourceField source;
 
     @ManyToOne
     @JoinColumn(name = "target_id", nullable = false)
     @JsonView(Views.TableMapping.class)
+    @Expose
     private TargetField target;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String logic;
 
     @ManyToOne

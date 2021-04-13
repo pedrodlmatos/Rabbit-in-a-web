@@ -2,6 +2,7 @@ package com.ua.hiah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.views.Views;
@@ -24,18 +25,22 @@ public class TargetDatabase {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "version")
+    @Expose
     private CDMVersion version;
 
     @Column(name = "database_name", nullable = false)
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private String databaseName;
 
     @Column(name = "vocabulary_version", nullable = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private String conceptIdHintsVocabularyVersion;
 
     @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private List<TargetTable> tables;
 
     @OneToOne(mappedBy = "targetDatabase")

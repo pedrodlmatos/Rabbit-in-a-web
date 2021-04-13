@@ -2,6 +2,7 @@ package com.ua.hiah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.views.Views;
 
@@ -19,10 +20,12 @@ public class SourceDatabase {
 
     @Column(name = "database_name")
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private String databaseName;
 
     @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private List<SourceTable> tables;
 
     @OneToOne(mappedBy = "sourceDatabase")

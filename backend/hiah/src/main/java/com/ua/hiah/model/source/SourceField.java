@@ -2,6 +2,7 @@ package com.ua.hiah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.views.Views;
@@ -22,6 +23,7 @@ public class SourceField {
 
     @Column(name = "name")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String name;
 
     /*
@@ -32,25 +34,32 @@ public class SourceField {
 
     @Column(name = "type")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String type;
 
     @Column(name = "nullable")
+    @Expose
     private boolean isNullable;
 
     @Column(name = "maxLength", nullable = true)
+    @Expose
     private int maxLength;
 
     @Column(name = "fractionEmpty", nullable = true)
+    @Expose
     private double fractionEmpty;
 
     @Column(name = "uniqueCount", nullable = true)
+    @Expose
     private int uniqueCount;
 
     @Column(name = "fractionUnique", nullable = true)
+    @Expose
     private double fractionUnique;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String comment;
 
     @ManyToOne
@@ -66,6 +75,7 @@ public class SourceField {
     @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
     @Column(name = "valueCount")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private List<ValueCount> valueCounts;
 
 

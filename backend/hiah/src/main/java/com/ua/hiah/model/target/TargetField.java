@@ -2,6 +2,7 @@ package com.ua.hiah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.views.Views;
@@ -25,21 +26,26 @@ public class TargetField {
 
     @Column(name = "name")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String description;
 
     @Column(name = "type")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String type;
 
     @Column(name = "nullable")
+    @Expose
     private boolean isNullable;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,6 +61,7 @@ public class TargetField {
     @OneToMany(mappedBy = "field", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "concepts")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private List<Concept> concepts;
 
 

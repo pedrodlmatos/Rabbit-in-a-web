@@ -2,6 +2,7 @@ package com.ua.hiah.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.views.Views;
@@ -22,23 +23,28 @@ public class TableMapping {
     @ManyToOne
     @JoinColumn(name = "source_table_id", nullable = false)
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private SourceTable source;
 
     @ManyToOne
     @JoinColumn(name = "target_table_id", nullable = false)
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private TargetTable target;
 
     @OneToMany(mappedBy = "tableMapping", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.TableMapping.class)
+    @Expose
     private List<FieldMapping> fieldMappings;
 
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     @Column(name = "complete", nullable = false)
+    @Expose
     private boolean complete;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String logic;
 
     @ManyToOne

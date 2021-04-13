@@ -2,6 +2,7 @@ package com.ua.hiah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
 
@@ -21,6 +22,7 @@ public class SourceTable {
 
     @Column(name = "name")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String name;
 
     @ManyToOne
@@ -30,17 +32,21 @@ public class SourceTable {
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
+    @Expose
     private String comment;
 
     @Column(name = "rowCount", nullable = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private int rowCount;
 
     @Column(name = "rowsCheckedCount", nullable = true)
+    @Expose
     private int rowsCheckedCount;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL)
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private List<SourceField> fields;
 
 

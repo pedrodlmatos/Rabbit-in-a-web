@@ -2,6 +2,7 @@ package com.ua.hiah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
@@ -18,14 +19,17 @@ public class ValueCount {
 
     @Column(name = "value")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private String value;
 
     @Column(name = "frequency")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private int frequency;
 
     @Column(name = "percentage")
     @JsonView(Views.TableMapping.class)
+    @Expose
     private double percentage;
 
     @ManyToOne

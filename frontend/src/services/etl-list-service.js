@@ -58,6 +58,18 @@ class ETLService {
         }
     }
 
+    
+    createETLFromFile = async (file) => {
+        let formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            return await axios.post(API_URL + "sessions/save", formData, { headers: authHeaderMultiPart() });
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
 
     /**
      * Sends PUT request to change the OMOP CDM version
