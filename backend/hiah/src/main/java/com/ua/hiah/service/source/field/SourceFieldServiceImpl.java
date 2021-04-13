@@ -11,25 +11,34 @@ public class SourceFieldServiceImpl implements SourceFieldService{
     @Autowired
     private SourceFieldRepository repository;
 
-    @Override
-    public SourceField createField(SourceField field) {
-        return repository.save(field);
-    }
+
+    /**
+     * Retrieves a field from the EHR database given its id
+     *
+     * @param source_id field's id
+     * @return retrieve field if found, null otherwise
+     */
 
     @Override
     public SourceField getFieldById(Long source_id) {
         return repository.findById(source_id).orElse(null);
     }
 
+    /**
+     * Changes the comment a field from the EHR database
+     *
+     * @param fieldId field's id
+     * @param comment comment to change to
+     * @return changed field
+     */
+
     @Override
     public SourceField changeComment(Long fieldId, String comment) {
         SourceField field = repository.findById(fieldId).orElse(null);
-
         if (field != null) {
             field.setComment(comment);
             return repository.save(field);
         }
-
         return null;
     }
 }

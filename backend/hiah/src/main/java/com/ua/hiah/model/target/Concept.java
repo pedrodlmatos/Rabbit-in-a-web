@@ -2,6 +2,7 @@ package com.ua.hiah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.Column;
@@ -20,40 +21,55 @@ public class Concept {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     private Long id;
 
     @Column(name = "concept_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private Long conceptId;
 
     @Column(name = "concept_name", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private String conceptName;
 
     @Column(name = "standard_concept", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private String standardConcept;
 
     @Column(name = "domain_id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private String domainId;
 
     @Column(name = "vocabulary_id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private String vocabularyId;
 
     @Column(name = "concept_class_id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private String conceptClassId;
 
     @ManyToOne
     @JoinColumn(name = "field_id", nullable = false)
-    //@JsonView(Views.ETLSession.class)
     @JsonIgnore
     private TargetField field;
 
-    public Concept() {
+
+    public Concept() { }
+
+    public Concept(Long conceptId, String conceptName, String standardConcept, String domainId, String vocabularyId, String conceptClassId, TargetField field) {
+        this.conceptId = conceptId;
+        this.conceptName = conceptName;
+        this.standardConcept = standardConcept;
+        this.domainId = domainId;
+        this.vocabularyId = vocabularyId;
+        this.conceptClassId = conceptClassId;
+        this.field = field;
     }
 
     public Long getId() {

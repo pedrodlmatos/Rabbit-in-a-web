@@ -11,10 +11,13 @@ public class SourceTableServiceImpl implements SourceTableService {
     @Autowired
     private SourceTableRepository repository;
 
-    @Override
-    public SourceTable createTable(SourceTable table) {
-        return repository.save(table);
-    }
+
+    /**
+     * Retrieves a table from the EHR database given its id
+     *
+     * @param id table's id
+     * @return retrieved table if found, null otherwise
+     */
 
     @Override
     public SourceTable getTableById(Long id) {
@@ -23,20 +26,20 @@ public class SourceTableServiceImpl implements SourceTableService {
 
 
     /**
+     * Changes the comment of a table of the EHR database
      *
-     * @param tableId
-     * @param comment
-     * @return
+     * @param tableId table's id
+     * @param comment comment to change to
+     * @return changed table
      */
+
     @Override
     public SourceTable changeComment(Long tableId, String comment) {
         SourceTable table = repository.findById(tableId).orElse(null);
-
         if (table != null) {
             table.setComment(comment);
             return repository.save(table);
         }
-
         return null;
     }
 }

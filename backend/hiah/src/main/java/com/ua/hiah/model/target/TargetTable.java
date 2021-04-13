@@ -2,8 +2,12 @@ package com.ua.hiah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -16,11 +20,12 @@ public class TargetTable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String name;
 
     @ManyToOne
@@ -30,10 +35,12 @@ public class TargetTable {
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
+    @Expose
     private String comment;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private List<TargetField> fields;
 
 
@@ -45,6 +52,21 @@ public class TargetTable {
 
     // CONSTRUCTOR
     public TargetTable() {
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+    }
+
+    public TargetTable(String name, TargetDatabase database) {
+        this.name = name;
+        this.targetDatabase = database;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+    }
+
+    public TargetTable(String name, String comment, TargetDatabase targetDatabase) {
+        this.name = name;
+        this.comment = comment;
+        this.targetDatabase = targetDatabase;
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
     }

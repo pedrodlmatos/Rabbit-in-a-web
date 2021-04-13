@@ -2,9 +2,13 @@ package com.ua.hiah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -17,26 +21,31 @@ public class TargetField {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String description;
 
     @Column(name = "type")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String type;
 
     @Column(name = "nullable")
+    @Expose
     private boolean isNullable;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,19 +53,41 @@ public class TargetField {
     @JsonIgnore
     private TargetTable table;
 
-    @OneToMany(mappedBy = "target")
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;
 
-    @OneToMany(mappedBy = "field")
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "concepts")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private List<Concept> concepts;
 
 
     // CONSTRUCTOR
     public TargetField() {
+    }
+
+    public TargetField(String name, boolean isNullable, String type, String description, TargetTable table) {
+        this.name = name;
+        this.isNullable = isNullable;
+        this.type = type;
+        this.description = description;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.concepts = new ArrayList<>();
+    }
+
+    public TargetField(String name, boolean nullable, String type, String description, String comment, TargetTable table) {
+        this.name = name;
+        this.isNullable = nullable;
+        this.type = type;
+        this.description = description;
+        this.comment = comment;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.concepts = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS

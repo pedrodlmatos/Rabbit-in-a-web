@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { makeStyles, Tooltip } from '@material-ui/core';
+import ConnectPointsWrapper from '../session/connect-point-wrapper';
 
 const useStyles = makeStyles(theme => ({
     unselected: {
@@ -38,23 +39,36 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function TooltipBox(props) {
-    const { id, table, clicked, handleSelection } = props;
+    const { element, handler, clicked, help, position, handleSelection, createMapping } = props;
+    const ref0 = useRef();
     const classes = useStyles(props);
 
     const selectTable = () => {
-        handleSelection(table);
+        handleSelection(element);
     }
 
 
     return(
         <Tooltip 
-            title="Select first an EHR table and then an OMOP CDM table" 
-            placement="right-end"
+            title={help}
+            placement={position}
             enterDelay={1000}
         >
-            <div id={id} className={clicked ? classes.selected : classes.unselected} onClick={selectTable}>
-                { table.name }
+            <div 
+                id={element.name} 
+                ref={ref0} 
+                className={clicked ? classes.selected : classes.unselected} 
+                onClick={selectTable}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => {
+                    if (e.dataTransfer.getData("source") !== element.id) {
+                        createMapping(e.dataTransfer.getData("source"), element.id);
+                    }
+                }}
+            >
+                { element.name }
+                <ConnectPointsWrapper id={element.id} name={element.name} handler={handler} />
             </div> 
-        </Tooltip>     
+        </Tooltip>
     )
 }

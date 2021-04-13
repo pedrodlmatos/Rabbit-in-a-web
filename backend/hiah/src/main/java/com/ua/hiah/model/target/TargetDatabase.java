@@ -2,9 +2,13 @@ package com.ua.hiah.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -21,18 +25,22 @@ public class TargetDatabase {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "version")
+    @Expose
     private CDMVersion version;
 
     @Column(name = "database_name", nullable = false)
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private String databaseName;
 
     @Column(name = "vocabulary_version", nullable = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private String conceptIdHintsVocabularyVersion;
 
-    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "targetDatabase", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private List<TargetTable> tables;
 
     @OneToOne(mappedBy = "targetDatabase")
@@ -48,6 +56,12 @@ public class TargetDatabase {
     public TargetDatabase(String databaseName, ETL etl) {
         this.databaseName = databaseName;
         this.etl = etl;
+    }
+
+    public TargetDatabase(String databaseName, CDMVersion version, String vocabularyVersion) {
+        this.databaseName = databaseName;
+        this.version = version;
+        this.conceptIdHintsVocabularyVersion = vocabularyVersion;
     }
 
     // GETTERS AND SETTERS
@@ -71,11 +85,11 @@ public class TargetDatabase {
         return tables;
     }
 
-    /*
+
     public void setTables(List<TargetTable> tables) {
         this.tables = tables;
     }
-    */
+
 
     public ETL getEtl() {
         return etl;

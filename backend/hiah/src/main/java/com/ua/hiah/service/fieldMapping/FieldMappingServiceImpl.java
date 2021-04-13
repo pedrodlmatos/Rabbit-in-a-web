@@ -1,6 +1,7 @@
 package com.ua.hiah.service.fieldMapping;
 
 import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.repository.FieldMappingRepository;
 import com.ua.hiah.service.source.field.SourceFieldService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
@@ -48,5 +49,16 @@ public class FieldMappingServiceImpl implements FieldMappingService {
     @Override
     public List<FieldMapping> getFieldMappingsFromTableMapping(Long tableMappingId) {
         return repository.findAllByTableMapping_Id(tableMappingId);
+    }
+
+    @Override
+    public FieldMapping changeMappingLogic(Long id, String logic) {
+        FieldMapping mapping = repository.findById(id).orElse(null);
+
+        if (mapping != null) {
+            mapping.setLogic(logic);
+            return repository.save(mapping);
+        }
+        return null;
     }
 }

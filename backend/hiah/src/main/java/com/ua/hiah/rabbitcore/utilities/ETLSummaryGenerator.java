@@ -43,7 +43,7 @@ public class ETLSummaryGenerator {
                 row.add("Source Table", sourceTable.getName());
                 row.add("Source Field", sourceField.getName());
                 row.add("Type", sourceField.getType());
-                //row.add("Comment", sourceField.getComment()); TODO
+                row.add("Comment", sourceField.getComment());
                 row.add("Mapped?", mappings.size() > 0 ? "X" : "");
                 row.add("Number of mappings", mappings.size() > 0 ? String.valueOf(mappings.size()) : "");
                 row.add("Mappings", String.join(",", mappings));
@@ -69,7 +69,7 @@ public class ETLSummaryGenerator {
                 row.add("Target Table", targetTable.getName());
                 row.add("Target Field", targetField.getName());
                 row.add("Required?", targetField.isNullable() ? "" : "*");
-                //row.add("Comment", targetField.getComment()); TODO
+                row.add("Comment", targetField.getComment());
                 row.add("Mapped?", mappings.size() > 0 ? "X" : "");
                 row.add("Number of mappings", mappings.size() > 0 ? String.valueOf(mappings.size()) : "");
                 row.add("Mappings", String.join(",", mappings));

@@ -14,7 +14,6 @@ class ETLService {
      */
 
     getAllETL = async () => {
-        console.log(API_URL);
         try {
             return await axios.get(API_URL + 'sessions', { headers: authHeader() })
         } catch (e) {
@@ -59,6 +58,18 @@ class ETLService {
         }
     }
 
+    
+    createETLFromFile = async (file) => {
+        let formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            return await axios.post(API_URL + "sessions/save", formData, { headers: authHeaderMultiPart() });
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
 
     /**
      * Sends PUT request to change the OMOP CDM version
@@ -72,8 +83,26 @@ class ETLService {
         return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl, cdm: cdm }});
     }
 
-    downloadSourceFieldsFile(etl) {
-        return axios.get(API_URL + "sessions/sourceCSV", { headers: authHeader(), params: { etl: etl }})
+
+    /**
+     * Sends GET request to retrieve data from source fields summary file
+     * 
+     * @param {*} etl etl's id
+     * @returns 
+     */
+
+    downloadSourceFieldsFile = async (etl) => {
+        return await axios.get(API_URL + "sessions/sourceCSV", { headers: authHeader(), params: { etl: etl }})
+    }
+
+
+    downloadTargetFieldsFile = async (etl) => {
+        return await axios.get(API_URL + "sessions/targetCSV", { headers: authHeader(), params: { etl: etl }})
+    }
+
+
+    downloadSaveFile(etl) {
+        return axios.get(API_URL + "sessions/save", { headers: authHeader(), params: {etl: etl }});
     }
 }
 

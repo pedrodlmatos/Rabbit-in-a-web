@@ -8,11 +8,4 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConceptServiceImpl implements ConceptService {
 
-    @Autowired
-    private ConceptRepository repository;
-
-    @Override
-    public Concept saveConcept(Concept concept) {
-        return repository.save(concept);
-    }
 }

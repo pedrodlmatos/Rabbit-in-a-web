@@ -7,6 +7,7 @@ import Select from './select';
 import DropdownCheckbox from './dropdown-checkbox';
 import TooltipBox from './box';
 import ElementBox from './elementBox';
+import DownloadButton from './download-button';
 
 const Controls = {
     FileInput,
@@ -17,7 +18,8 @@ const Controls = {
     Select,
     DropdownCheckbox,
     TooltipBox,
-    ElementBox
+    ElementBox,
+    DownloadButton
 }
 
 export default Controls;

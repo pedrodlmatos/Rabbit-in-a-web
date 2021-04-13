@@ -1,7 +1,12 @@
 package com.ua.hiah.service.etl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
+import com.ua.hiah.model.TableMapping;
+import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetTable;
@@ -19,11 +24,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import com.cedarsoftware.util.io.JsonWriter;
 
 @Service
 public class ETLServiceImpl implements ETLService {
@@ -48,10 +58,7 @@ public class ETLServiceImpl implements ETLService {
 
     private static final Logger logger = LoggerFactory.getLogger(ETLServiceImpl.class);
 
-    @Override
-    public List<ETL> getAllETL() {
-        return etlRepository.findAll();
-    }
+
 
 
     /**
@@ -84,6 +91,61 @@ public class ETLServiceImpl implements ETLService {
             return etlRepository.save(etl);
         }
         return null;
+    }
+    
+
+    @Override
+    public ETL createETLSessionFromFile(MultipartFile saveFile) {
+        try {
+            // write content in a file
+            File scanTemp = new File("scanTemp.xlsx");
+            if(scanTemp.createNewFile()) {
+                OutputStream os = new FileOutputStream(scanTemp);
+                os.write(saveFile.getBytes());
+                os.close();
+            }
+
+            FileInputStream inputStream = new FileInputStream(scanTemp);
+            InputStreamReader reader = new InputStreamReader(inputStream);
+            JsonReader jsonReader = new JsonReader(reader);
+            Gson gson = new Gson();
+            ETL request = gson.fromJson(jsonReader, ETL.class);
+
+            ETL response = new ETL();
+            response.setName("ETL session " + etlRepository.count());
+            response = etlRepository.save(response);
+
+            // create source database
+            SourceDatabase source = sourceDatabaseService.createDatabaseFromJSON(request.getSourceDatabase());
+            response.setSourceDatabase(source);
+
+            // create target database
+            TargetDatabase target = targetDatabaseService.createDatabaseFromJSON(request.getTargetDatabase());
+            response.setTargetDatabase(target);
+
+            // create mappings
+            List<TableMapping> mappings = mappingService.getTableMappingsFromJSON(response, request.getTableMappings(), source, target);
+            response.setTableMappings(mappings);
+
+            scanTemp.delete();
+            return etlRepository.save(response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+    /**
+     * Retrieve all ETL sessions
+     *
+     * @return list with ETL sessions
+     */
+
+    @Override
+    public List<ETL> getAllETL() {
+        return etlRepository.findAll();
     }
 
 
@@ -126,14 +188,11 @@ public class ETLServiceImpl implements ETLService {
 
         if (etl != null) {
             TargetDatabase previous = etl.getTargetDatabase();
-
             // create an OMOP CDM from a different version
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
-
             // remove previous cdm and mappings
-            //targetDatabaseService.removeDatabase(previous.getId());
             mappingService.removeTableMappingsFromETL(etl.getId());
-
+            targetDatabaseService.removeDatabase(previous.getId());
 
             //targetDatabaseService.removeDatabase(previous);
             // order tables by id
@@ -143,9 +202,7 @@ public class ETLServiceImpl implements ETLService {
 
             List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
             Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
-
              */
-
             return etlRepository.save(etl);
         }
         return null;
@@ -165,6 +222,19 @@ public class ETLServiceImpl implements ETLService {
         return null;
     }
 
+    @Override
+    public byte[] createTargetFieldListCSV(Long id) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            List<Row> rows = ETLSummaryGenerator.createTargetFieldList(etl);
+            byte[] outputStream = ETLSummaryGenerator.writeCSV("targetList.csv", rows);
+
+            return outputStream;
+        }
+        return null;
+    }
+
 
     @Override
     public void createDocumentationFile(Long id) {
@@ -176,5 +246,28 @@ public class ETLServiceImpl implements ETLService {
             generator.generateWordDocument(etl);
         }
          */
+    }
+
+    @Override
+    public byte[] save(String filename, Long id) {
+        ETL etl = etlRepository.findById(id).orElse(null);
+
+        if (etl != null) {
+            try {
+                //String etlJsonStr = JsonWriter.formatJson(JsonWriter.objectToJson(etl));
+                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                String etlJsonStr = gson.toJson(etl);
+
+                FileOutputStream fileOutputStream = new FileOutputStream(filename);
+                //GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);
+                OutputStreamWriter out = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
+                out.write(etlJsonStr);
+
+                return etlJsonStr.getBytes(StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

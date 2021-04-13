@@ -1,9 +1,12 @@
 package com.ua.hiah.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.views.Views;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -21,20 +24,24 @@ public class ETL {
 
     @Column(name = "name", nullable = false)
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private String name;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id")
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private SourceDatabase sourceDatabase;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id")
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private TargetDatabase targetDatabase;
 
     @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private List<TableMapping> tableMappings;
 
     public ETL() {
@@ -77,20 +84,20 @@ public class ETL {
         return tableMappings;
     }
 
-    /*
+
     public void setTableMappings(List<TableMapping> tableMappings) {
         this.tableMappings = tableMappings;
     }
-    */
+
 
     @Override
     public String toString() {
-        return "ETL{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                //", sourceDatabase=" + sourceDatabase +
-                ", targetDatabase=" + targetDatabase +
-                ", tableMappings=" + tableMappings +
-                '}';
+        return String.format("ETL{" +
+                "\tid=%s,\n" +
+                "\tname=%s,\n" +
+                "\tsourceDatabase=%s,\n" +
+                "\ttargetDatabase=%s,\n" +
+                "\ttableMappings=%s\n" +
+                "}", id, name, sourceDatabase, targetDatabase, tableMappings);
     }
 }

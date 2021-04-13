@@ -2,6 +2,10 @@ package com.ua.hiah.service.tableMapping;
 
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
+import com.ua.hiah.model.source.SourceDatabase;
+import com.ua.hiah.model.source.SourceTable;
+import com.ua.hiah.model.target.TargetDatabase;
+import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.repository.TableMappingRepository;
 import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.service.source.table.SourceTableService;
@@ -10,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -84,5 +89,21 @@ public class TableMappingServiceImpl implements TableMappingService {
     @Override
     public void removeTableMappingsFromETL(long etl_id) {
         repository.deleteAllByEtl_Id(etl_id);
+    }
+
+    @Override
+    public List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase source, TargetDatabase target) {
+        List<TableMapping> responseMappings = new ArrayList<>();
+        for (TableMapping mapping : tableMappings) {
+            SourceTable src = source.getTables().stream().filter(sourceTable -> sourceTable.getName().equals(mapping.getSource().getName())).findFirst().orElse(null);
+            TargetTable trg = target.getTables().stream().filter(targetTable -> targetTable.getName().equals(mapping.getTarget().getName())).findFirst().orElse(null);
+
+            if (src != null && trg != null) {
+                TableMapping responseMapping = new TableMapping(etl, src, trg, mapping.getLogic());
+                responseMappings.add(responseMapping);
+            }
+        }
+
+        return responseMappings;
     }
 }

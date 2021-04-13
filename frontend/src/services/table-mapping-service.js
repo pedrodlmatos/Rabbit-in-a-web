@@ -27,8 +27,8 @@ class TableMappingService {
      * @returns table mapping created
      */
 
-    addTableMapping(etl, source, target) {
-        return axios.post(API_URL + "map", {}, { headers: authHeader(), params: { etl_id: etl, source_id: source, target_id: target } });
+    addTableMapping = async (etl, source, target) => {
+        return await axios.post(API_URL + "map", {}, { headers: authHeader(), params: { etl_id: etl, source_id: source, target_id: target } });
     }
 
 
@@ -66,7 +66,7 @@ class TableMappingService {
      * @returns table mapping edited
      */
 
-     editMappingLogic(map_id, logic) {
+    editMappingLogic(map_id, logic) {
         return axios.put(API_URL + "map/" + map_id + "/logic", null, { headers: authHeader(), params: { logic: logic }})
     }
 

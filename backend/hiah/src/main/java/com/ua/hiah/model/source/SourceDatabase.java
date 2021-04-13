@@ -2,6 +2,7 @@ package com.ua.hiah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.views.Views;
 
@@ -19,10 +20,12 @@ public class SourceDatabase {
 
     @Column(name = "database_name")
     @JsonView(Views.ETLSessionsList.class)
+    @Expose
     private String databaseName;
 
-    @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sourceDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private List<SourceTable> tables;
 
     @OneToOne(mappedBy = "sourceDatabase")
@@ -31,6 +34,10 @@ public class SourceDatabase {
 
     // CONSTRUCTOR
     public SourceDatabase() {
+    }
+
+    public SourceDatabase(String name) {
+        this.databaseName = name;
     }
 
     // GETTER AND SETTER
@@ -68,10 +75,10 @@ public class SourceDatabase {
 
     @Override
     public String toString() {
-        return "SourceDatabase{" +
-                "id=" + id +
-                ", databaseName='" + databaseName + '\'' +
-                ", tables=" + tables +
-                '}';
+        return String.format("SourceDatabase{\n" +
+                "\tid=%s,\n" +
+                "\tdatabaseName=%s,\n" +
+                "\ttables=%s\n" +
+                "}", id, databaseName, tables);
     }
 }

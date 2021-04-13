@@ -2,11 +2,13 @@ package com.ua.hiah.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,29 +18,34 @@ public class TableMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "source_table_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private SourceTable source;
 
     @ManyToOne
     @JoinColumn(name = "target_table_id", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private TargetTable target;
 
     @OneToMany(mappedBy = "tableMapping", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private List<FieldMapping> fieldMappings;
 
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     @Column(name = "complete", nullable = false)
+    @Expose
     private boolean complete;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String logic;
 
     @ManyToOne
@@ -48,6 +55,14 @@ public class TableMapping {
 
     // CONSTRUCTOR
     public TableMapping() {
+    }
+
+    public TableMapping(ETL etl, SourceTable sourceTable, TargetTable targetTable, String logic) {
+        this.etl = etl;
+        this.source = sourceTable;
+        this.target = targetTable;
+        this.logic = logic;
+        this.fieldMappings = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS

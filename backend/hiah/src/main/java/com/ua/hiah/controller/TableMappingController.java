@@ -56,7 +56,7 @@ public class TableMappingController {
 
     })
     @GetMapping("/map/{id}")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
     public ResponseEntity<?> getTableMapping(@PathVariable Long id) {
         logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + id);
 
@@ -188,18 +188,18 @@ public class TableMappingController {
 
 
     /**
-     * Changes the completion status of a table mapping
+     * Changes the logic of a table mapping
      *
      * @param id table mapping id
      * @param logic table mapping logic
      * @return table mapping altered
      */
 
-    @Operation(summary = "Change table mapping completion status")
+    @Operation(summary = "Change table mapping logic")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Completion status changed",
+                    description = "Logic changed",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TableMapping.class)

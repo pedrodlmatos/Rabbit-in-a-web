@@ -2,6 +2,7 @@ package com.ua.hiah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.views.Views;
@@ -17,11 +18,12 @@ public class SourceField {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String name;
 
     /*
@@ -31,26 +33,33 @@ public class SourceField {
     */
 
     @Column(name = "type")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String type;
 
     @Column(name = "nullable")
+    @Expose
     private boolean isNullable;
 
     @Column(name = "maxLength", nullable = true)
+    @Expose
     private int maxLength;
 
     @Column(name = "fractionEmpty", nullable = true)
+    @Expose
     private double fractionEmpty;
 
     @Column(name = "uniqueCount", nullable = true)
+    @Expose
     private int uniqueCount;
 
     @Column(name = "fractionUnique", nullable = true)
+    @Expose
     private double fractionUnique;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private String comment;
 
     @ManyToOne
@@ -63,14 +72,40 @@ public class SourceField {
     @JsonIgnore
     private List<FieldMapping> mappings;
 
-    @OneToMany(mappedBy = "field")
+    @OneToMany(mappedBy = "field", cascade = CascadeType.ALL)
     @Column(name = "valueCount")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.TableMapping.class)
+    @Expose
     private List<ValueCount> valueCounts;
 
 
     // CONSTRUCTOR
     public SourceField() {
+    }
+
+    public SourceField(String name, String type, int maxLength, double fractionEmpty, int uniqueCount, double fractionUnique, SourceTable table) {
+        this.name = name;
+        this.type = type;
+        this.maxLength = maxLength;
+        this.fractionEmpty = fractionEmpty;
+        this.uniqueCount = uniqueCount;
+        this.fractionUnique = fractionUnique;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.valueCounts = new ArrayList<>();
+    }
+
+    public SourceField(String name, String type, int maxLength, double fractionEmpty, int uniqueCount, double fractionUnique, String comment, SourceTable table) {
+        this.name = name;
+        this.type = type;
+        this.maxLength = maxLength;
+        this.fractionEmpty = fractionEmpty;
+        this.uniqueCount = uniqueCount;
+        this.fractionUnique = fractionUnique;
+        this.comment = comment;
+        this.table = table;
+        this.mappings = new ArrayList<>();
+        this.valueCounts = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS
@@ -172,6 +207,13 @@ public class SourceField {
         this.mappings = mappings;
     }
 
+    public List<ValueCount> getValueCounts() {
+        return valueCounts;
+    }
+
+    public void setValueCounts(List<ValueCount> valueCounts) {
+        this.valueCounts = valueCounts;
+    }
 
     /* Adapted from ETL (Rabbit in a hat) */
     public List<String> getMappingsFromSourceField() {

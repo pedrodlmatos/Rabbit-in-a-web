@@ -18,7 +18,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -54,12 +61,9 @@ public class ETLController {
     @JsonView(Views.ETLSessionsList.class)
     public ResponseEntity<?> getAllETLs() {
         logger.info("ETL CONTROLLER - Requesting all ETL sessions");
-
         List<ETL> response = etlService.getAllETL();
-
         if (response == null)
             return new ResponseEntity<>(null, HttpStatus.OK);
-
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -90,13 +94,10 @@ public class ETLController {
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getETLById(@PathVariable Long id) {
         logger.info("ETL CONTROLLER - Requesting ETL session with id " + id);
-
         ETL response = etlService.getETLWithId(id);
-
         if (response == null) {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -127,13 +128,22 @@ public class ETLController {
     })
     @PostMapping(value = "/sessions", consumes = "multipart/form-data")
     public ResponseEntity<?> createETLSession(@Param(value = "name") String name, @RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
+        logger.info("ETL CONTROLLER - Creating new ETL session");
         ETL etl = etlService.createETLSession(name, file, cdm);
+        if (etl == null)
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(etl, HttpStatus.CREATED);
+    }
 
-        if (etl == null) {
-            return new ResponseEntity<>(etl, HttpStatus.BAD_REQUEST);
-        }
 
-        logger.info("ETL CONTROLLER - Created ETL session with id: " + etl.getId());
+    @PostMapping(value = "/sessions/save", consumes = "multipart/form-data")
+    public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file) {
+        logger.info("ETL CONTROLLER - Creating ETL session from file");
+        ETL etl = etlService.createETLSessionFromFile(file);
+
+        if (etl == null)
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
         return new ResponseEntity<>(etl, HttpStatus.CREATED);
     }
 
@@ -167,21 +177,17 @@ public class ETLController {
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> changeTargetDatabase(@Param(value = "etl") Long etl, @Param(value = "cdm") String cdm) {
         logger.info("ETL CONTROLLER - Change target database of session {} to {}", etl, cdm);
-
         ETL response = etlService.changeTargetDatabase(etl, cdm);
-        if (response == null) {
-            response = new ETL();
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
-    // TODO
+
     @GetMapping(value = "/sessions/sourceCSV")
     public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl") Long etl) {
-        logger.info("ETL {} - Download source field list CSV", etl);
+        logger.info("ETL CONTROLLER - Download source field list CSV of session {}", etl);
 
         byte[] content = etlService.createSourceFieldListCSV(etl);
         String filename = "sourceList.csv";
@@ -193,5 +199,35 @@ public class ETLController {
 
         return new ResponseEntity<byte[]>(content, header, HttpStatus.OK);
 
+    }
+
+
+    @GetMapping(value = "/sessions/targetCSV")
+    public ResponseEntity<?> getTargetFieldListCSV(@Param(value = "etl") Long etl) {
+        logger.info("ETL CONTROLLER - Download target field list CSV of session {}", etl);
+
+        byte[] content = etlService.createTargetFieldListCSV(etl);
+        String filename = "targetList.csv";
+
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.parseMediaType("application/csv"));
+        header.setContentDispositionFormData(filename, filename);
+        header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+        return new ResponseEntity<byte[]>(content, header, HttpStatus.OK);
+    }
+
+
+    @GetMapping(value = "/sessions/save")
+    public ResponseEntity<?> getSaveFile(@Param(value = "etl") Long etl) {
+        logger.info("ETL CONTROLLER - Download save file of session {}", etl);
+
+        byte[] content = etlService.save("Scan.json", etl);
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.APPLICATION_JSON);
+        header.setContentLength(content.length);
+        header.set("Content-Disposition", "attachment; filename=Scan.json");
+        logger.info("DONE");
+        return new ResponseEntity<>(content, header, HttpStatus.OK);
     }
 }

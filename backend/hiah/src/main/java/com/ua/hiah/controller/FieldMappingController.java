@@ -1,6 +1,7 @@
 package com.ua.hiah.controller;
 
 import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.service.fieldMapping.FieldMappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -104,5 +105,42 @@ public class FieldMappingController {
 
         List<FieldMapping> res = service.getFieldMappingsFromTableMapping(tableMappingId);
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+
+    /**
+     * Changes the logic of a field mapping
+     *
+     * @param id field mapping id
+     * @param logic field mapping logic
+     * @return field mapping altered
+     */
+
+    @Operation(summary = "Change field mapping logic")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Logic changed",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FieldMapping.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Table mapping not found",
+                    content = @Content
+            )
+    })
+    @PutMapping("/map/{id}/logic")
+    public ResponseEntity<?> editMappingLogic(@PathVariable Long id, @Param(value = "logic") String logic) {
+        logger.info("FIELD MAPPING - Change mapping logic of mapping " + id);
+        FieldMapping response = service.changeMappingLogic(id, logic);
+
+        if (response == null) {
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

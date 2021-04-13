@@ -2,10 +2,12 @@ package com.ua.hiah.model.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,11 +17,12 @@ public class SourceTable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "name")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private String name;
 
     @ManyToOne
@@ -29,17 +32,21 @@ public class SourceTable {
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
+    @Expose
     private String comment;
 
     @Column(name = "rowCount", nullable = true)
     @JsonView(Views.ETLSession.class)
+    @Expose
     private int rowCount;
 
     @Column(name = "rowsCheckedCount", nullable = true)
+    @Expose
     private int rowsCheckedCount;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
     private List<SourceField> fields;
 
 
@@ -51,6 +58,25 @@ public class SourceTable {
 
     // CONSTRUCTOR
     public SourceTable() {
+    }
+
+    public SourceTable(String tableName, int rowCount, int rowsCheckedCount, SourceDatabase database) {
+        this.name = tableName;
+        this.rowCount = rowCount;
+        this.rowsCheckedCount = rowsCheckedCount;
+        this.sourceDatabase = database;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+    }
+
+    public SourceTable(String name, int rowCount, int rowsCheckedCount, String comment, SourceDatabase sourceDatabase) {
+        this.name = name;
+        this.sourceDatabase = sourceDatabase;
+        this.comment = comment;
+        this.rowCount = rowCount;
+        this.rowsCheckedCount = rowsCheckedCount;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
     }
 
     // GETTERS AND SETTERS
