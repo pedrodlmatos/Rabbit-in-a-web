@@ -193,8 +193,7 @@ public class ETLServiceImpl implements ETLService {
             // remove previous cdm and mappings
             mappingService.removeTableMappingsFromETL(etl.getId());
             targetDatabaseService.removeDatabase(previous.getId());
-
-            //targetDatabaseService.removeDatabase(previous);
+            ;
             // order tables by id
             /*
             List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
@@ -256,6 +255,11 @@ public class ETLServiceImpl implements ETLService {
             try {
                 //String etlJsonStr = JsonWriter.formatJson(JsonWriter.objectToJson(etl));
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
+                Collections.sort(sourceTables, Comparator.comparingLong(SourceTable::getId));
+
+                List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
+                Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
                 String etlJsonStr = gson.toJson(etl);
 
                 FileOutputStream fileOutputStream = new FileOutputStream(filename);

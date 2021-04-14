@@ -1,10 +1,13 @@
 package com.ua.hiah.service.tableMapping;
 
 import com.ua.hiah.model.ETL;
+import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.model.source.SourceDatabase;
+import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
+import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.repository.TableMappingRepository;
 import com.ua.hiah.service.etl.ETLService;
@@ -100,6 +103,22 @@ public class TableMappingServiceImpl implements TableMappingService {
 
             if (src != null && trg != null) {
                 TableMapping responseMapping = new TableMapping(etl, src, trg, mapping.getLogic());
+
+                for (FieldMapping fieldMapping : mapping.getFieldMappings()) {
+                    SourceField srcField = src.getFields().stream().filter(sourceField -> sourceField.getName().equals(fieldMapping.getSource().getName())).findFirst().orElse(null);
+                    TargetField trgField = trg.getFields().stream().filter(targetField -> targetField.getName().equals(fieldMapping.getTarget().getName())).findFirst().orElse(null);
+
+                    if (srcField != null && trgField != null) {
+                        FieldMapping responseFieldMapping = new FieldMapping(
+                                srcField,
+                                trgField,
+                                fieldMapping.getLogic(),
+                                responseMapping
+                        );
+                        responseMapping.getFieldMappings().add(responseFieldMapping);
+                    }
+
+                }
                 responseMappings.add(responseMapping);
             }
         }

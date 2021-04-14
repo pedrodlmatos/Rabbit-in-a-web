@@ -45,6 +45,13 @@ public class FieldMapping {
     public FieldMapping() {
     }
 
+    public FieldMapping(SourceField source, TargetField target, String logic, TableMapping tableMapping) {
+        this.source = source;
+        this.target = target;
+        this.logic = logic;
+        this.tableMapping = tableMapping;
+    }
+
     // GETTERS AND SETTERS
     public Long getId() {
         return id;
