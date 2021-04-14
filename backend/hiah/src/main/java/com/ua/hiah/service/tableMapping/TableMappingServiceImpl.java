@@ -36,10 +36,26 @@ public class TableMappingServiceImpl implements TableMappingService {
     @Autowired
     private TargetTableService targetTableService;
 
+
+    /**
+     * Gets a table mapping given its id
+     *
+     * @param map_id table mapping id
+     * @return table mapping if found, null otherwise
+     */
+
     @Override
     public TableMapping getTableMappingById(Long map_id) {
         return repository.findById(map_id).orElse(null);
     }
+
+
+    /**
+     * Deletes a table mapping given its id
+     *
+     * @param map_id table mapping id
+     * @return deleted mapping
+     */
 
     @Override
     public TableMapping removeTableMapping(Long map_id) {
@@ -52,10 +68,28 @@ public class TableMappingServiceImpl implements TableMappingService {
         return mapping;
     }
 
+
+    /**
+     * Gets all table mappings from a given ETL procedure
+     *
+     * @param etl_id ETL procedure's id
+     * @return list with table mappings
+     */
+
     @Override
     public List<TableMapping> getTableMappingFromETL(Long etl_id) {
         return repository.findAllByEtl_Id(etl_id);
     }
+
+
+    /**
+     * Creates a table mapping between a table from the EHR database and a table from the OMOP CDM
+     *
+     * @param source_id source table's id
+     * @param target_id target table's id
+     * @param etl_id ETL procedure's id
+     * @return created table mapping
+     */
 
     @Override
     public TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id) {
@@ -67,9 +101,18 @@ public class TableMappingServiceImpl implements TableMappingService {
         return repository.save(mapping);
     }
 
+
+    /**
+     * Changes the completion state of a table mapping
+     *
+     * @param tableMappingId table mapping id
+     * @param completion state to change to
+     * @return altered table mapping
+     */
+
     @Override
-    public TableMapping changeCompletionStatus(Long id, boolean completion) {
-        TableMapping mapping = repository.findById(id).orElse(null);
+    public TableMapping changeCompletionStatus(Long tableMappingId, boolean completion) {
+        TableMapping mapping = repository.findById(tableMappingId).orElse(null);
 
         if (mapping != null) {
             mapping.setComplete(completion);
@@ -78,9 +121,18 @@ public class TableMappingServiceImpl implements TableMappingService {
         return null;
     }
 
+
+    /**
+     * Changes the table mapping logic
+     *
+     * @param tableMappingId table mapping id
+     * @param logic logic to change to
+     * @return altered table mapping
+     */
+
     @Override
-    public TableMapping changeMappingLogic(Long id, String logic) {
-        TableMapping mapping = repository.findById(id).orElse(null);
+    public TableMapping changeMappingLogic(Long tableMappingId, String logic) {
+        TableMapping mapping = repository.findById(tableMappingId).orElse(null);
 
         if (mapping != null) {
             mapping.setLogic(logic);
@@ -89,40 +141,56 @@ public class TableMappingServiceImpl implements TableMappingService {
         return null;
     }
 
+
+    /**
+     * Removes all table mappings of a given ETL procedures
+     *
+     * @param etl_id ETL procedure's id
+     */
+
     @Override
     public void removeTableMappingsFromETL(long etl_id) {
         repository.deleteAllByEtl_Id(etl_id);
     }
 
+
+    /**
+     * Creates the table mapping contained in a JSON file
+     *
+     * @param etl ETL procedure object
+     * @param tableMappings table mapping in JSON
+     * @param sourceDatabase source database
+     * @param targetDatabase target database
+     * @return table mappings created
+     */
+
     @Override
-    public List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase source, TargetDatabase target) {
+    public List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase sourceDatabase, TargetDatabase targetDatabase) {
         List<TableMapping> responseMappings = new ArrayList<>();
         for (TableMapping mapping : tableMappings) {
-            SourceTable src = source.getTables().stream().filter(sourceTable -> sourceTable.getName().equals(mapping.getSource().getName())).findFirst().orElse(null);
-            TargetTable trg = target.getTables().stream().filter(targetTable -> targetTable.getName().equals(mapping.getTarget().getName())).findFirst().orElse(null);
+            SourceTable sourceTable = sourceDatabase.getTables().stream().filter(src -> src.getName().equals(mapping.getSource().getName())).findFirst().orElse(null);
+            TargetTable targetTable = targetDatabase.getTables().stream().filter(trg -> trg.getName().equals(mapping.getTarget().getName())).findFirst().orElse(null);
 
-            if (src != null && trg != null) {
-                TableMapping responseMapping = new TableMapping(etl, src, trg, mapping.getLogic());
+            if (sourceTable != null && targetTable != null) {
+                TableMapping responseMapping = new TableMapping(etl, sourceTable, targetTable, mapping.getLogic());
 
                 for (FieldMapping fieldMapping : mapping.getFieldMappings()) {
-                    SourceField srcField = src.getFields().stream().filter(sourceField -> sourceField.getName().equals(fieldMapping.getSource().getName())).findFirst().orElse(null);
-                    TargetField trgField = trg.getFields().stream().filter(targetField -> targetField.getName().equals(fieldMapping.getTarget().getName())).findFirst().orElse(null);
+                    SourceField sourceField = sourceTable.getFields().stream().filter(srcField -> srcField.getName().equals(fieldMapping.getSource().getName())).findFirst().orElse(null);
+                    TargetField targetField = targetTable.getFields().stream().filter(trgField -> trgField.getName().equals(fieldMapping.getTarget().getName())).findFirst().orElse(null);
 
-                    if (srcField != null && trgField != null) {
+                    if (sourceField != null && targetField != null) {
                         FieldMapping responseFieldMapping = new FieldMapping(
-                                srcField,
-                                trgField,
-                                fieldMapping.getLogic(),
-                                responseMapping
+                            sourceField,
+                            targetField,
+                            fieldMapping.getLogic(),
+                            responseMapping
                         );
                         responseMapping.getFieldMappings().add(responseFieldMapping);
                     }
-
                 }
                 responseMappings.add(responseMapping);
             }
         }
-
         return responseMappings;
     }
 }

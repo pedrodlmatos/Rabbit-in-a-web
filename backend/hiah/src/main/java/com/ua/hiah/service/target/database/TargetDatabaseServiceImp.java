@@ -133,7 +133,8 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
             e.printStackTrace();
         }
         database.setTables(tables);
-        return repository.save(database);
+        //return repository.save(database);
+        return database;
     }
 
 

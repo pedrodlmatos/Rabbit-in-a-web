@@ -57,9 +57,8 @@ public class SourceFieldController {
         logger.info("SOURCE FIELD CONTROLLER - Change field {} comment", field);
 
         SourceField response = fieldService.changeComment(field, comment);
-        if (response == null) {
+        if (response == null)
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

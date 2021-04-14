@@ -50,7 +50,7 @@ public class TargetTable {
     private List<FieldMapping> mappings;
 
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public TargetTable() {
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
@@ -100,11 +100,11 @@ public class TargetTable {
         return fields;
     }
 
-    /*
+
     public void setFields(List<TargetField> fields) {
         this.fields = fields;
     }
-    */
+
 
     public List<FieldMapping> getMappings() {
         return mappings;
@@ -113,7 +113,6 @@ public class TargetTable {
     public void setMappings(List<FieldMapping> mappings) {
         this.mappings = mappings;
     }
-
 
     public String getComment() {
         return comment;

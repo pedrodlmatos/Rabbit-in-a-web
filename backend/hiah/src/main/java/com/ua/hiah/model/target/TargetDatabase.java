@@ -48,7 +48,7 @@ public class TargetDatabase {
     private ETL etl;
 
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public TargetDatabase() {
         this.tables = new ArrayList<>();
     }

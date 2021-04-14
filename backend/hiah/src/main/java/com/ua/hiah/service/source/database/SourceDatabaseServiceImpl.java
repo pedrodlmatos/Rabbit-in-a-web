@@ -80,6 +80,8 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                         nameToTable.put(tableName, table);
                     }
                     tables.add(table);
+
+                    // Get field
                     SourceField field = new SourceField(
                         row.getStringByHeaderName(ScanFieldName.FIELD).toLowerCase(),
                         row.getByHeaderName(ScanFieldName.TYPE),
@@ -91,6 +93,7 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                     );
                     table.getFields().add(field);
 
+                    // Get value counts of the field
                     Map<String, Integer> valueCounts = getValueCounts(workbook, table, row.getStringByHeaderName(ScanFieldName.FIELD));
                     if (valueCounts != null) {
                         int totalCount = valueCounts.values().stream().reduce(0, Integer::sum);
@@ -108,18 +111,28 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
             }
             database.setTables(tables);
             scanTemp.delete();
-            return databaseRepository.save(database);
+            //return databaseRepository.save(database);
+            return database;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
+
+    /**
+     * Creates and persists the content of an EHR database contained in a JSON file
+     *
+     * @param sourceDatabase EHR database stored in JSON file
+     * @return created source database
+     */
+
     @Override
     public SourceDatabase createDatabaseFromJSON(SourceDatabase sourceDatabase) {
         SourceDatabase response = new SourceDatabase(sourceDatabase.getDatabaseName());
         List<SourceTable> tables = new ArrayList<>();
         for (SourceTable table : sourceDatabase.getTables()) {
+            // Get table
             SourceTable responseTable = new SourceTable(
                 table.getName(),
                 table.getRowCount(),
@@ -128,7 +141,7 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                 response
             );
             tables.add(responseTable);
-
+            // Get field of the table
             for (SourceField field : table.getFields()) {
                 SourceField responseField = new SourceField(
                     field.getName(),
@@ -141,13 +154,13 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                     responseTable
                 );
                 responseTable.getFields().add(responseField);
-
+                // Get value counts of a field
                 for (ValueCount valueCount : field.getValueCounts()) {
                     ValueCount responseValue = new ValueCount(
-                            valueCount.getValue(),
-                            valueCount.getFrequency(),
-                            valueCount.getPercentage(),
-                            responseField
+                        valueCount.getValue(),
+                        valueCount.getFrequency(),
+                        valueCount.getPercentage(),
+                        responseField
                     );
                     responseField.getValueCounts().add(responseValue);
                 }
@@ -155,7 +168,8 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
         }
 
         response.setTables(tables);
-        return databaseRepository.save(response);
+        //return databaseRepository.save(response);
+        return response;
     }
 
 

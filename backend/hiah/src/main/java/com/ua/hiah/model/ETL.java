@@ -44,10 +44,12 @@ public class ETL {
     @Expose
     private List<TableMapping> tableMappings;
 
+    // CONSTRUCTORS
     public ETL() {
         this.tableMappings = new ArrayList<>();
     }
 
+    // GETTERS AND SETTERS
     public Long getId() {
         return id;
     }
@@ -83,7 +85,6 @@ public class ETL {
     public List<TableMapping> getTableMappings() {
         return tableMappings;
     }
-
 
     public void setTableMappings(List<TableMapping> tableMappings) {
         this.tableMappings = tableMappings;

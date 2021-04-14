@@ -35,12 +35,12 @@ public class SourceTable {
     @Expose
     private String comment;
 
-    @Column(name = "rowCount", nullable = true)
+    @Column(name = "row_count", nullable = true)
     @JsonView(Views.ETLSession.class)
     @Expose
     private int rowCount;
 
-    @Column(name = "rowsCheckedCount", nullable = true)
+    @Column(name = "rows_checked_count", nullable = true)
     @Expose
     private int rowsCheckedCount;
 
@@ -56,7 +56,7 @@ public class SourceTable {
     private List<FieldMapping> mappings;
 
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public SourceTable() {
     }
 

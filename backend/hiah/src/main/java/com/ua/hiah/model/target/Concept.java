@@ -59,7 +59,7 @@ public class Concept {
     @JsonIgnore
     private TargetField field;
 
-
+    // CONSTRUCTORS
     public Concept() { }
 
     public Concept(Long conceptId, String conceptName, String standardConcept, String domainId, String vocabularyId, String conceptClassId, TargetField field) {
@@ -72,6 +72,7 @@ public class Concept {
         this.field = field;
     }
 
+    // GETTERS AND SETTERS
     public Long getId() {
         return id;
     }

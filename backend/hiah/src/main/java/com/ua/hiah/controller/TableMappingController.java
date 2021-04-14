@@ -16,7 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -34,15 +41,15 @@ public class TableMappingController {
     /**
      * Retrieves data from a table mapping given its id
      *
-     * @param id table mapping id
+     * @param etl_id table mapping id
      * @return table mapping
      */
 
-    @Operation(summary = "Retrieve a table mapping")
+    @Operation(summary = "Retrieves a table mapping")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "table mapping found",
+                    description = "Table mapping found",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = TableMapping.class)
@@ -55,16 +62,14 @@ public class TableMappingController {
             )
 
     })
-    @GetMapping("/map/{id}")
+    @GetMapping("/map/{etl_id}")
     @JsonView(Views.TableMapping.class)
-    public ResponseEntity<?> getTableMapping(@PathVariable Long id) {
-        logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + id);
+    public ResponseEntity<?> getTableMapping(@PathVariable Long etl_id) {
+        logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + etl_id);
+        TableMapping response = service.getTableMappingById(etl_id);
 
-        TableMapping response = service.getTableMappingById(id);
-
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -98,10 +103,9 @@ public class TableMappingController {
     @PostMapping("/map")
     public ResponseEntity<?> createTableMapping(@Param(value = "elt_id") Long etl_id, @Param(value = "source_id") Long source_id, @Param(value = "target_id") Long target_id) {
         TableMapping response = service.addTableMapping(source_id, target_id, etl_id);
-        if (response == null) {
-            response = new TableMapping();
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
         logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -138,12 +142,11 @@ public class TableMappingController {
     })
     @DeleteMapping("/map")
     public ResponseEntity<?> removeTableMapping(@Param(value="map_id") Long map_id, @Param(value="etl_id") Long etl_id) {
+        logger.info("TABLE MAPPING CONTROLLER - Removed table mapping with id " + map_id);
         TableMapping response = service.removeTableMapping(map_id);
 
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-        logger.info("TABLE MAPPING - Removed table mapping with id " + map_id);
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         List<TableMapping> res = service.getTableMappingFromETL(etl_id);
         return new ResponseEntity<>(res, HttpStatus.OK);
@@ -153,7 +156,7 @@ public class TableMappingController {
     /**
      * Changes the completion status of a table mapping
      *
-     * @param id table mapping id
+     * @param map_id table mapping id
      * @param completion completion status to change to
      * @return table mapping altered
      */
@@ -174,14 +177,13 @@ public class TableMappingController {
                     content = @Content
             )
     })
-    @PutMapping("/map/{id}/complete")
-    public ResponseEntity<?> editCompleteMapping(@PathVariable Long id, @Param(value = "completion") boolean completion) {
-        logger.info("TABLE MAPPING - Change completion status of mapping " + id);
-        TableMapping response = service.changeCompletionStatus(id, completion);
+    @PutMapping("/map/{map_id}/complete")
+    public ResponseEntity<?> editCompleteMapping(@PathVariable Long map_id, @Param(value = "completion") boolean completion) {
+        logger.info("TABLE MAPPING CONTROLLER - Change completion status of mapping " + map_id);
+        TableMapping response = service.changeCompletionStatus(map_id, completion);
 
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -190,7 +192,7 @@ public class TableMappingController {
     /**
      * Changes the logic of a table mapping
      *
-     * @param id table mapping id
+     * @param map_id table mapping id
      * @param logic table mapping logic
      * @return table mapping altered
      */
@@ -211,14 +213,13 @@ public class TableMappingController {
                     content = @Content
             )
     })
-    @PutMapping("/map/{id}/logic")
-    public ResponseEntity<?> editMappingLogic(@PathVariable Long id, @Param(value = "logic") String logic) {
-        logger.info("TABLE MAPPING - Change mapping logic of mapping " + id);
-        TableMapping response = service.changeMappingLogic(id, logic);
+    @PutMapping("/map/{map_id}/logic")
+    public ResponseEntity<?> editMappingLogic(@PathVariable Long map_id, @Param(value = "logic") String logic) {
+        logger.info("TABLE MAPPING - Change mapping logic of mapping " + map_id);
+        TableMapping response = service.changeMappingLogic(map_id, logic);
 
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

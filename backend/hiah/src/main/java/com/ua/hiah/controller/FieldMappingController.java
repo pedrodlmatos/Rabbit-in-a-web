@@ -1,7 +1,6 @@
 package com.ua.hiah.controller;
 
 import com.ua.hiah.model.FieldMapping;
-import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.service.fieldMapping.FieldMappingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -24,7 +23,7 @@ import java.util.List;
 @RequestMapping("/v1/api/fieldMap")
 public class FieldMappingController {
 
-    private Logger logger = LoggerFactory.getLogger(FieldMappingController.class);
+    private static final Logger logger = LoggerFactory.getLogger(FieldMappingController.class);
 
     @Autowired
     private FieldMappingService service;
@@ -38,7 +37,7 @@ public class FieldMappingController {
      * @return created field mapping or error
      */
 
-    @Operation(summary = "Creates a field mapping")
+    @Operation(summary = "Creates a field mapping with a field from the EHR database and other from the OMOP CDM")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -56,19 +55,17 @@ public class FieldMappingController {
     })
     @PostMapping("/create")
     public ResponseEntity<?> createFieldMapping(@Param(value = "tableMap") Long tableMap, @Param(value = "source_id") Long source_id, @Param(value = "target_id") Long target_id) {
-        FieldMapping response = service.addFieldMapping(source_id, target_id, tableMap);
-        if (response == null) {
-            response = new FieldMapping();
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-
         logger.info("FIELD MAPPING CONTROLLER - Add field mapping between {} and {} in table mapping {}", source_id, target_id, tableMap);
+        FieldMapping response = service.addFieldMapping(source_id, target_id, tableMap);
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
     /**
-     * Removes a field mapping
+     * Removes a field mapping given its id
      *
      * @param tableMappingId Table mapping id
      * @param fieldMappingId Field mapping id
@@ -96,12 +93,11 @@ public class FieldMappingController {
     })
     @DeleteMapping("/remove")
     public ResponseEntity<?> removeFieldMapping(@Param(value="tableMappingId") Long tableMappingId, @Param(value="fieldMappingId") Long fieldMappingId) {
+        logger.info("FIELD MAPPING CONTROLLER - Removed field mapping with id " + fieldMappingId);
         FieldMapping response = service.removeFieldMapping(fieldMappingId);
 
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-        logger.info("FIELD MAPPING CONTROLLER - Removed field mapping with id " + fieldMappingId);
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         List<FieldMapping> res = service.getFieldMappingsFromTableMapping(tableMappingId);
         return new ResponseEntity<>(res, HttpStatus.OK);
@@ -137,9 +133,8 @@ public class FieldMappingController {
         logger.info("FIELD MAPPING - Change mapping logic of mapping " + id);
         FieldMapping response = service.changeMappingLogic(id, logic);
 
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

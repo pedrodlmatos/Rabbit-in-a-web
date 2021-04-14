@@ -57,11 +57,9 @@ public class SourceTableController {
         logger.info("SOURCE TABLE CONTROLLER - Change table {} comment", table);
 
         SourceTable response = tableService.changeComment(table, comment);
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 }

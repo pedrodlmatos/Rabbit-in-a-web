@@ -41,16 +41,16 @@ public class ETLController {
     private static final Logger logger = LoggerFactory.getLogger(ETLController.class);
 
     /**
-     * Retrieves a list with all ETL sessions
+     * Retrieves a list with all ETL procedures
      *
-     * @return ETL sessions
+     * @return ETL procedures
      */
 
     @Operation(summary = "Retrieve all ETL sessions")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "ETL sessions returned",
+                    description = "ETL procedures returned",
                     content = { @Content(
                             mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = ETL.class))
@@ -60,7 +60,7 @@ public class ETLController {
     @GetMapping("/sessions")
     @JsonView(Views.ETLSessionsList.class)
     public ResponseEntity<?> getAllETLs() {
-        logger.info("ETL CONTROLLER - Requesting all ETL sessions");
+        logger.info("ETL CONTROLLER - Requesting all ETL procedures");
         List<ETL> response = etlService.getAllETL();
         if (response == null)
             return new ResponseEntity<>(null, HttpStatus.OK);
@@ -74,11 +74,11 @@ public class ETLController {
      * @return ETL session
      */
 
-    @Operation(summary = "Retrieve a ETL session by its id")
+    @Operation(summary = "Retrieve a ETL procedure by its id")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Found the ETL session",
+                    description = "Found the ETL procedure",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ETL.class)
@@ -86,35 +86,35 @@ public class ETLController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "ETL session not found",
+                    description = "ETL procedure not found",
                     content = @Content
             )
     })
     @GetMapping("/sessions/{id}")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getETLById(@PathVariable Long id) {
-        logger.info("ETL CONTROLLER - Requesting ETL session with id " + id);
+        logger.info("ETL CONTROLLER - Requesting ETL procedure with id " + id);
         ETL response = etlService.getETLWithId(id);
         if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
     /**
-     * Creates an ETL session
+     * Creates an ETL procedure with Scan Report
      *
      * @param file file created by White Rabbit that contains info about EHR database
      * @param cdm OMOP CDM version to use
-     * @return created session or error
+     * @return created procedure or error
      */
 
-    @Operation(summary = "Create an ETL session")
+    @Operation(summary = "Create an ETL procedure")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "ETL session created with success",
+                    description = "ETL procedure created with success",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ETL.class)
@@ -127,15 +127,38 @@ public class ETLController {
             )
     })
     @PostMapping(value = "/sessions", consumes = "multipart/form-data")
-    public ResponseEntity<?> createETLSession(@Param(value = "name") String name, @RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
-        logger.info("ETL CONTROLLER - Creating new ETL session");
-        ETL etl = etlService.createETLSession(name, file, cdm);
+    public ResponseEntity<?> createETLProcedure(@Param(value = "name") String name, @RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
+        logger.info("ETL CONTROLLER - Creating new ETL procedure");
+        ETL etl = etlService.createETLProcedure(name, file, cdm);
         if (etl == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(etl, HttpStatus.CREATED);
+        return new ResponseEntity<>(etl.getId(), HttpStatus.CREATED);
     }
 
 
+    /**
+     * Creates an ETL procedure from a JSON file that contains a summary of an ETL procedure
+     *
+     * @param file JSON summary file
+     * @return ETL procedure created, error if file is invalid
+     */
+
+    @Operation(summary = "Creates an ETL procedure from a JSON summary file")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "ETL procedure created with success",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ETL.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Invalid file",
+                    content = @Content
+            )
+    })
     @PostMapping(value = "/sessions/save", consumes = "multipart/form-data")
     public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file) {
         logger.info("ETL CONTROLLER - Creating ETL session from file");
@@ -150,18 +173,18 @@ public class ETLController {
     // TODO: create ETL session with a custom OMOP CDM file
 
     /**
-     * Changes the OMOP CDM version in a given ETL session
+     * Changes the OMOP CDM version in a given ETL procedure
      *
-     * @param etl ETL session's id
+     * @param etl ETL procedure's id
      * @param cdm OMOP CDM version to change to
      * @return altered ETL or error
      */
 
-    @Operation(summary = "Change OMOP CDM version in ETL session")
+    @Operation(summary = "Change OMOP CDM version in ETL procedure")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "ETL session changed with success",
+                    description = "ETL procedure changed with success",
                     content = { @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ETL.class)
@@ -176,7 +199,7 @@ public class ETLController {
     @PutMapping("/sessions/targetDB")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> changeTargetDatabase(@Param(value = "etl") Long etl, @Param(value = "cdm") String cdm) {
-        logger.info("ETL CONTROLLER - Change target database of session {} to {}", etl, cdm);
+        logger.info("ETL CONTROLLER - Change target database of procedure {} to {}", etl, cdm);
         ETL response = etlService.changeTargetDatabase(etl, cdm);
         if (response == null)
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -184,50 +207,127 @@ public class ETLController {
     }
 
 
+    /**
+     * Gets the file containing all source field and its attributes and relations
+     *
+     * @param etl ETL procedure's id
+     * @return source fields file
+     */
 
+    @Operation(summary = "Gets file of the source fields")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Retrieves the source fields file of a given ETL procedure",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(allOf = byte[].class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL procedure not found",
+                    content = @Content
+            )
+    })
     @GetMapping(value = "/sessions/sourceCSV")
     public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download source field list CSV of session {}", etl);
 
         byte[] content = etlService.createSourceFieldListCSV(etl);
-        String filename = "sourceList.csv";
 
+        if (content == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        String filename = "sourceList.csv";
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.parseMediaType("application/csv"));
         header.setContentDispositionFormData(filename, filename);
         header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
-        return new ResponseEntity<byte[]>(content, header, HttpStatus.OK);
+        return new ResponseEntity<>(content, header, HttpStatus.OK);
 
     }
 
 
+    /**
+     * Gets the file containing all target fields and its attributes and relations
+     *
+     * @param etl ETL procedure's id
+     * @return target fields file
+     */
+
+    @Operation(summary = "Gets file of the target fields")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Retrieves the target fields file of a given ETL procedure",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(allOf = byte[].class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL procedure not found",
+                    content = @Content
+            )
+    })
     @GetMapping(value = "/sessions/targetCSV")
     public ResponseEntity<?> getTargetFieldListCSV(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download target field list CSV of session {}", etl);
 
         byte[] content = etlService.createTargetFieldListCSV(etl);
-        String filename = "targetList.csv";
+        if (content == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
 
+        String filename = "targetList.csv";
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.parseMediaType("application/csv"));
         header.setContentDispositionFormData(filename, filename);
         header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
-        return new ResponseEntity<byte[]>(content, header, HttpStatus.OK);
+        return new ResponseEntity<>(content, header, HttpStatus.OK);
     }
 
 
+    /**
+     * Retrieves the JSON file of an ETL procedure
+     *
+     * @param etl ETL procedure's id
+     * @return ETL summary JSON file, error if not found
+     */
+
+    @Operation(summary = "Gets the JSON file containing all ETL procedure information")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Retrieves the JSON file of a given ETL procedure",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(allOf = byte[].class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL procedure not found",
+                    content = @Content
+            )
+    })
     @GetMapping(value = "/sessions/save")
     public ResponseEntity<?> getSaveFile(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download save file of session {}", etl);
 
-        byte[] content = etlService.save("Scan.json", etl);
+        byte[] content = etlService.createSavingFile("Scan.json", etl);
+        if (content == null)
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.APPLICATION_JSON);
         header.setContentLength(content.length);
         header.set("Content-Disposition", "attachment; filename=Scan.json");
-        logger.info("DONE");
         return new ResponseEntity<>(content, header, HttpStatus.OK);
     }
 }

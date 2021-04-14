@@ -15,5 +15,13 @@ public interface SourceDatabaseService {
 
     SourceDatabase createDatabaseFromScanReport(String name, MultipartFile file);
 
+
+    /**
+     * Creates and persists the content of an EHR database contained in a JSON file
+     *
+     * @param sourceDatabase EHR database stored in JSON file
+     * @return created source database
+     */
+
     SourceDatabase createDatabaseFromJSON(SourceDatabase sourceDatabase);
 }

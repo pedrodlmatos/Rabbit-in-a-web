@@ -7,7 +7,16 @@ import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +62,7 @@ public class TableMapping {
     @JsonIgnore
     private ETL etl;
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public TableMapping() {
     }
 
@@ -102,11 +111,11 @@ public class TableMapping {
         return fieldMappings;
     }
 
-    /*
+
     public void setFieldMappings(List<FieldMapping> fieldMappings) {
         this.fieldMappings = fieldMappings;
     }
-    */
+
 
     public boolean isComplete() {
         return complete;

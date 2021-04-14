@@ -65,7 +65,7 @@ public class TargetField {
     private List<Concept> concepts;
 
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public TargetField() {
     }
 

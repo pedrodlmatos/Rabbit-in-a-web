@@ -57,9 +57,8 @@ public class TargetTableController {
         logger.info("TARGET TABLE CONTROLLER - Change table {} comment", table);
 
         TargetTable response = tableService.changeComment(table, comment);
-        if (response == null) {
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

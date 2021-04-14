@@ -7,7 +7,14 @@ import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.views.Views;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "FIELD_MAPPING")
@@ -41,8 +48,14 @@ public class FieldMapping {
     @JsonIgnore
     private TableMapping tableMapping;
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public FieldMapping() {
+    }
+
+    public FieldMapping(SourceField sourceField, TargetField targetField, TableMapping tableMapping) {
+        this.source = sourceField;
+        this.target = targetField;
+        this.tableMapping = tableMapping;
     }
 
     public FieldMapping(SourceField source, TargetField target, String logic, TableMapping tableMapping) {

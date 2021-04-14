@@ -56,7 +56,7 @@ export default function SessionList() {
     const createETLSession = (values, resetForm) => {
         // sends request to API and then redirects to created session
         ETLService.createETL(values.ehrName, values.ehrFile, values.omop).then(res => {
-            window.location.href = '/session/' + res.data.id;
+            window.location.href = '/session/' + res.data;
         }).then(res => {
             console.log(res);
         })

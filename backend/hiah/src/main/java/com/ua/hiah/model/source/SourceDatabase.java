@@ -32,7 +32,7 @@ public class SourceDatabase {
     @JsonIgnore
     private ETL etl;
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public SourceDatabase() {
     }
 

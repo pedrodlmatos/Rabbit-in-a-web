@@ -57,9 +57,8 @@ public class TargetFieldController {
         logger.info("TARGET FIELD CONTROLLER - Change field {} comment", field);
 
         TargetField response = fieldService.changeComment(field, comment);
-        if (response == null) {
+        if (response == null)
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

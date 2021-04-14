@@ -41,19 +41,19 @@ public class SourceField {
     @Expose
     private boolean isNullable;
 
-    @Column(name = "maxLength", nullable = true)
+    @Column(name = "max_length", nullable = true)
     @Expose
     private int maxLength;
 
-    @Column(name = "fractionEmpty", nullable = true)
+    @Column(name = "fraction_empty", nullable = true)
     @Expose
     private double fractionEmpty;
 
-    @Column(name = "uniqueCount", nullable = true)
+    @Column(name = "unique_count", nullable = true)
     @Expose
     private int uniqueCount;
 
-    @Column(name = "fractionUnique", nullable = true)
+    @Column(name = "fraction_unique", nullable = true)
     @Expose
     private double fractionUnique;
 
@@ -79,7 +79,7 @@ public class SourceField {
     private List<ValueCount> valueCounts;
 
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
     public SourceField() {
     }
 

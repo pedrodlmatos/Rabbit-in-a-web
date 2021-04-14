@@ -37,6 +37,7 @@ public class ValueCount {
     @JsonIgnore
     private SourceField field;
 
+    // CONSTRUCTORS
     public ValueCount() {
     }
 
@@ -47,6 +48,7 @@ public class ValueCount {
         this.field = field;
     }
 
+    // GETTERS AND SETTERS
     public Long getId() {
         return id;
     }

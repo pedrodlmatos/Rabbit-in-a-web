@@ -9,19 +9,89 @@ import java.util.List;
 
 public interface TableMappingService {
 
+
+    /**
+     * Creates a table mapping between a table from the EHR database and a table from the OMOP CDM
+     *
+     * @param source_id source table's id
+     * @param target_id target table's id
+     * @param etl_id ETL procedure's id
+     * @return created table mapping
+     */
+
     TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id);
+
+
+    /**
+     * Gets a table mapping given its id
+     *
+     * @param map_id table mapping id
+     * @return table mapping if found, null otherwise
+     */
 
     TableMapping getTableMappingById(Long map_id);
 
+
+    /**
+     * Deletes a table mapping given its id
+     *
+     * @param map_id table mapping id
+     * @return deleted mapping
+     */
+
     TableMapping removeTableMapping(Long map_id);
+
+
+    /**
+     * Gets all table mappings from a given ETL procedure
+     *
+     * @param etl_id ETL procedure's id
+     * @return list with table mappings
+     */
 
     List<TableMapping> getTableMappingFromETL(Long etl_id);
 
-    TableMapping changeCompletionStatus(Long id, boolean completion);
 
-    TableMapping changeMappingLogic(Long id, String logic);
+    /**
+     * Changes the completion state of a table mapping
+     *
+     * @param tableMappingId table mapping id
+     * @param completion state to change to
+     * @return altered table mapping
+     */
+
+    TableMapping changeCompletionStatus(Long tableMappingId, boolean completion);
+
+
+    /**
+     * Changes the table mapping logic
+     *
+     * @param tableMappingId table mapping id
+     * @param logic logic to change to
+     * @return altered table mapping
+     */
+
+    TableMapping changeMappingLogic(Long tableMappingId, String logic);
+
+
+    /**
+     * Removes all table mappings of a given ETL procedures
+     *
+     * @param etl_id ETL procedure's id
+     */
 
     void removeTableMappingsFromETL(long etl_id);
 
-    List<TableMapping> getTableMappingsFromJSON(ETL response, List<TableMapping> tableMappings, SourceDatabase source, TargetDatabase target);
+
+    /**
+     * Creates the table mapping contained in a JSON file
+     *
+     * @param etl ETL procedure object
+     * @param tableMappings table mapping in JSON
+     * @param sourceDatabase source database
+     * @param targetDatabase target database
+     * @return table mappings created
+     */
+
+    List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase sourceDatabase, TargetDatabase targetDatabase);
 }
