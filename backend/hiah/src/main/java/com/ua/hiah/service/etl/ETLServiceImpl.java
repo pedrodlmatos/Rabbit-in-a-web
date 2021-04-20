@@ -245,14 +245,14 @@ public class ETLServiceImpl implements ETLService {
 
 
     @Override
-    public File createWordSummaryFile(Long id) {
+    public byte[] createWordSummaryFile(Long id) {
 
         ETL etl = etlRepository.findById(id).orElse(null);
 
         if (etl != null) {
             ETL_RIAH etlRiah = new ETL_RIAH(etl);
 
-            File documentData = ETLWordDocumentGenerator.generate(etlRiah);
+            byte[] documentData = ETLWordDocumentGenerator.generate(etlRiah);
             if (documentData != null) {
                 return documentData;
             }

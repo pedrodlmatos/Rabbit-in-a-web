@@ -14,11 +14,9 @@ export default function FilesModal(props) {
     const classes = useStyles();
     const { etl_id, openModal, closeModal } = props;
     const [sourceFieldFile, setSourceFieldFile] = useState([]);
-    const [targetFieldFile, setTargetFieldFile] = useState([]);
     const [summaryFile, setSummaryFile] = useState([]);
     
     const source_csvLink = useRef();
-    const target_csvLink = useRef();
     const summary_link = useRef();
 
     const fetchSourceFieldsFile = () => {
@@ -31,9 +29,9 @@ export default function FilesModal(props) {
 
     const fetchTargetFieldsFile = () => {
         ETLService.downloadTargetFieldsFile(etl_id).then(response => {
-            setTargetFieldFile(response.data);
-        }).catch(e => console.log(e));
-        target_csvLink.current.link.click();
+            let blob = new Blob([response.data], { type: 'application/csv', name: 'target_fields.csv' });
+            saveAs(blob, 'target_fields.csv');
+        })
     }
 
 
@@ -49,11 +47,28 @@ export default function FilesModal(props) {
 
     const fetchSummaryFile = () => {
         ETLService.downloadSummaryFile(etl_id).then(response => {
-            console.log(response);
-            //const filename = response.headers.get('Content-Disposition').split('filename=')[1];
-            //console.log(filename);
-            let blob = new Blob([response.data], { type: 'application/docx', name: 'Scan.json' });
+            //const url = window.URL.createObjectURL(new Blob([response.data]));
+            //const link = document.createElement("a");
+            //link.href = url;
+            //link.setAttribute(
+            //    "download",
+            //    "table_mapping.docx"
+            //);
+            //document.body.appendChild(link);
+            //link.click();
+            //response.blob().then(blob => console.log(blob))
+            
+            //let blob = new Blob([response], { type: 'application/octet-stream' });
+            //saveAs(blob, 'table_mappings.docx');
+
+            var blob = new Blob([response.data], { type: 'application/octet-stream' });
             saveAs(blob, 'table_mappings.docx');
+            //var link = document.createElement('a');
+            //link.href = URL.createObjectURL(blob);
+            // set the name of the file
+            //link.download = ".docx";
+            // clicking the anchor element will download the file
+            //link.click();
 
         })
     }
@@ -82,13 +97,6 @@ export default function FilesModal(props) {
                 <br />
                 <div>
                     <Controls.Button text="Target Field" onClick={fetchTargetFieldsFile} />
-                    <CSVLink
-                        data={targetFieldFile} 
-                        filename="target_fields.csv"
-                        className="hidden"
-                        ref={target_csvLink}
-                        target="_blank"
-                    />
                 </div>
                 <br />
                 <div>

@@ -10,7 +10,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class HiahApplication {
 
 	public static void main(String[] args) {
-		//SpringApplication.run(HiahApplication.class, args);
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(HiahApplication.class).headless(false).run(args);
+		SpringApplication.run(HiahApplication.class, args);
+		//ConfigurableApplicationContext context = new SpringApplicationBuilder(HiahApplication.class).headless(false).run(args);
 	}
 }

@@ -2,6 +2,7 @@
 package rabbitinahat;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.xwpf.usermodel.*;
 import rabbitcore.ooxml.CustomXWPFDocument;
 import rabbitinahat.model.*;
@@ -10,29 +11,27 @@ import java.io.*;
 
 public class ETLWordDocumentGenerator {
 
-    public static File generate(ETL_RIAH etl, boolean includeCounts) {
+    public static byte[] generate(ETL_RIAH etl, boolean includeCounts) {
         try {
             CustomXWPFDocument document = new CustomXWPFDocument();
 
             addTableLevelSection(document, etl);
 
+
             for (Table targetTable : etl.getTargetDB().getTables())
                 addTargetTableSection(document, etl, targetTable);
-
+            /*
             if (includeCounts)
                 addSourceTablesToAppendix(document, etl);
+            */
 
-
-            File file = new File("file.docx");
-            FileOutputStream outputStream = new FileOutputStream(file);
-            //ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            //File file = new File("table_mappings.docx");
+            //FileOutputStream outputStream = new FileOutputStream(file);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             document.write(outputStream);
             outputStream.close();
             document.close();
-
-
-
-            return file;
+            return outputStream.toByteArray();
 
         } catch (IOException | InvalidFormatException e) {
             e.printStackTrace();
@@ -40,7 +39,7 @@ public class ETLWordDocumentGenerator {
         return null;
     }
 
-    public static File generate(ETL_RIAH etl) {
+    public static byte[] generate(ETL_RIAH etl) {
         return generate(etl, true);
     }
 

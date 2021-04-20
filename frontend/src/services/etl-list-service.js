@@ -97,7 +97,7 @@ class ETLService {
 
 
     downloadTargetFieldsFile = async (etl) => {
-        return await axios.get(API_URL + "sessions/targetCSV", { headers: authHeader(), params: { etl: etl }})
+        return await axios.get(API_URL + "sessions/targetCSV", { headers: authHeader(), params: { etl: etl }, responseType: "blob"})
     }
 
 
@@ -106,7 +106,7 @@ class ETLService {
     }
 
     downloadSummaryFile(etl) {
-        return axios.get(API_URL + "sessions/summary", { headers: authHeader(), params: {etl: etl }});
+        return axios.get(API_URL + "sessions/summary", { headers: authHeader(), params: {etl: etl }, responseType: "blob"});
     }
 }
 

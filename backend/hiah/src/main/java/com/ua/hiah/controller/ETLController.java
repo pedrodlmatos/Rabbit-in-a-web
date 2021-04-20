@@ -30,7 +30,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -338,23 +340,13 @@ public class ETLController {
     public ResponseEntity<?> getWordDocument(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download word summary file of procedure {}", etl);
 
-        File response = etlService.createWordSummaryFile(etl);
+        byte[] response = etlService.createWordSummaryFile(etl);
         if (response == null) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
-        try {
-            FileInputStream inputStream = new FileInputStream(response);
-            byte[] doc = IOUtils.toByteArray(inputStream);
-
-            HttpHeaders header = new HttpHeaders();
-            header.set("Content-Disposition", "attachment; filename=DocxProject.docx");
-            header.setContentLength(response.length());
-            return new ResponseEntity<>(doc, header, HttpStatus.OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment;filename=hero.docx");
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 }
