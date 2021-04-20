@@ -1,4 +1,4 @@
-package com.ua.hiah.rabbitcore.utilities.collections;
+package rabbitcore.utilities.collections;
 
 import java.util.Comparator;
 

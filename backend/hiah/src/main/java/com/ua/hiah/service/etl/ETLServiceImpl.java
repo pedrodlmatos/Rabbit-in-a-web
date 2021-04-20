@@ -10,26 +10,24 @@ import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetTable;
-import com.ua.hiah.rabbitcore.utilities.ETLSummaryGenerator;
-import com.ua.hiah.rabbitcore.utilities.files.Row;
+import rabbitcore.utilities.ETLSummaryGenerator;
+import rabbitcore.utilities.files.Row;
 import com.ua.hiah.repository.ETLRepository;
 import com.ua.hiah.service.source.database.SourceDatabaseService;
-import com.ua.hiah.service.source.table.SourceTableService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
 import com.ua.hiah.service.target.database.TargetDatabaseService;
-import com.ua.hiah.service.target.table.TargetTableService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import rabbitinahat.ETLWordDocumentGenerator;
+import rabbitinahat.model.ETL_RIAH;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -247,15 +245,29 @@ public class ETLServiceImpl implements ETLService {
 
 
     @Override
-    public void createDocumentationFile(Long id) {
-        /*
+    public File createWordSummaryFile(Long id) {
+
         ETL etl = etlRepository.findById(id).orElse(null);
 
+        if (etl != null) {
+            ETL_RIAH etlRiah = new ETL_RIAH(etl);
+
+            File documentData = ETLWordDocumentGenerator.generate(etlRiah);
+            if (documentData != null) {
+                return documentData;
+            }
+        }
+
+        return null;
+
+        /*
         if (etl != null) {
             WordDocumentGenerator generator = new WordDocumentGenerator(etl);
             generator.generateWordDocument(etl);
         }
+
          */
+
     }
 
 

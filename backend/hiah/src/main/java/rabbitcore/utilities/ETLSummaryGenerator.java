@@ -1,4 +1,4 @@
-package com.ua.hiah.rabbitcore.utilities;
+package rabbitcore.utilities;
 
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.FieldMapping;
@@ -7,8 +7,8 @@ import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
-import com.ua.hiah.rabbitcore.utilities.files.Row;
-import com.ua.hiah.rabbitcore.utilities.files.WriteCSVFileWithHeader;
+import rabbitcore.utilities.files.Row;
+import rabbitcore.utilities.files.WriteCSVFileWithHeader;
 import org.apache.commons.csv.CSVFormat;
 
 import java.util.ArrayList;

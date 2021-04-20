@@ -1,7 +1,9 @@
-package com.ua.hiah.rabbitcore.riah_datamodel;
+/* Adapted from ConceptsMap (rabbit-core) */
+package rabbitcore.riah_datamodel;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import rabbitinahat.model.Field;
 
 import java.io.*;
 import java.util.*;
@@ -18,6 +20,10 @@ public class ConceptsMap {
     public ConceptsMap(String fileName) {
         this();
         this.load(fileName);
+    }
+
+    public ConceptsMap(List<Concept> concepts) {
+
     }
 
     private void load(String fileName) {
@@ -82,6 +88,87 @@ public class ConceptsMap {
         }
 
         void setConceptId(String conceptId) {
+            this.conceptId = conceptId;
+        }
+
+        public String getConceptName() {
+            return conceptName;
+        }
+
+        void setConceptName(String conceptName) {
+            this.conceptName = conceptName;
+        }
+
+        public String getStandardConcept() {
+            return standardConcept;
+        }
+
+        void setStandardConcept(String standardConcept) {
+            this.standardConcept = standardConcept;
+        }
+
+        public String getDomainId() {
+            return domainId;
+        }
+
+        public void setDomainId(String domainId) {
+            this.domainId = domainId;
+        }
+
+        public String getVocabularyId() {
+            return vocabularyId;
+        }
+
+        public void setVocabularyId(String vocabularyId) {
+            this.vocabularyId = vocabularyId;
+        }
+
+        public String getConceptClassId() {
+            return conceptClassId;
+        }
+
+        public void setConceptClassId(String conceptClassId) {
+            this.conceptClassId = conceptClassId;
+        }
+
+        public String toString() {
+            return this.conceptId + " -- " + this.conceptName;
+        }
+    }
+
+
+    public static class Concept {
+        private Field field;
+        private Long conceptId;
+        private String conceptName;
+        private String standardConcept;
+        private String domainId;
+        private String vocabularyId;
+        private String conceptClassId;
+
+        public Concept(com.ua.hiah.model.target.Concept concept, Field field) {
+            this.field = field;
+            this.conceptId = concept.getConceptId();
+            this.conceptName = concept.getConceptName();
+            this.standardConcept = concept.getStandardConcept();
+            this.domainId = concept.getDomainId();
+            this.vocabularyId = concept.getVocabularyId();
+            this.conceptClassId = concept.getConceptClassId();
+        }
+
+        public Field getField() {
+            return field;
+        }
+
+        public void setField(Field field) {
+            this.field = field;
+        }
+
+        public Long getConceptId() {
+            return conceptId;
+        }
+
+        void setConceptId(Long conceptId) {
             this.conceptId = conceptId;
         }
 

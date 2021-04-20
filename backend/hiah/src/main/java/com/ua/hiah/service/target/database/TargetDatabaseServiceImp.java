@@ -1,14 +1,11 @@
 package com.ua.hiah.service.target.database;
 
 import com.ua.hiah.model.CDMVersion;
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.source.ValueCount;
 import com.ua.hiah.model.target.Concept;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
-import com.ua.hiah.rabbitcore.riah_datamodel.ConceptsMap;
+import rabbitcore.riah_datamodel.ConceptsMap;
 import com.ua.hiah.repository.target.TargetDatabaseRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -139,15 +136,11 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
 
 
     /**
-     * Removes a database given its id
+     * Creates a OMOP CDM database from data contained in JSON
      *
-     * @param id database's id
+     * @param targetDatabase database stored in JSON object
+     * @return database altered for specific model
      */
-
-    @Override
-    public void removeDatabase(Long id) {
-        repository.deleteById(id);
-    }
 
     @Override
     public TargetDatabase createDatabaseFromJSON(TargetDatabase targetDatabase) {
@@ -192,6 +185,21 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
         }
 
         responseDatabase.setTables(tables);
-        return repository.save(responseDatabase);
+        //return repository.save(responseDatabase);
+        return responseDatabase;
     }
+
+
+    /**
+     * Removes a database given its id
+     *
+     * @param id database's id
+     */
+
+    @Override
+    public void removeDatabase(Long id) {
+        repository.deleteById(id);
+    }
+
+
 }

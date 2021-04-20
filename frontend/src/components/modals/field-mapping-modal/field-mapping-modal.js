@@ -189,7 +189,7 @@ export default function FieldMappingModal(props) {
             setFieldInfo([]);
         } else if (sourceSelected) {                                                // source field is selected -> create arrow
             resetArrowsColor();                                                     // change arrows color to grey
-            createFieldMapping(selectedField, field);                               // create arrow
+            createFieldMapping(selectedField.id, field.id);                         // create arrow
             setSelectedField({});                                                   // unselects fields
             setSourceSelected(false);                                               // clean state
             setShowFieldInfo(false);

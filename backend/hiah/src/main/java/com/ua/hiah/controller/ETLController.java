@@ -10,14 +10,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +26,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -167,7 +169,7 @@ public class ETLController {
         if (etl == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
-        return new ResponseEntity<>(etl, HttpStatus.CREATED);
+        return new ResponseEntity<>(etl.getId(), HttpStatus.CREATED);
     }
 
     // TODO: create ETL session with a custom OMOP CDM file
@@ -329,5 +331,30 @@ public class ETLController {
         header.setContentLength(content.length);
         header.set("Content-Disposition", "attachment; filename=Scan.json");
         return new ResponseEntity<>(content, header, HttpStatus.OK);
+    }
+
+
+    @GetMapping(value = "/sessions/summary", produces="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    public ResponseEntity<?> getWordDocument(@Param(value = "etl") Long etl) {
+        logger.info("ETL CONTROLLER - Download word summary file of procedure {}", etl);
+
+        File response = etlService.createWordSummaryFile(etl);
+        if (response == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            FileInputStream inputStream = new FileInputStream(response);
+            byte[] doc = IOUtils.toByteArray(inputStream);
+
+            HttpHeaders header = new HttpHeaders();
+            header.set("Content-Disposition", "attachment; filename=DocxProject.docx");
+            header.setContentLength(response.length());
+            return new ResponseEntity<>(doc, header, HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 }

@@ -1,4 +1,4 @@
-package com.ua.hiah.rabbitcore.utilities.files;
+package rabbitcore.utilities.files;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;

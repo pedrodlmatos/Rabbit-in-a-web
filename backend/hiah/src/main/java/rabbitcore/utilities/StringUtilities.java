@@ -1,4 +1,4 @@
-package com.ua.hiah.rabbitcore.utilities;
+package rabbitcore.utilities;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

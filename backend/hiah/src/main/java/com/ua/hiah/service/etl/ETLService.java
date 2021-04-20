@@ -3,6 +3,7 @@ package com.ua.hiah.service.etl;
 import com.ua.hiah.model.ETL;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 
 public interface ETLService {
@@ -78,7 +79,7 @@ public interface ETLService {
 
     byte[] createTargetFieldListCSV(Long etl_id);
 
-    void createDocumentationFile(Long id);
+    File createWordSummaryFile(Long id);
 
 
     /**

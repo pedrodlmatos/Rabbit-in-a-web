@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle, makeStyles } from '@material-ui/core'
+import CloseIcon from '@material-ui/icons/Close';
 import Controls from '../../controls/controls';
 import ETLService from '../../../services/etl-list-service';
 import { CSVLink } from 'react-csv';
@@ -14,9 +15,11 @@ export default function FilesModal(props) {
     const { etl_id, openModal, closeModal } = props;
     const [sourceFieldFile, setSourceFieldFile] = useState([]);
     const [targetFieldFile, setTargetFieldFile] = useState([]);
+    const [summaryFile, setSummaryFile] = useState([]);
     
     const source_csvLink = useRef();
     const target_csvLink = useRef();
+    const summary_link = useRef();
 
     const fetchSourceFieldsFile = () => {
         ETLService.downloadSourceFieldsFile(etl_id).then(response => {
@@ -44,12 +47,27 @@ export default function FilesModal(props) {
         })
     }
 
+    const fetchSummaryFile = () => {
+        ETLService.downloadSummaryFile(etl_id).then(response => {
+            console.log(response);
+            //const filename = response.headers.get('Content-Disposition').split('filename=')[1];
+            //console.log(filename);
+            let blob = new Blob([response.data], { type: 'application/docx', name: 'Scan.json' });
+            saveAs(blob, 'table_mappings.docx');
+
+        })
+    }
+
 
     return(
         <Dialog open={openModal} classes={{ paper: classes.dialogWrapper }}>
             <DialogTitle>
                 Summary files
+                <Controls.ActionButton color="secondary" onClick={closeModal}>
+                    <CloseIcon />
+                </Controls.ActionButton>
             </DialogTitle>
+
             <DialogContent>
                 <div>
                     <Controls.Button text="Source Field" onClick={fetchSourceFieldsFile} />
@@ -75,6 +93,11 @@ export default function FilesModal(props) {
                 <br />
                 <div>
                     <Controls.Button text="Save" onClick={fetchSaveFile} />
+                </div>
+
+                <br />
+                <div>
+                    <Controls.Button text="Summary" onClick={fetchSummaryFile} />
                 </div>
 
 

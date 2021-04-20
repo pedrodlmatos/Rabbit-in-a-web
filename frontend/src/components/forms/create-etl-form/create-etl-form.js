@@ -32,8 +32,6 @@ export default function CreateETLForm(props) {
     const validate = (fieldValues = values) => {
         let temp = { ...errors }
 
-        console.log(fieldValues);
-
         if ('ehrName' in fieldValues) {
             temp.ehrName = fieldValues.ehrName ? "" : "This field is required"
         } if ('ehrFile' in fieldValues) {

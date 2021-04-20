@@ -140,15 +140,15 @@ export default function Session() {
      */
 
     const selectSourceTable = (table) => {                       
-        setSelectedMapping({});                                                     // clean state
-        if (Object.keys(selectedTable).length === 0) {                              // all tables are unselected
+        setSelectedMapping({});                                                    // clean state
+        if (Object.keys(selectedTable).length === 0) {                                   // all tables are unselected
             setSelectedTable(table);
             setSourceSelected(true);
-            selectArrowsFromSource(table);                                          // change color of mappings that comes from the selected table
-            defineData(table);                                                      // define fields info
-        } else if (selectedTable === table) {                                       // select the same table
-            resetArrowsColor();                                                     // change color of arrows to grey
-            setSelectedTable({});                                                   // unselect
+            selectArrowsFromSource(table);                                               // change color of mappings that comes from the selected table
+            defineData(table);                                                           // define fields info
+        } else if (selectedTable === table) {                                            // select the same table
+            resetArrowsColor();                                                          // change color of arrows to grey
+            setSelectedTable({});                                                  // unselect
             setSourceSelected(false);
             setShowTableDetails(false);
             setTableDetails(null);
@@ -170,7 +170,7 @@ export default function Session() {
      * - If select the same table, unselect
      * - Else selects a different target table
      *
-     * @param element
+     * @param table
      */
 
     const selectTargetTable = (table) => {

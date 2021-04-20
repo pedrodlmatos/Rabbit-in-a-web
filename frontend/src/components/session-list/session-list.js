@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles, Grid, CircularProgress } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import AttachFileIcon from '@material-ui/icons/AttachFile';
 import SessionCard from "../sessionCard/session-card";
 import ETLService from "../../services/etl-list-service";
 import ETLModal from "../modals/create-etl-modal/etl-modal";
@@ -17,28 +18,32 @@ const useStyles = makeStyles(theme => ({
     title: {
         marginBottom: theme.spacing(5),
         fontSize: "12"
+    },
+    button: {
+        marginRight: theme.spacing(1)
     }
 }))
 
 
 export default function SessionList() {
     const classes = useStyles();
-    const [openModal, setOpenModal] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [disabled, setDisabled] = useState(false);
-    const [sessions, setSessions] = useState({ });
 
-    const [openFromFileModal, setOpenFromFileModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [disabled, setDisabled] = useState(false);
+    const [procedures, setProcedures] = useState({ });
+
+    const [openCreateModal, setOpenCreateModal] = useState(false);
+    const [openCreateFromFileModal, setOpenCreateFromFileModal] = useState(false);
 
     
     /**
-     * Sends GET request to API to retrieve all ETL sessions
+     * Sends GET request to API to retrieve all ETL procedures
      */
     
     useEffect(() => {
         ETLService.getAllETL().then(response => {
-            setSessions(response.data);
-            setLoading(true);
+            setProcedures(response.data);
+            setLoading(false);
         }).catch(response => {
             console.log(response);
         })
@@ -46,14 +51,14 @@ export default function SessionList() {
 
 
     /**
-     * Sends POST request to API to create a new ETL session
+     * Sends POST request to API to create a new ETL procedure
      * Disables buttons
      * 
      * @param {*} values form values (file and OMOP CDM)
      * @param {*} resetForm function to reset form
      */
 
-    const createETLSession = (values, resetForm) => {
+    const createETLProcedure = (values, resetForm) => {
         // sends request to API and then redirects to created session
         ETLService.createETL(values.ehrName, values.ehrFile, values.omop).then(res => {
             window.location.href = '/session/' + res.data;
@@ -66,76 +71,93 @@ export default function SessionList() {
     }
 
 
-    const createETLSessionFromFile = (values, resetForm) => {
+    /**
+     * Creates ETL procedure from JSON file and redirects to page of created procedure
+     *
+     * @param values form values
+     * @param resetForm function to reset from
+     */
+    const createETLProcedureFromJSONFile = (values, resetForm) => {
         // sends request to API and then redirects to created session
         ETLService.createETLFromFile(values.file).then(res => {
-            window.location.href = '/session/' + res.data.id;
-        }).then(res => {
+            window.location.href = '/session/' + res.data;
+        }).catch(res => {
             console.log(res);
         })
-
         setDisabled(true);
         resetForm();
     }
 
 
     /**
-     * Closes ETL session creation modal and reset its form
+     * Closes ETL procedure creation modal and reset its form
      * 
      * @param {*} resetForm function to reset form
      */
 
-    const closeModal = (resetForm) => {
+    const closeCreateModal = (resetForm) => {
         resetForm();
-        setOpenModal(false);
+        setOpenCreateModal(false);
     }
 
+    /**
+     * Closes ETL procedure creation modal (with JSON file) and reset form
+     *
+     * @param resetForm function to reset form
+     */
 
-    const closeETLFileModal = (resetForm) => {
+    const closeCreateFromFileModal = (resetForm) => {
         resetForm();
-        setOpenFromFileModal(false);
+        setOpenCreateFromFileModal(false);
     }
     
-
 
     return(
         <div className={classes.pageContainer}>
             { loading ? (
+                <CircularProgress color="primary" variant="indeterminate" size={40} />
+            ) : (
                 <div>
-                    <h1 className={classes.title}>ETL Sessions</h1>
-
+                    <h1 className={classes.title}>ETL Procedures</h1>
                     <Grid container spacing={4}>
-                        { sessions.map(session => 
+                        { procedures.map(session =>
                             <Grid key={session.id} item xs={12} sm={12} md={2} lg={2}>
-                                <SessionCard id={session.id} name={session.name} ehr={session.sourceDatabase.databaseName} omop={session.targetDatabase.databaseName}/>
+                                <SessionCard
+                                    id={session.id}
+                                    name={session.name}
+                                    ehr={session.sourceDatabase.databaseName}
+                                    omop={session.targetDatabase.databaseName}
+                                />
                             </Grid>
                         )}
                     </Grid>
 
-                    <Controls.Button 
+                    <Controls.Button
+                        className={classes.button}
                         text="Create ETL Session"
                         disabled={disabled}
-                        onClick={() => {setOpenModal(true)}}
+                        onClick={() => {setOpenCreateModal(true)}}
                     >
                         <AddIcon fontSize="large"/>
                     </Controls.Button>
-                    
-                    <ETLModal title="Create ETL session" openModal={openModal} setOpenModal={setOpenModal}>
-                        <CreateETLForm addSession={createETLSession} close={closeModal} />
+
+                    <ETLModal title="Create ETL session" openModal={openCreateModal} setOpenModal={setOpenCreateModal}>
+                        <CreateETLForm addSession={createETLProcedure} close={closeCreateModal} />
                     </ETLModal>
 
                     <Controls.Button
+                        className={classes.button}
                         text="Create from file"
                         disabled={disabled}
-                        onClick={() => {setOpenFromFileModal(true)}}
-                    />
-                    <FileETLModal title="Create from file" openModal={openFromFileModal} setOpenModal={setOpenFromFileModal}>
-                        <FileETLForm addSession={createETLSessionFromFile} close={closeETLFileModal}/>
+                        onClick={() => {setOpenCreateFromFileModal(true)}}
+                    >
+                        <AttachFileIcon fontSize="large" />
+                    </Controls.Button>
+
+                    <FileETLModal title="Create from file" openModal={openCreateFromFileModal} setOpenModal={setOpenCreateFromFileModal}>
+                        <FileETLForm addSession={createETLProcedureFromJSONFile} close={closeCreateFromFileModal}/>
                     </FileETLModal>
-                    
                 </div>
-            ) : (
-                <CircularProgress color="primary" variant="indeterminate" size={40} />
             )}
         </div>
     )

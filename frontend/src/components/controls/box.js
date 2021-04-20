@@ -44,6 +44,7 @@ export default function TooltipBox(props) {
     const classes = useStyles(props);
 
     const selectTable = () => {
+        console.log(element);
         handleSelection(element);
     }
 

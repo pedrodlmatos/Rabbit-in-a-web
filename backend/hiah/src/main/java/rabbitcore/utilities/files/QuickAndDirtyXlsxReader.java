@@ -1,7 +1,7 @@
-package com.ua.hiah.rabbitcore.utilities.files;
+package rabbitcore.utilities.files;
 
-import com.ua.hiah.rabbitcore.utilities.StringUtilities;
-import com.ua.hiah.rabbitcore.utilities.collections.IntegerComparator;
+import rabbitcore.utilities.StringUtilities;
+import rabbitcore.utilities.collections.IntegerComparator;
 
 import java.io.*;
 import java.util.*;

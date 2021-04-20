@@ -104,6 +104,10 @@ class ETLService {
     downloadSaveFile(etl) {
         return axios.get(API_URL + "sessions/save", { headers: authHeader(), params: {etl: etl }});
     }
+
+    downloadSummaryFile(etl) {
+        return axios.get(API_URL + "sessions/summary", { headers: authHeader(), params: {etl: etl }});
+    }
 }
 
 export default new ETLService();

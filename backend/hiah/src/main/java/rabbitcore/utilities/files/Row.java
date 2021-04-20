@@ -1,6 +1,6 @@
-package com.ua.hiah.rabbitcore.utilities.files;
+package rabbitcore.utilities.files;
 
-import com.ua.hiah.rabbitcore.utilities.StringUtilities;
+import rabbitcore.utilities.StringUtilities;
 
 import java.util.ArrayList;
 import java.util.HashMap;

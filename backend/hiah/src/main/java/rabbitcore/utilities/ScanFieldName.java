@@ -1,4 +1,4 @@
-package com.ua.hiah.rabbitcore.utilities;
+package rabbitcore.utilities;
 
 public interface ScanFieldName {
     String TABLE = "Table";
