@@ -95,7 +95,10 @@ public class Field implements MappableItem {
 
     @Override
     public String outputName() {
-        return null;
+        if (!isNullable)
+            return "*" + name;
+        else
+            return name;
     }
 
     @Override

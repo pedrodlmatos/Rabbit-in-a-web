@@ -7,10 +7,7 @@ import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.target.TargetDatabase;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ETL_RIAH {
 
@@ -65,6 +62,18 @@ public class ETL_RIAH {
         return new Mapping<>(sourceDB.getTables(), targetDB.getTables(), tableToTableMaps);
     }
 
+    public Mapping<Table> getMappingToTargetTable(Table targetTable) {
+        List<ItemToItemMap> mappings = new ArrayList<>();
+        List<Table> sourceTables = new ArrayList<>();
+        for (ItemToItemMap map : tableToTableMaps) {
+            if (map.getTargetItem() == targetTable) {
+                sourceTables.add((Table) map.getSourceItem());
+                mappings.add(map);
+            }
+        }
+        return new Mapping<>(sourceTables, new ArrayList<>(Collections.singleton(targetTable)), mappings);
+    }
+
     public Mapping<Field> getFieldToFieldMapping(Table sourceTable, Table targetTable) {
         List<ItemToItemMap> fieldToFieldMappings = fieldToFieldMaps.get(new ItemToItemMap(sourceTable, targetTable));
         if (fieldToFieldMappings == null) {
@@ -86,5 +95,15 @@ public class ETL_RIAH {
         return "ETL_RIAH{" +
                 "sourceDB=" + sourceDB +
                 '}';
+    }
+
+    public int getNumberOfMappingsToTable(MappableItem item) {
+        int nMaps = 0;
+        for (ItemToItemMap map : tableToTableMaps) {
+            if (map.getTargetItem() == item) {
+                nMaps++;
+            }
+        }
+        return nMaps;
     }
 }

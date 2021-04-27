@@ -129,7 +129,7 @@ public class Table implements MappableItem {
 
     @Override
     public String outputName() {
-        return null;
+        return getName();
     }
 
     @Override

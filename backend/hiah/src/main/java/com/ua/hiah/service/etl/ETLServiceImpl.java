@@ -250,6 +250,15 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(id).orElse(null);
 
         if (etl != null) {
+
+
+            // order tables by id
+            //List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
+            //sourceTables.sort(Comparator.comparingLong(SourceTable::getId));
+
+            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
+            targetTables.sort(Comparator.comparingLong(TargetTable::getId));
+
             ETL_RIAH etlRiah = new ETL_RIAH(etl);
 
             byte[] documentData = ETLWordDocumentGenerator.generate(etlRiah);

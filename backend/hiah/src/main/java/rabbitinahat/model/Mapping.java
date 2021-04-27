@@ -96,4 +96,8 @@ public class Mapping<T extends MappableItem> {
         }
         return null;
     }
+
+    public int size() {
+        return sourceToTargetMaps.size();
+    }
 }

@@ -1,3 +1,10 @@
+IP: 35.205.94.208
+
+add rules to ports
+
+8080
+
+
 --- 1 - Install Docker ---
 
 sudo apt-get update
@@ -25,7 +32,7 @@ docker-compose up -d --build
 
 --- 4 - Configure Jenkins ---
 
-34.118.8.157:8080
+35.205.94.208:8080
 Create pipeline job
 
 # Build Triggers
@@ -36,7 +43,7 @@ Definition - Pipeline script from SCM
 Create credentials with username and pass
 
 
-Install Maven Integration plugin
+Install Maven Pipeline Integration plugin
 Create a new settings.xml
 Replace content to stored in settings.xml file
 
@@ -57,7 +64,7 @@ sudo systemctl restart docker
 
 cd .ssh/
 ssh-keygen -f jenkins
-Copy jenkins.pun content to runtime vm metadata
+Copy jenkins.pub content to runtime vm metadata
 Create credential in Jenkins
 Copy jenkins content to key credential
 Change id in Jenkinsfile

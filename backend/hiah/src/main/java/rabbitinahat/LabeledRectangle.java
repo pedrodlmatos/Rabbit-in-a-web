@@ -27,7 +27,6 @@ public class LabeledRectangle implements MappingComponent {
     private MappableItem item;
     private Color baseColor;
     private Color transparentColor;
-    private boolean isVisible = true;
 
     private static int FONT_SIZE = 18;
     private static Stroke stroke = new BasicStroke(2);
@@ -70,15 +69,12 @@ public class LabeledRectangle implements MappingComponent {
 
     @Override
     public boolean isVisible() {
-        return isVisible;
+        return true;
     }
 
 
     @Override
     public void paint(Graphics g) {
-        if (!isVisible)
-            return;
-
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(transparentColor);
         g2d.fillRect(x, y, width, height);
