@@ -3,6 +3,9 @@ IP: 35.205.94.208
 add rules to ports
 
 8080
+5000
+5432
+8100
 
 
 --- 1 - Install Docker ---

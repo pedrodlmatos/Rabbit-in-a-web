@@ -32,7 +32,7 @@ Postgres details:
 
 ## CI/CD Virtual machine
 
-IP Address: `34.118.8.157`
+IP Address: `35.205.94.208`
 
 Service | Internal port | External port
 --- | --- | ---
@@ -44,7 +44,7 @@ Registry | 5000 | 5000
 
 ## Runtime Virtual Machine
 
-IP Address: `104.199.21.27`
+IP Address: `34.76.46.230`
 
 Service | Internal port | External port
 --- | ---| -
