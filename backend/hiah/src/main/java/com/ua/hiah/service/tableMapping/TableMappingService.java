@@ -1,8 +1,10 @@
 package com.ua.hiah.service.tableMapping;
 
+import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.model.source.SourceDatabase;
+import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
 
 import java.util.List;
@@ -94,4 +96,6 @@ public interface TableMappingService {
      */
 
     List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase sourceDatabase, TargetDatabase targetDatabase);
+
+    List<TableMapping> createMappingsWithStemTable(CDMVersion version, TargetDatabase targetDatabase, SourceTable sourceStemTable, ETL etl);
 }

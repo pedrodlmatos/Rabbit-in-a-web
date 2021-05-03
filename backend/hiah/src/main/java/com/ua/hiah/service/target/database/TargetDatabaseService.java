@@ -2,6 +2,7 @@ package com.ua.hiah.service.target.database;
 
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.target.TargetDatabase;
+import com.ua.hiah.model.target.TargetTable;
 
 public interface TargetDatabaseService {
 
@@ -35,4 +36,6 @@ public interface TargetDatabaseService {
     void removeDatabase(Long id);
 
     TargetDatabase createDatabaseFromJSON(TargetDatabase targetDatabase);
+
+    TargetTable createTargetStemTable(CDMVersion version, TargetDatabase targetDatabase);
 }

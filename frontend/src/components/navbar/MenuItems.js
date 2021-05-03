@@ -5,8 +5,8 @@ export const MenuItems = [
         cName: 'nav-links'
     },
     {
-        title: 'Sessions',
-        url: '/sessions',
+        title: 'ETL procedures',
+        url: '/procedures',
         cName: 'nav-links'
     },
     {

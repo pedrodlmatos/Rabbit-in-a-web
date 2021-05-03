@@ -38,6 +38,11 @@ public class TargetTable {
     @Expose
     private String comment;
 
+    @Column(name = "stem", nullable = false)
+    @JsonView(Views.ETLSession.class)
+    @Expose
+    private boolean stem;
+
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     @Expose
@@ -54,6 +59,7 @@ public class TargetTable {
     public TargetTable() {
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
+        this.stem = false;
     }
 
     public TargetTable(String name, TargetDatabase database) {
@@ -61,11 +67,21 @@ public class TargetTable {
         this.targetDatabase = database;
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
+        this.stem = false;
     }
 
     public TargetTable(String name, String comment, TargetDatabase targetDatabase) {
         this.name = name;
         this.comment = comment;
+        this.targetDatabase = targetDatabase;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+        this.stem = false;
+    }
+
+    public TargetTable(String name, boolean stem, TargetDatabase targetDatabase) {
+        this.name = name;
+        this.stem = stem;
         this.targetDatabase = targetDatabase;
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
@@ -120,6 +136,14 @@ public class TargetTable {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public boolean isStem() {
+        return stem;
+    }
+
+    public void setStem(boolean stem) {
+        this.stem = stem;
     }
 
     @Override

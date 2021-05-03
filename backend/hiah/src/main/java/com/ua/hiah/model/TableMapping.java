@@ -66,6 +66,13 @@ public class TableMapping {
     public TableMapping() {
     }
 
+    public TableMapping(ETL etl, SourceTable sourceTable, TargetTable targetTable) {
+        this.etl = etl;
+        this.source = sourceTable;
+        this.target = targetTable;
+        this.fieldMappings = new ArrayList<>();
+    }
+
     public TableMapping(ETL etl, SourceTable sourceTable, TargetTable targetTable, String logic) {
         this.etl = etl;
         this.source = sourceTable;

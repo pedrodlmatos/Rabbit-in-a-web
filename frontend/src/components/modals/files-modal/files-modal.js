@@ -47,29 +47,8 @@ export default function FilesModal(props) {
 
     const fetchSummaryFile = () => {
         ETLService.downloadSummaryFile(etl_id).then(response => {
-            //const url = window.URL.createObjectURL(new Blob([response.data]));
-            //const link = document.createElement("a");
-            //link.href = url;
-            //link.setAttribute(
-            //    "download",
-            //    "table_mapping.docx"
-            //);
-            //document.body.appendChild(link);
-            //link.click();
-            //response.blob().then(blob => console.log(blob))
-            
-            //let blob = new Blob([response], { type: 'application/octet-stream' });
-            //saveAs(blob, 'table_mappings.docx');
-
             var blob = new Blob([response.data], { type: 'application/octet-stream' });
             saveAs(blob, 'table_mappings.docx');
-            //var link = document.createElement('a');
-            //link.href = URL.createObjectURL(blob);
-            // set the name of the file
-            //link.download = ".docx";
-            // clicking the anchor element will download the file
-            //link.click();
-
         })
     }
 

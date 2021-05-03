@@ -1,6 +1,9 @@
 package com.ua.hiah.service.target.database;
 
 import com.ua.hiah.model.CDMVersion;
+import com.ua.hiah.model.StemTableFile;
+import com.ua.hiah.model.source.SourceField;
+import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.Concept;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetField;
@@ -187,6 +190,38 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
         responseDatabase.setTables(tables);
         //return repository.save(responseDatabase);
         return responseDatabase;
+    }
+
+    @Override
+    public TargetTable createTargetStemTable(CDMVersion version, TargetDatabase targetDatabase) {
+        TargetTable stemTargetTable = new TargetTable(
+                "stem_table",
+                true,
+                targetDatabase
+        );
+
+
+        try {
+            StemTableFile stemTableFile = StemTableFile.valueOf(version.name());
+            FileInputStream fileInputStream = new FileInputStream(stemTableFile.fileName);
+
+            for (CSVRecord row : CSVFormat.RFC4180.withHeader().parse(new InputStreamReader(fileInputStream))) {
+                TargetField field = new TargetField(
+                    row.get("COLUMN_NAME").toLowerCase(),
+                    row.get("IS_NULLABLE").equals("YES"),
+                    row.get("DATA_TYPE"),
+                    row.get("DESCRIPTION"),
+                    true,
+                    stemTargetTable
+                );
+                stemTargetTable.getFields().add(field);
+            }
+            return stemTargetTable;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 

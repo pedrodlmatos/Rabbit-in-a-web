@@ -11,14 +11,7 @@ const useStyles = makeStyles(theme => ({
         borderColor: props => props.border,
         borderStyle: 'solid',
         backgroundColor: props => props.color,
-        fontSize: 15,
-        display: 'flex',
-        justifyContent: 'center',
-        alignContent: 'center',
-        flexDirection: 'column',
-        textAlign: 'center',
-        wordWrap: 'break-work'
-        
+        display: 'table'
     },
     selected: {
         width: 200,
@@ -28,23 +21,26 @@ const useStyles = makeStyles(theme => ({
         borderColor: 'black',
         borderStyle: 'dashed',
         backgroundColor: props => props.color,
-        fontSize: 15,
-        display: 'flex',
-        justifyContent: 'center',
-        alignContent: 'center',
-        flexDirection: 'column',
+        display: 'table'
+    },
+    text: {
         textAlign: 'center',
-        wordWrap: 'break-work'
+        verticalAlign: 'middle',
+        display: 'table-cell',
+        justifyContent: 'center',
+        fontSize: 15,
+        flexDirection: 'column',
+        alignContent: 'center',
+        wordBreak: "break-all"
     }
 }))
 
 export default function TooltipBox(props) {
-    const { element, handler, clicked, help, position, handleSelection, createMapping } = props;
+    const { element, id, handler, clicked, help, position, handleSelection, createMapping } = props;
     const ref0 = useRef();
     const classes = useStyles(props);
 
     const selectTable = () => {
-        console.log(element);
         handleSelection(element);
     }
 
@@ -56,7 +52,7 @@ export default function TooltipBox(props) {
             enterDelay={1000}
         >
             <div 
-                id={element.name} 
+                id={id}
                 ref={ref0} 
                 className={clicked ? classes.selected : classes.unselected} 
                 onClick={selectTable}
@@ -67,7 +63,7 @@ export default function TooltipBox(props) {
                     }
                 }}
             >
-                { element.name }
+                <p className={classes.text}>{ element.name }</p>
                 <ConnectPointsWrapper id={element.id} name={element.name} handler={handler} />
             </div> 
         </Tooltip>

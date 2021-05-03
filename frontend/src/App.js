@@ -2,8 +2,8 @@ import React, {Component} from 'react';
 import './App.css';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import Home from "./components/home/home";
-import SessionList from './components/session-list/session-list';
-import Session from "./components/session/session";
+import ProcedureList from './components/procedure-list/procedure-list';
+import Procedure from "./components/session/procedure";
 import Documentation from "./components/documentation/Documentation";
 
 class App extends Component {
@@ -17,7 +17,7 @@ class App extends Component {
 
                         <div className="navbar-nav mr-auto">
                             <li className="nav-item">
-                                <Link to={"/sessions"} className="nav-link">Sessions</Link>
+                                <Link to={"/procedures"} className="nav-link">ETL Procedures</Link>
                             </li>
                         </div>
                     </nav>
@@ -25,8 +25,8 @@ class App extends Component {
                     <div>
                         <Switch>
                             <Route exact path="/" component={Home}/>
-                            <Route path='/sessions' component={SessionList} />
-                            <Route path='/session/:id' component={Session} />
+                            <Route path='/procedures' component={ProcedureList} />
+                            <Route path='/procedure/:id' component={Procedure} />
                             <Route exact path='/documentation' component={Documentation} />
                         </Switch>
                     </div>

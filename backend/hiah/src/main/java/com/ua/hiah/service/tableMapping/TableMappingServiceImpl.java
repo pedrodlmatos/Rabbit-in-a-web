@@ -1,8 +1,6 @@
 package com.ua.hiah.service.tableMapping;
 
-import com.ua.hiah.model.ETL;
-import com.ua.hiah.model.FieldMapping;
-import com.ua.hiah.model.TableMapping;
+import com.ua.hiah.model.*;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.source.SourceTable;
@@ -13,12 +11,16 @@ import com.ua.hiah.repository.TableMappingRepository;
 import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.service.source.table.SourceTableService;
 import com.ua.hiah.service.target.table.TargetTableService;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 @Service
 @Transactional
@@ -192,5 +194,42 @@ public class TableMappingServiceImpl implements TableMappingService {
             }
         }
         return responseMappings;
+    }
+
+    @Override
+    public List<TableMapping> createMappingsWithStemTable(CDMVersion version, TargetDatabase targetDatabase, SourceTable sourceStemTable, ETL etl) {
+        try {
+            StemTableFile stemTableFile = StemTableFile.valueOf(version.name());
+            FileInputStream fileInputStream = new FileInputStream(stemTableFile.defaultMappings);
+            List<TableMapping> mappings = new ArrayList<>();
+            Map<String, TableMapping> mappingMap = new HashMap<>();
+
+            for (CSVRecord row : CSVFormat.RFC4180.withHeader().parse(new InputStreamReader(fileInputStream))) {
+                String targetTableName = row.get("TARGET_TABLE").toLowerCase();
+                TargetTable targetTable = targetDatabase.getTables().stream().filter(target -> target.getName().equals(targetTableName)).findFirst().orElse(null);
+                if (targetTable != null) {
+                    if (mappingMap.get(targetTableName) == null) {
+                        TableMapping tableMapping = new TableMapping(etl, sourceStemTable, targetTable);
+                        mappingMap.put(targetTableName, tableMapping);
+                        mappings.add(tableMapping);
+                    }
+                    SourceField sourceField = sourceStemTable.getFields().stream().filter(field -> field.getName().equals(row.get("SOURCE_FIELD").toLowerCase())).findFirst().orElse(null);
+                    TargetField targetField = targetTable.getFields().stream().filter(field -> field.getName().equals(row.get("TARGET_FIELD").toLowerCase())).findFirst().orElse(null);
+
+                    if (sourceField != null && targetField != null) {
+                        FieldMapping fieldMapping = new FieldMapping(
+                                sourceField,
+                                targetField,
+                                mappingMap.get(targetTableName)
+                        );
+                        mappingMap.get(targetTableName).getFieldMappings().add(fieldMapping);
+                    }
+                }
+            }
+            return mappings;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -1,9 +1,13 @@
 package com.ua.hiah.service.source.database;
 
+import com.ua.hiah.model.CDMVersion;
+import com.ua.hiah.model.StemTableFile;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.source.ValueCount;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import rabbitcore.utilities.ScanFieldName;
 import rabbitcore.utilities.ScanSheetName;
 import rabbitcore.utilities.files.QuickAndDirtyXlsxReader;
@@ -14,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -170,6 +171,38 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
         response.setTables(tables);
         //return databaseRepository.save(response);
         return response;
+    }
+
+    @Override
+    public SourceTable createSourceStemTable(CDMVersion version, SourceDatabase sourceDatabase) {
+        SourceTable stemSourceTable = new SourceTable(
+            "stem_table",
+            true,
+            sourceDatabase
+        );
+
+
+        try {
+            StemTableFile stemTableFile = StemTableFile.valueOf(version.name());
+            FileInputStream fileInputStream = new FileInputStream(stemTableFile.fileName);
+
+            for (CSVRecord row : CSVFormat.RFC4180.withHeader().parse(new InputStreamReader(fileInputStream))) {
+                SourceField field = new SourceField(
+                    row.get("COLUMN_NAME").toLowerCase(),
+                    row.get("IS_NULLABLE").equals("YES"),
+                    row.get("DATA_TYPE"),
+                    row.get("DESCRIPTION"),
+                    true,
+                    stemSourceTable
+                );
+                stemSourceTable.getFields().add(field);
+            }
+            return stemSourceTable;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 

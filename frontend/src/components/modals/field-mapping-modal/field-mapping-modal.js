@@ -140,6 +140,10 @@ export default function FieldMappingModal(props) {
      */
 
     const selectSourceField = (field) => {
+        // clean state
+        setSelectedFieldMapping({});
+        setShowFieldMappingLogic(false);
+        setShowDeleteFieldMappingButton(false);
         if (Object.keys(selectedField).length === 0) {                             // no field is selected
             setSelectedField(field);
             setSourceSelected(true);                                               // change color of mappings that comes from the selected table
@@ -175,6 +179,10 @@ export default function FieldMappingModal(props) {
      */
 
     const selectTargetField = (field) => {
+        // clean state
+        setSelectedFieldMapping({});
+        setShowFieldMappingLogic(false);
+        setShowDeleteFieldMappingButton(false);
         if (Object.keys(selectedField).length === 0) {                              // no field is selected
             selectArrowsFromTarget(field);                                          // change color of mappings that goes to the selected field
             setSelectedField(field);                                                // change select field information
@@ -509,7 +517,8 @@ export default function FieldMappingModal(props) {
                                 { sourceTable.fields.map(item => {
                                     return(
                                         <Controls.TooltipBox
-                                            key={item.id} 
+                                            key={item.id}
+                                            id={'s_' + item.name}
                                             element={item}
                                             handler="right"
                                             clicked={selectedField.id === item.id}
@@ -528,7 +537,8 @@ export default function FieldMappingModal(props) {
                             { targetTable.fields.map(item => {
                                     return(
                                         <Controls.TooltipBox
-                                            key={item.id} 
+                                            key={item.id}
+                                            id={'t_' + item.name}
                                             element={item}
                                             handler="left" 
                                             clicked={selectedField.id === item.id}
@@ -543,9 +553,10 @@ export default function FieldMappingModal(props) {
                                 })}
                             </Grid>
                             { fieldMappings.map((ar, i) => (
-                                <Xarrow key={i}
-                                    start={ar.start}
-                                    end={ar.end}
+                                <Xarrow
+                                    key={i}
+                                    start={'s_' + ar.start}
+                                    end={'t_' + ar.end}
                                     startAnchor="right"
                                     endAnchor="left"
                                     color={ar.color}

@@ -39,6 +39,11 @@ public class TargetField {
     @Expose
     private String type;
 
+    @Column(name = "stem", nullable = false)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
+    private boolean stem;
+
     @Column(name = "nullable")
     @Expose
     private boolean isNullable;
@@ -77,6 +82,7 @@ public class TargetField {
         this.table = table;
         this.mappings = new ArrayList<>();
         this.concepts = new ArrayList<>();
+        this.stem = false;
     }
 
     public TargetField(String name, boolean nullable, String type, String description, String comment, TargetTable table) {
@@ -86,6 +92,18 @@ public class TargetField {
         this.description = description;
         this.comment = comment;
         this.table = table;
+        this.mappings = new ArrayList<>();
+        this.concepts = new ArrayList<>();
+        this.stem = false;
+    }
+
+    public TargetField(String name, boolean isNullable, String type, String description, boolean stem, TargetTable targetTable) {
+        this.name = name;
+        this.isNullable = isNullable;
+        this.type = type;
+        this.description = description;
+        this.stem = stem;
+        this.table = targetTable;
         this.mappings = new ArrayList<>();
         this.concepts = new ArrayList<>();
     }
@@ -161,6 +179,14 @@ public class TargetField {
 
     public void setMappings(List<FieldMapping> mappings) {
         this.mappings = mappings;
+    }
+
+    public boolean isStem() {
+        return stem;
+    }
+
+    public void setStem(boolean stem) {
+        this.stem = stem;
     }
 
     /* Adapted from ETL (Rabbit in a hat) */

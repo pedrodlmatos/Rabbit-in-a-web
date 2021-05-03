@@ -1,6 +1,8 @@
 package com.ua.hiah.service.source.database;
 
+import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.source.SourceDatabase;
+import com.ua.hiah.model.source.SourceTable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface SourceDatabaseService {
@@ -24,4 +26,6 @@ public interface SourceDatabaseService {
      */
 
     SourceDatabase createDatabaseFromJSON(SourceDatabase sourceDatabase);
+
+    SourceTable createSourceStemTable(CDMVersion version, SourceDatabase sourceDatabase);
 }

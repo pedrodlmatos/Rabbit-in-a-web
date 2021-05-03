@@ -61,7 +61,7 @@ public class ETLController {
                     )}
             )
     })
-    @GetMapping("/sessions")
+    @GetMapping("/procedures")
     @JsonView(Views.ETLSessionsList.class)
     public ResponseEntity<?> getAllETLs() {
         logger.info("ETL CONTROLLER - Requesting all ETL procedures");
@@ -94,7 +94,7 @@ public class ETLController {
                     content = @Content
             )
     })
-    @GetMapping("/sessions/{id}")
+    @GetMapping("/procedures/{id}")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getETLById(@PathVariable Long id) {
         logger.info("ETL CONTROLLER - Requesting ETL procedure with id " + id);
@@ -130,7 +130,7 @@ public class ETLController {
                     content = @Content
             )
     })
-    @PostMapping(value = "/sessions", consumes = "multipart/form-data")
+    @PostMapping(value = "/procedures", consumes = "multipart/form-data")
     public ResponseEntity<?> createETLProcedure(@Param(value = "name") String name, @RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
         logger.info("ETL CONTROLLER - Creating new ETL procedure");
         ETL etl = etlService.createETLProcedure(name, file, cdm);
@@ -163,7 +163,7 @@ public class ETLController {
                     content = @Content
             )
     })
-    @PostMapping(value = "/sessions/save", consumes = "multipart/form-data")
+    @PostMapping(value = "/procedures/save", consumes = "multipart/form-data")
     public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file) {
         logger.info("ETL CONTROLLER - Creating ETL session from file");
         ETL etl = etlService.createETLSessionFromFile(file);
@@ -200,11 +200,21 @@ public class ETLController {
                     content = @Content
             )
     })
-    @PutMapping("/sessions/targetDB")
+    @PutMapping("/procedures/targetDB")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> changeTargetDatabase(@Param(value = "etl") Long etl, @Param(value = "cdm") String cdm) {
         logger.info("ETL CONTROLLER - Change target database of procedure {} to {}", etl, cdm);
         ETL response = etlService.changeTargetDatabase(etl, cdm);
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/procedures/stem")
+    @JsonView(Views.ETLSession.class)
+    public ResponseEntity<?> addStemTables(@Param(value = "etl") Long etl) {
+        logger.info("ETL CONTROLLER - Add stem tables on procedure {}", etl);
+        ETL response = etlService.addStemTable(etl);
         if (response == null)
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -234,7 +244,7 @@ public class ETLController {
                     content = @Content
             )
     })
-    @GetMapping(value = "/sessions/sourceCSV")
+    @GetMapping(value = "/procedures/sourceCSV")
     public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download source field list CSV of session {}", etl);
 
@@ -278,7 +288,7 @@ public class ETLController {
                     content = @Content
             )
     })
-    @GetMapping(value = "/sessions/targetCSV")
+    @GetMapping(value = "/procedures/targetCSV")
     public ResponseEntity<?> getTargetFieldListCSV(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download target field list CSV of session {}", etl);
 
@@ -320,7 +330,7 @@ public class ETLController {
                     content = @Content
             )
     })
-    @GetMapping(value = "/sessions/save")
+    @GetMapping(value = "/procedures/save")
     public ResponseEntity<?> getSaveFile(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download save file of session {}", etl);
 
@@ -336,7 +346,7 @@ public class ETLController {
     }
 
 
-    @GetMapping(value = "/sessions/summary", produces="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    @GetMapping(value = "/procedures/summary", produces="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     public ResponseEntity<?> getWordDocument(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download word summary file of procedure {}", etl);
 

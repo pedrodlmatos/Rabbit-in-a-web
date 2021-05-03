@@ -59,6 +59,8 @@ public interface ETLService {
     ETL changeTargetDatabase(Long etl_id, String cdm);
 
 
+    ETL addStemTable(Long etl_id);
+
     /**
      * Creates the file with source fields summary
      *

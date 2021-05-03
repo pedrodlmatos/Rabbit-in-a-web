@@ -206,6 +206,45 @@ public class ETLServiceImpl implements ETLService {
     }
 
 
+    @Override
+    public ETL addStemTable(Long etl_id) {
+        ETL etl = etlRepository.findById(etl_id).orElse(null);
+
+        if (etl != null && !containsStemTable(etl)) {
+            CDMVersion version = etl.getTargetDatabase().getVersion();
+
+            SourceDatabase sourceDatabase = etl.getSourceDatabase();
+            SourceTable sourceStemTable = sourceDatabaseService.createSourceStemTable(version, sourceDatabase);
+            sourceDatabase.getTables().add(sourceStemTable);
+            etl.setSourceDatabase(sourceDatabase);
+
+            TargetDatabase targetDatabase = etl.getTargetDatabase();
+            TargetTable targetStemTable = targetDatabaseService.createTargetStemTable(version, targetDatabase);
+            targetDatabase.getTables().add(targetStemTable);
+            etl.setTargetDatabase(targetDatabase);
+
+            List<TableMapping> prevTableMappings = etl.getTableMappings();
+            List<TableMapping> tableMappings = mappingService.createMappingsWithStemTable(version, targetDatabase, sourceStemTable, etl);
+            prevTableMappings.addAll(tableMappings);
+            etl.setTableMappings(prevTableMappings);
+
+
+            return etlRepository.save(etl);
+        }
+
+        return null;
+
+    }
+
+    private boolean containsStemTable(ETL etl) {
+        for (SourceTable table : etl.getSourceDatabase().getTables()) {
+            if (table.isStem())
+                return true;
+        }
+        return false;
+    }
+
+
     /**
      * Creates the file with source fields summary
      *

@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-export default function SessionCard(props) {
+export default function ProcedureCard(props) {
     const classes = useStyles();
     const { id, name, omop, ehr } = props;
     const omopName = CDMVersions.filter(function(cdm) { return cdm.id === omop })[0].name;
@@ -38,7 +38,7 @@ export default function SessionCard(props) {
      */
 
     const redirect = (session_id) => {
-        window.location.href = '/session/' + session_id;
+        window.location.href = '/procedure/' + session_id;
     }
 
     return(

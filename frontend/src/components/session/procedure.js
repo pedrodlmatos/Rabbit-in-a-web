@@ -38,7 +38,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-export default function Session() {
+export default function Procedure() {
     const classes = useStyles();
 
     const initialETLValues = {
@@ -68,13 +68,13 @@ export default function Session() {
     const [loadingSaveTableComment, setLoadingSaveTableComment] = useState(false);
       
     const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
-
     const [loadingSaveTableMappingLogic, setLoadingSaveTableMappingLogic] = useState(false);
     
     useEffect(() => {
-        const session_id = window.location.pathname.toString().replace("/session/", "");
-        
-        ETLService.getETLById(session_id).then(res => {
+        const procedure_id = window.location.pathname.toString().replace("/procedure/", "");
+
+        // make request to API
+        ETLService.getETLById(procedure_id).then(res => {
             setEtl({
                 id: res.data.id,
                 name: res.data.name,
@@ -87,7 +87,7 @@ export default function Session() {
             res.data.tableMappings.forEach(function(item) {
                 const arrow = {
                     id: item.id,
-                    start: item.source,
+                    start:  item.source,
                     end: item.target,
                     complete: item.complete,
                     logic: item.logic,
@@ -113,19 +113,8 @@ export default function Session() {
      */
 
     const defineSourceTableColor = (table) => {
-        if (!sourceSelected && Object.keys(selectedTable).length !== 0) {
-            // table from target db selected
-            return "#FF9224";
-        } else if (sourceSelected && selectedTable.id === table.id) {
-            // source table selected
-            return "#FF9224";
-        } else if (sourceSelected && selectedTable.id !== table.id) {
-            // others source tables
-            return "#FFD3A6";
-        } else {
-            // nothing is selected
-            return "#FF9224";
-        }  
+        if (sourceSelected && selectedTable.id !== table.id) return "#FFD3A6";
+        else return "#FF9224";
     }
 
 
@@ -140,11 +129,11 @@ export default function Session() {
      */
 
     const selectSourceTable = (table) => {                       
-        setSelectedMapping({});                                                    // clean state
-        if (Object.keys(selectedTable).length === 0) {                                   // all tables are unselected
+        setSelectedMapping({});                                                                                   // clean state
+        if (Object.keys(selectedTable).length === 0) {                                                                  // all tables are unselected
             setSelectedTable(table);
             setSourceSelected(true);
-            selectArrowsFromSource(table);                                               // change color of mappings that comes from the selected table
+            selectArrowsFromSource(table);                                                                              // change color of mappings that comes from the selected table
             defineData(table);                                                           // define fields info
         } else if (selectedTable === table) {                                            // select the same table
             resetArrowsColor();                                                          // change color of arrows to grey
@@ -190,7 +179,7 @@ export default function Session() {
             const source_id = selectedTable.id;
             //resetArrowsColor();                                                     // change arrows color to grey
             //setSelectedTable({})                                                  // unselects tables
-            createArrow(source_id, table.id);                                       // create arrow
+            createTableMapping(source_id, table.id);                                       // create arrow
             //setSourceSelected(false);                                               // clean state
             //setShowTableDetails(false);
             //setTableDetails(null);
@@ -234,18 +223,14 @@ export default function Session() {
      * Defines the color of a table mapping
      * 
      * @param {*} mapping table mapping
-     * @returns color
+     * @returns string
      */
 
     const defineArrowColor = (mapping) => {
-        let color = 'grey';
-        if (Object.keys(selectedTable).length === 0)
-            color = mapping.complete ? 'black' : 'grey'
-        else if (selectedTable.id === mapping.source.id)
-            color = 'orange';
-        else if (selectedTable.id === mapping.target.id)
-            color = 'blue';
-        return color;
+        if (Object.keys(selectedTable).length === 0) return mapping.complete ? 'black' : 'grey'
+        else if (selectedTable.id === mapping.source.id) return 'orange';
+        else if (selectedTable.id === mapping.target.id) return 'blue';
+        else return 'grey';
     }
 
 
@@ -300,6 +285,7 @@ export default function Session() {
     const selectArrow = (arrow) => {
         resetArrowsColor();                                                         // change color to grey
         setSelectedTable({});
+        setSourceSelected(false);
         setShowTableDetails(false);
         setTableDetails([]);
         const index = mappings.indexOf(arrow);
@@ -325,11 +311,11 @@ export default function Session() {
     /**
      * Creates an arrow between a source table and a target table.
      *
-     * @param sourceTable table from EHR database
-     * @param targetTable table from OMOP CDM database
+     * @param sourceTable_id source table's id
+     * @param targetTable_id target table's id
      */
 
-    const createArrow = (sourceTable_id, targetTable_id) => {
+    const createTableMapping = (sourceTable_id, targetTable_id) => {
         TableMappingService.addTableMapping(etl.id, sourceTable_id, targetTable_id).then(res => {
             const arrow = {
                 id: res.data.id,
@@ -347,7 +333,7 @@ export default function Session() {
 
 
     /**
-     * Removes an arrow
+     * Removes the selected table mapping
      */
 
     const removeTableMapping = () => {
@@ -502,7 +488,7 @@ export default function Session() {
                 }
             })
         } else {
-            createArrow(selectedTable.id, targetTable_id);
+            createTableMapping(selectedTable.id, targetTable_id);
         }
     }
 
@@ -540,7 +526,7 @@ export default function Session() {
                 }
             })
         } else {
-            createArrow(sourceTable_id, selectedTable.id);
+            createTableMapping(sourceTable_id, selectedTable.id);
         }
     }
 
@@ -596,7 +582,13 @@ export default function Session() {
                                     />
                                 </Grid>
                             ) : (
-                                <></>
+                              <Grid item xs={2} sm={2} md={2} lg={2}>
+                                <Controls.Button
+                                  color="primary"
+                                  text="Add stem table"
+                                  onClick={() => ETLService.addStemTables(etl.id)}
+                                />
+                              </Grid>
                             ) }
                         </Grid>
                             
@@ -621,7 +613,8 @@ export default function Session() {
                                 { etl.sourceDatabase.tables.map(item => {
                                     return(
                                         <Controls.TooltipBox
-                                            key={item.id} 
+                                            key={item.id}
+                                            id={'s_' + item.name}
                                             element={item}
                                             handler="right"
                                             clicked={selectedTable.id === item.id}
@@ -630,7 +623,7 @@ export default function Session() {
                                             color={defineSourceTableColor(item)}
                                             border="#A10000"
                                             handleSelection={selectSourceTable}
-                                            createMapping={createArrow} 
+                                            createMapping={createTableMapping}
                                         />
                                     )
                                 })}
@@ -640,7 +633,8 @@ export default function Session() {
                                 { etl.targetDatabase.tables.map(item => {
                                     return(
                                         <Controls.TooltipBox
-                                            key={item.id} 
+                                            key={item.id}
+                                            id={'t_' + item.name}
                                             element={item}
                                             handler="left" 
                                             clicked={item.id === selectedTable.id}
@@ -649,15 +643,15 @@ export default function Session() {
                                             color="#53ECEC"
                                             border="#000F73"
                                             handleSelection={selectTargetTable}
-                                            createMapping={createArrow} 
+                                            createMapping={createTableMapping}
                                         />
                                     )
                                 })}
                             </Grid>
                             { mappings.map((ar, i) => (
                                 <Xarrow key={i}
-                                    start={ar.start.name}
-                                    end={ar.end.name}
+                                    start={'s_' + ar.start.name}
+                                    end={'t_' + ar.end.name}
                                     startAnchor="right"
                                     endAnchor="left"
                                     color={ar.color}

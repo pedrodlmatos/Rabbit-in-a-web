@@ -15,7 +15,7 @@ class ETLService {
 
     getAllETL = async () => {
         try {
-            return await axios.get(API_URL + 'sessions', { headers: authHeader() })
+            return await axios.get(API_URL + 'procedures', { headers: authHeader() })
         } catch (e) {
             console.log(e);
         }
@@ -31,7 +31,7 @@ class ETLService {
 
     getETLById = async (id) => {
         try {
-            return await axios.get(API_URL + "sessions/" + id, { headers: authHeader() });
+            return await axios.get(API_URL + "procedures/" + id, { headers: authHeader() });
         } catch (e) {
             console.log(e);
         }
@@ -52,7 +52,7 @@ class ETLService {
         formData.append("file", file);
         
         try {
-            return await axios.post(API_URL + "sessions", formData, { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm } });
+            return await axios.post(API_URL + "procedures", formData, { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm } });
         } catch (e) {
             console.log(e);
         }
@@ -64,7 +64,7 @@ class ETLService {
         formData.append("file", file);
 
         try {
-            return await axios.post(API_URL + "sessions/save", formData, { headers: authHeaderMultiPart() });
+            return await axios.post(API_URL + "procedures/save", formData, { headers: authHeaderMultiPart() });
         } catch(e) {
             console.log(e);
         }
@@ -80,7 +80,12 @@ class ETLService {
      */
 
     changeTargetDatabase(etl, cdm) {
-        return axios.put(API_URL + "sessions/targetDB", null, { headers: authHeader(), params:{etl: etl, cdm: cdm }});
+        return axios.put(API_URL + "procedures/targetDB", null, { headers: authHeader(), params:{etl: etl, cdm: cdm }});
+    }
+
+
+    addStemTables(etl) {
+        return axios.put(API_URL + "procedures/stem", null, { headers: authHeader(), params:{etl: etl }});
     }
 
 
@@ -92,21 +97,21 @@ class ETLService {
      */
 
     downloadSourceFieldsFile = async (etl) => {
-        return await axios.get(API_URL + "sessions/sourceCSV", { headers: authHeader(), params: { etl: etl }})
+        return await axios.get(API_URL + "procedures/sourceCSV", { headers: authHeader(), params: { etl: etl }})
     }
 
 
     downloadTargetFieldsFile = async (etl) => {
-        return await axios.get(API_URL + "sessions/targetCSV", { headers: authHeader(), params: { etl: etl }, responseType: "blob"})
+        return await axios.get(API_URL + "procedures/targetCSV", { headers: authHeader(), params: { etl: etl }, responseType: "blob"})
     }
 
 
     downloadSaveFile(etl) {
-        return axios.get(API_URL + "sessions/save", { headers: authHeader(), params: {etl: etl }});
+        return axios.get(API_URL + "procedures/save", { headers: authHeader(), params: {etl: etl }});
     }
 
     downloadSummaryFile(etl) {
-        return axios.get(API_URL + "sessions/summary", { headers: authHeader(), params: {etl: etl }, responseType: "blob"});
+        return axios.get(API_URL + "procedures/summary", { headers: authHeader(), params: {etl: etl }, responseType: "blob"});
     }
 }
 

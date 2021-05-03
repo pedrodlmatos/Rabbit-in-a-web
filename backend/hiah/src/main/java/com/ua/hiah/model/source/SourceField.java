@@ -26,16 +26,20 @@ public class SourceField {
     @Expose
     private String name;
 
-    /*
+
     @Column(name = "description", columnDefinition = "TEXT")
     @JsonView(Views.ETLSession.class)
     private String description;
-    */
 
     @Column(name = "type")
     @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     @Expose
     private String type;
+
+    @Column(name = "stem", nullable = false)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @Expose
+    private boolean stem;
 
     @Column(name = "nullable")
     @Expose
@@ -91,6 +95,7 @@ public class SourceField {
         this.uniqueCount = uniqueCount;
         this.fractionUnique = fractionUnique;
         this.table = table;
+        this.stem = false;
         this.mappings = new ArrayList<>();
         this.valueCounts = new ArrayList<>();
     }
@@ -104,6 +109,18 @@ public class SourceField {
         this.fractionUnique = fractionUnique;
         this.comment = comment;
         this.table = table;
+        this.stem = false;
+        this.mappings = new ArrayList<>();
+        this.valueCounts = new ArrayList<>();
+    }
+
+    public SourceField(String name, boolean isNullable, String type, String description, boolean stem, SourceTable sourceTable) {
+        this.name = name;
+        this.isNullable = isNullable;
+        this.type = type;
+        //this.description = description;
+        this.stem = stem;
+        this.table = sourceTable;
         this.mappings = new ArrayList<>();
         this.valueCounts = new ArrayList<>();
     }

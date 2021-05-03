@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { makeStyles, Grid, CircularProgress } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
-import SessionCard from "../sessionCard/session-card";
+import ProcedureCard from "./procedure-card";
 import ETLService from "../../services/etl-list-service";
 import ETLModal from "../modals/create-etl-modal/etl-modal";
 import Controls from '../controls/controls';
@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-export default function SessionList() {
+export default function ProcedureList() {
     const classes = useStyles();
 
     const [loading, setLoading] = useState(true);
@@ -61,7 +61,7 @@ export default function SessionList() {
     const createETLProcedure = (values, resetForm) => {
         // sends request to API and then redirects to created session
         ETLService.createETL(values.ehrName, values.ehrFile, values.omop).then(res => {
-            window.location.href = '/session/' + res.data;
+            window.location.href = '/procedure/' + res.data;
         }).then(res => {
             console.log(res);
         })
@@ -80,7 +80,7 @@ export default function SessionList() {
     const createETLProcedureFromJSONFile = (values, resetForm) => {
         // sends request to API and then redirects to created session
         ETLService.createETLFromFile(values.file).then(res => {
-            window.location.href = '/session/' + res.data;
+            window.location.href = '/procedure/' + res.data;
         }).catch(res => {
             console.log(res);
         })
@@ -122,7 +122,7 @@ export default function SessionList() {
                     <Grid container spacing={4}>
                         { procedures.map(session =>
                             <Grid key={session.id} item xs={12} sm={12} md={2} lg={2}>
-                                <SessionCard
+                                <ProcedureCard
                                     id={session.id}
                                     name={session.name}
                                     ehr={session.sourceDatabase.databaseName}
@@ -134,14 +134,14 @@ export default function SessionList() {
 
                     <Controls.Button
                         className={classes.button}
-                        text="Create ETL Session"
+                        text="Create ETL procedure"
                         disabled={disabled}
                         onClick={() => {setOpenCreateModal(true)}}
                     >
                         <AddIcon fontSize="large"/>
                     </Controls.Button>
 
-                    <ETLModal title="Create ETL session" openModal={openCreateModal} setOpenModal={setOpenCreateModal}>
+                    <ETLModal title="Create ETL procedure" openModal={openCreateModal} setOpenModal={setOpenCreateModal}>
                         <CreateETLForm addSession={createETLProcedure} close={closeCreateModal} />
                     </ETLModal>
 

@@ -35,6 +35,11 @@ public class SourceTable {
     @Expose
     private String comment;
 
+    @Column(name = "stem", nullable = false)
+    @JsonView(Views.ETLSession.class)
+    @Expose
+    private boolean stem;
+
     @Column(name = "row_count", nullable = true)
     @JsonView(Views.ETLSession.class)
     @Expose
@@ -67,6 +72,7 @@ public class SourceTable {
         this.sourceDatabase = database;
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
+        this.stem = false;
     }
 
     public SourceTable(String name, int rowCount, int rowsCheckedCount, String comment, SourceDatabase sourceDatabase) {
@@ -75,6 +81,15 @@ public class SourceTable {
         this.comment = comment;
         this.rowCount = rowCount;
         this.rowsCheckedCount = rowsCheckedCount;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+        this.stem = false;
+    }
+
+    public SourceTable(String name, boolean stem, SourceDatabase sourceDatabase) {
+        this.name = name;
+        this.stem = stem;
+        this.sourceDatabase = sourceDatabase;
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
     }
@@ -142,6 +157,14 @@ public class SourceTable {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public boolean isStem() {
+        return stem;
+    }
+
+    public void setStem(boolean stem) {
+        this.stem = stem;
     }
 
     @Override
