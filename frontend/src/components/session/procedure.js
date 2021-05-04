@@ -113,6 +113,7 @@ export default function Procedure() {
      */
 
     const defineSourceTableColor = (table) => {
+        if (table.stem) return "#A000A0";
         if (sourceSelected && selectedTable.id !== table.id) return "#FFD3A6";
         else return "#FF9224";
     }
@@ -621,7 +622,7 @@ export default function Procedure() {
                                             help="Select first an EHR table and then an OMOP CDM table" 
                                             position="right-end"
                                             color={defineSourceTableColor(item)}
-                                            border="#A10000"
+                                            border="#000000"
                                             handleSelection={selectSourceTable}
                                             createMapping={createTableMapping}
                                         />
@@ -640,8 +641,8 @@ export default function Procedure() {
                                             clicked={item.id === selectedTable.id}
                                             help="Select first an EHR table and then an OMOP CDM table" 
                                             position="right-end"
-                                            color="#53ECEC"
-                                            border="#000F73"
+                                            color={item.stem ? "#A000A0" : "#53ECEC"}
+                                            border="#000000"
                                             handleSelection={selectTargetTable}
                                             createMapping={createTableMapping}
                                         />
