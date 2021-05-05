@@ -113,9 +113,9 @@ export default function Procedure() {
      */
 
     const defineSourceTableColor = (table) => {
-        if (table.stem) return "#A000A0";
-        if (sourceSelected && selectedTable.id !== table.id) return "#FFD3A6";
-        else return "#FF9224";
+        if (table.stem) return "#A000A0";                                           // stem table
+        if (sourceSelected && selectedTable.id !== table.id) return "#FFD3A6";      // unselected source table (when a source table is selected)
+        else return "#FF9224";                                                      // selected source source or when none is selected
     }
 
 
@@ -129,25 +129,29 @@ export default function Procedure() {
      * @param table selected source table
      */
 
-    const selectSourceTable = (table) => {                       
-        setSelectedMapping({});                                                                                   // clean state
-        if (Object.keys(selectedTable).length === 0) {                                                                  // all tables are unselected
+    const selectSourceTable = (table) => {
+        // clean state
+        setSelectedMapping({});
+        if (Object.keys(selectedTable).length === 0) {
+            // all tables are unselected
             setSelectedTable(table);
             setSourceSelected(true);
-            selectArrowsFromSource(table);                                                                              // change color of mappings that comes from the selected table
-            defineData(table);                                                           // define fields info
-        } else if (selectedTable === table) {                                            // select the same table
-            resetArrowsColor();                                                          // change color of arrows to grey
-            setSelectedTable({});                                                  // unselect
-            setSourceSelected(false);
+            selectArrowsFromSource(table);      // change color of mappings that comes from the selected table
+            defineData(table);                  // define fields info
+        } else if (selectedTable === table) {
+            // select the same table -> unselect
+            resetArrowsColor();                 // change color of arrows to grey
+            setSourceSelected(false);     // unselect
             setShowTableDetails(false);
+            setSelectedTable({});
             setTableDetails(null);
-        } else {                                                                    // select any other source table
-            resetArrowsColor();                                                     // change color of arrows to grey
-            setSelectedTable(table);                                                // change select table information
+        } else {
+            // select any other source table
+            resetArrowsColor();                // change color of arrows to grey
+            setSelectedTable(table);           // change select table information
             setSourceSelected(true);
-            selectArrowsFromSource(table);                                          // change color of mappings that comes from the selected table
-            defineData(table);                                                      // change content of fields table
+            selectArrowsFromSource(table);     // change color of mappings that comes from the selected table
+            defineData(table);                 // change content of fields table
         }
     }
 
@@ -164,33 +168,38 @@ export default function Procedure() {
      */
 
     const selectTargetTable = (table) => {
+        // clean state
         setSelectedMapping({});
-        if (Object.keys(selectedTable).length === 0) {                              // no table is selected
-            selectArrowsFromTarget(table);                                          // change color of mappings that goes to the selected table
-            setSelectedTable(table);                                                // change select table information
+        if (Object.keys(selectedTable).length === 0) {
+            // no table is selected
+            selectArrowsFromTarget(table);          // change color of mappings that goes to the selected table
+            setSelectedTable(table);                // change select table information
             setSourceSelected(false);
-            defineData(table);                                                      // change content of fields table
-        } else if (selectedTable === table) {                                       // select the same table -> unselect
-            resetArrowsColor();                                                     // change color of arrows to grey
-            setSelectedTable({});                                                   // unselect
+            defineData(table);                      // change content of fields table
+        } else if (selectedTable === table) {
+            // select the same table -> unselect
+            resetArrowsColor();                     // change color of arrows to grey
             setSourceSelected(false);
             setShowTableDetails(false);
+            setSelectedTable({});             // unselect
             setTableDetails(null);
-        } else if (sourceSelected) {                                                // source table is selected -> create arrow
+        } else if (sourceSelected) {
+            // source table is selected -> create arrow
             const source_id = selectedTable.id;
-            //resetArrowsColor();                                                     // change arrows color to grey
-            //setSelectedTable({})                                                  // unselects tables
-            createTableMapping(source_id, table.id);                                       // create arrow
-            //setSourceSelected(false);                                               // clean state
+            //resetArrowsColor();                    // change arrows color to grey
+            //setSelectedTable({})                   // unselects tables
+            createTableMapping(source_id, table.id); // create arrow
+            //setSourceSelected(false);              // clean state
             //setShowTableDetails(false);
             //setTableDetails(null);
-        } else {                                                                    // other target table is selected
-            resetArrowsColor();                                                     // change color of arrows to grey
-            setSelectedTable(table);                                                // change select table information
+        } else {
+            // other target table is selected
+            resetArrowsColor();                      // change color of arrows to grey
+            setSelectedTable(table);                 // change select table information
             setSourceSelected(false);
-            selectArrowsFromTarget(table);                                          // change color of mappings that comes from the selected table
-            defineData(table);                                                      // change content of fields table
-        } 
+            selectArrowsFromTarget(table);           // change color of mappings that comes from the selected table
+            defineData(table);                       // change content of fields table
+        }
     }
 
 

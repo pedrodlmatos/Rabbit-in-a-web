@@ -1,27 +1,34 @@
 import React from 'react'
-import { Input, Button, InputLabel } from '@material-ui/core';
+import { Input, Button, InputLabel, makeStyles } from '@material-ui/core'
+
+const useStyles = makeStyles(theme => ({
+    fileInput: {
+        marginTop: theme.spacing(1),
+        width: "250px"
+    }
+}))
+
 
 export default function FileInput(props) {
     
     const { name, type, placeholder, error=null, onChange, ...other } = props;
+    const classes = useStyles();
 
     return ( 
         <InputLabel>
-            <Input 
+            <Input
                 name={name}
                 type={type}
-                accept=".xlsx"
                 placeholder={placeholder}
                 onChange={onChange}
                 hidden
                 {...other} />
-            <Button 
-                className="btn-choose"
+            <Button
+                className={classes.fileInput}
                 variant="outlined"
-                component="span" 
-                error={error}
+                component="span"
             >
-                    Choose EHR Scan
+                Choose EHR Scan
             </Button>
         </InputLabel>
         

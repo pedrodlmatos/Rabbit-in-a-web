@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles, Grid, CircularProgress } from '@material-ui/core';
+import { makeStyles, Grid, CircularProgress, IconButton, Divider } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ProcedureCard from "./procedure-card";
 import ETLService from "../../services/etl-list-service";
-import ETLModal from "../modals/create-etl-modal/etl-modal";
 import Controls from '../controls/controls';
-import CreateETLForm from '../forms/create-etl-form/create-etl-form';
-import FileETLModal from '../modals/create-from-file/create-etl-from-file';
-import FileETLForm from '../forms/create-from-file-form/create-from-file-form';
+import CreateETLForm from '../forms/create-etl/create-new-etl-form';
+import ETLModal from '../modals/create-etl/etl-modal'
 
 const useStyles = makeStyles(theme => ({
     pageContainer: {
@@ -21,6 +19,13 @@ const useStyles = makeStyles(theme => ({
     },
     button: {
         marginRight: theme.spacing(1)
+    },
+    divider: {
+        marginLeft: "-1px"
+    },
+    iconButton: {
+        width: "50px",
+        height: "50px"
     }
 }))
 
@@ -31,9 +36,11 @@ export default function ProcedureList() {
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(false);
     const [procedures, setProcedures] = useState({ });
+    const [showETLCreationModal, setShowETLCreationModal] = useState(false);
+    const [showCreateNewETLModal, setShowCreateNewETLModal] = useState(false);
+    const [showCreateETLFromFileModal, setShowCreateETLFromFileModal] = useState(false);
 
-    const [openCreateModal, setOpenCreateModal] = useState(false);
-    const [openCreateFromFileModal, setOpenCreateFromFileModal] = useState(false);
+
 
     
     /**
@@ -51,6 +58,40 @@ export default function ProcedureList() {
 
 
     /**
+     * Closes the modal to choose type of creation and opens modal to create a new ETL procedure
+     */
+
+    const openCreateNewETLModal = () => {
+        setShowETLCreationModal(false);
+        setShowCreateNewETLModal(true);
+    }
+
+
+    /**
+     * Closes the modal to choose type of creation and opens modal to create ETL procedure from JSON file
+     */
+
+    const openCreateETLFromFileModal = () => {
+        setShowETLCreationModal(false);
+        setShowCreateETLFromFileModal(true);
+    }
+
+
+    /**
+     * Closes the creation modal and opens the method creation modal
+     */
+
+    const backToMethodSelection = () => {
+        if (showCreateNewETLModal)
+            setShowCreateNewETLModal(false);
+        else if (showCreateETLFromFileModal)
+            setShowCreateETLFromFileModal(false);
+
+        setShowETLCreationModal(true);
+    }
+
+
+    /**
      * Sends POST request to API to create a new ETL procedure
      * Disables buttons
      * 
@@ -61,13 +102,12 @@ export default function ProcedureList() {
     const createETLProcedure = (values, resetForm) => {
         // sends request to API and then redirects to created session
         ETLService.createETL(values.ehrName, values.ehrFile, values.omop).then(res => {
+            setDisabled(true);
+            resetForm();
             window.location.href = '/procedure/' + res.data;
         }).then(res => {
             console.log(res);
         })
-
-        setDisabled(true);
-        resetForm();
     }
 
 
@@ -97,7 +137,7 @@ export default function ProcedureList() {
 
     const closeCreateModal = (resetForm) => {
         resetForm();
-        setOpenCreateModal(false);
+        setShowCreateNewETLModal(false);
     }
 
     /**
@@ -108,8 +148,10 @@ export default function ProcedureList() {
 
     const closeCreateFromFileModal = (resetForm) => {
         resetForm();
-        setOpenCreateFromFileModal(false);
+        setShowCreateETLFromFileModal(false);
     }
+
+
     
 
     return(
@@ -134,29 +176,81 @@ export default function ProcedureList() {
 
                     <Controls.Button
                         className={classes.button}
-                        text="Create ETL procedure"
+                        text="Create Procedure"
                         disabled={disabled}
-                        onClick={() => {setOpenCreateModal(true)}}
-                    >
-                        <AddIcon fontSize="large"/>
-                    </Controls.Button>
-
-                    <ETLModal title="Create ETL procedure" openModal={openCreateModal} setOpenModal={setOpenCreateModal}>
-                        <CreateETLForm addSession={createETLProcedure} close={closeCreateModal} />
-                    </ETLModal>
-
-                    <Controls.Button
-                        className={classes.button}
-                        text="Create from file"
-                        disabled={disabled}
-                        onClick={() => {setOpenCreateFromFileModal(true)}}
+                        onClick={() => {setShowETLCreationModal(true)}}
                     >
                         <AttachFileIcon fontSize="large" />
                     </Controls.Button>
 
-                    <FileETLModal title="Create from file" openModal={openCreateFromFileModal} setOpenModal={setOpenCreateFromFileModal}>
+                    {/* Modal to choose ETL procedure creation method*/}
+                    <ETLModal
+                        title="Create ETL procedure"
+                        show={showETLCreationModal}
+                        setShow={setShowETLCreationModal}
+                    >
+                        <Grid container>
+                            <Grid item xs={6} sm={6} md={6} lg={6} align="center">
+                                <IconButton color="inherit" onClick={openCreateNewETLModal}>
+                                    <AddIcon className={classes.iconButton} />
+                                </IconButton>
+                                <p>Create a new ETL procedure</p>
+                            </Grid>
+                            <Divider orientation="vertical" flexItem className={classes.divider} />
+                            <Grid item xs={6} sm={6} md={6} lg={6} align="center">
+                                <IconButton color="inherit" onClick={openCreateETLFromFileModal}>
+                                    <AttachFileIcon className={classes.iconButton} />
+                                </IconButton>
+                                <p>Create from file</p>
+                            </Grid>
+                        </Grid>
+                    </ETLModal>
+
+                    {/* Modal to create a new ETL procedure */}
+                    <ETLModal
+                        title={"Create new ETL procedure"}
+                        show={showCreateNewETLModal}
+                        setShow={setShowCreateNewETLModal}
+                    >
+                        <CreateETLForm addSession={createETLProcedure} back={backToMethodSelection} close={closeCreateModal} />
+                    </ETLModal>
+
+                    {/* Modal to create ETL procedure from file */}
+                    <ETLModal
+                        title={"Create ETL procedure from file"}
+                        show={showCreateETLFromFileModal}
+                        setShow={setShowCreateETLFromFileModal}
+                    >
+
+                    </ETLModal>
+
+                    {/*
+                    <CreateEtlModal
+                        title="Create ETL procedure"
+                        openModal={openETLCreationModal}
+                        setOpenModal={setOpenETLCreationModal}
+                        openCreateNewETLModal={openCreateNewETLModal}
+                        openCreateETLFromFileModal={openCreateETLFromFileModal}
+                    />
+
+                    <CreateNewETLModal
+                        title="Create ETL procedure"
+                        openModal={showCreateNewETLModal}
+                        setOpenModal={setShowCreateNewETLModal}
+                    >
+                        <CreateETLForm addSession={createETLProcedure} close={closeCreateModal} />
+                    </CreateNewETLModal>
+
+                    <CreateETLFromFileModal
+                        title="Create from file"
+                        openModal={openCreateFromFileModal}
+                        setOpenModal={setShowCreateFromFileModal}
+                    >
                         <FileETLForm addSession={createETLProcedureFromJSONFile} close={closeCreateFromFileModal}/>
-                    </FileETLModal>
+                    </CreateETLFromFileModal>
+                    */}
+
+
                 </div>
             )}
         </div>

@@ -6,17 +6,19 @@ import Controls from '../../controls/controls';
 
 const useStyles = makeStyles(theme => ({
     dialogWrapper: {
-        padding: theme.spacing(2),
+        //padding: theme.spacing(2),
         position: 'absolute',
         top: theme.spacing(5)
     },
     DialogTitle: {
-        paddingRight: '0px'
+        paddingRight: '0px',
+        margin: theme.spacing(1),
+        flexGrow: 1
     }
 }))
 
 
-export default function ETLModal(props) {
+export default function CreateNewETLModal(props) {
 
     const { title, children, openModal, setOpenModal } = props;
     const classes = useStyles();
@@ -25,7 +27,7 @@ export default function ETLModal(props) {
         <Dialog open={openModal} fullWidth classes={{ paper: classes.dialogWrapper }}>
             <DialogTitle className={classes.DialogTitle}>
                 <div style={{ display: 'flex' }}>
-                    <Typography variant="h6" component="div" style={{ flexGrow: 1}}>
+                    <Typography variant="h6" component="div" className={classes.DialogTitle}>
                         { title }
                     </Typography>
 

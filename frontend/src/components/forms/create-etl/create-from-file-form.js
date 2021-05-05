@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
 import { Grid, CircularProgress } from '@material-ui/core';
 import Controls from '../../controls/controls';
-import { useForm, Form } from '../../forms/use-form';
-import { CDMVersions } from '../../../services/CDMVersions';
-
+import { useForm, Form } from '../use-form';
 
 /**
  * Initial values of the form

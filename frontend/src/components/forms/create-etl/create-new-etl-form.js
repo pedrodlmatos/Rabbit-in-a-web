@@ -1,9 +1,29 @@
 import React, { useState } from 'react'
 import { Grid, CircularProgress, makeStyles } from '@material-ui/core';
 import Controls from '../../controls/controls';
-import { useForm, Form } from '../../forms/use-form';
+import { useForm, Form } from '../use-form';
 import { CDMVersions } from '../../../services/CDMVersions';
 
+
+const useStyles = makeStyles(theme => ({
+    element: {
+        margin: theme.spacing(1)
+    },
+    fileInput: {
+        width: "50px",
+        marginTop: theme.spacing(1)
+    },
+    item: {
+        marginBottom: theme.spacing(1)
+    },
+    button: {
+        margin: theme.spacing(1)
+    },
+    exitButton: {
+        margin: theme.spacing(1),
+        float: "right"
+    }
+}))
 
 /**
  * Initial values of the form
@@ -18,8 +38,9 @@ const initialFValues = {
 
 export default function CreateETLForm(props) {
     
-    const { addSession, close } = props;
+    const { addSession, back, close } = props;
     const [loading, setLoading] = useState(false);
+    const classes = useStyles();
 
 
     /**
@@ -47,7 +68,7 @@ export default function CreateETLForm(props) {
 
 
     const {
-        values, setValues,
+        values,
         errors, setErrors,
         handleInputChange,
         handleFileChange,
@@ -69,6 +90,7 @@ export default function CreateETLForm(props) {
         }
     }
 
+
     /**
      * Calls function from parent to close modal and resets form
      */
@@ -81,8 +103,9 @@ export default function CreateETLForm(props) {
     return (
         <Form onSubmit={handleSubmit}>
             <Grid container>
-                <Grid item xs={12} sm={6} md={6} lg={6}>
+                <Grid className={classes.item} item xs={12} sm={6} md={6} lg={6}>
                     <Controls.Input
+                        className={classes.element}
                         label="EHR Name"
                         placeholder="EHR database name"
                         name="ehrName"
@@ -91,7 +114,7 @@ export default function CreateETLForm(props) {
                     />
                 </Grid>
                 
-                <Grid item xs={12} sm={6} md={6} lg={6}>
+                <Grid className={classes.item} item xs={12} sm={6} md={6} lg={6}>
                     <Controls.FileInput
                         name="ehrFile"
                         type="file"
@@ -99,25 +122,34 @@ export default function CreateETLForm(props) {
                         error={errors.ehrFile}
                         onChange={handleFileChange} 
                     />
-                    <p>{ values.ehrFile === '' ? "Upload a file" : values.ehrFile.name }</p>
+                    <p style={{ color: errors.ehrFile === "" ? "black" : "red" }}>{errors.ehrFile === "" ? values.ehrFile.name : errors.ehrFile}</p>
                 </Grid>
 
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                    <Controls.Select name="omop" label="OMOP CDM" value={values.omop} onChange={handleInputChange} options={CDMVersions} errors={errors.departmentId} />
+                <Grid className={classes.item} item xs={6} sm={6} md={6} lg={6}>
+                    <Controls.Select
+                        className={classes.select}
+                        name="omop"
+                        label="OMOP CDM"
+                        value={values.omop}
+                        onChange={handleInputChange}
+                        options={CDMVersions}
+                        errors={errors.cdmId}
+                    />
 
                     { loading ? 
                         (
                             <div>
-                                <Controls.Button type="submit" text="Creating" disabled>
+                                <Controls.Button className={classes.button} text="Back" color="default" onClick={back} disabled/>
+                                <Controls.Button className={classes.button} type="submit" text="Creating" disabled>
                                     <CircularProgress color="primary" variant="indeterminate" size={20}/>
                                 </Controls.Button>
-    
-                                <Controls.Button text="Close" color="secondary" onClick={closeModal} disabled />
+                                <Controls.Button className={classes.exitButton} text="Close" color="secondary" onClick={closeModal} disabled />
                             </div>
                         ) : (
                             <div>
-                                <Controls.Button type="submit" text="Create" />
-                                <Controls.Button text="Close" color="secondary" onClick={closeModal} />
+                                <Controls.Button className={classes.button} text="Back" color="default" onClick={back}/>
+                                <Controls.Button className={classes.button} type="submit" text="Create" />
+                                <Controls.Button className={classes.exitButton} text="Close" color="secondary" onClick={closeModal} />
                             </div>
                         ) 
                     }

@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-export default function FileETLModal(props) {
+export default function CreateETLFromFileModal(props) {
 
     const { title, children, openModal, setOpenModal } = props;
     const classes = useStyles();
