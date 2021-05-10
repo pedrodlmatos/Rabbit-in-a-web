@@ -27,5 +27,23 @@ public interface SourceDatabaseService {
 
     SourceDatabase createDatabaseFromJSON(SourceDatabase sourceDatabase);
 
+
+    /**
+     * Adds stem table to EHR database and its mappings (contained in file)
+     *
+     * @param version OMOP CDM version
+     * @param sourceDatabase EHR database object
+     * @return altered source database
+     */
+
     SourceTable createSourceStemTable(CDMVersion version, SourceDatabase sourceDatabase);
+
+
+    /**
+     * Remove stem table from EHR database
+     *
+     * @param table stem table
+     */
+
+    void removeTable(SourceTable table);
 }

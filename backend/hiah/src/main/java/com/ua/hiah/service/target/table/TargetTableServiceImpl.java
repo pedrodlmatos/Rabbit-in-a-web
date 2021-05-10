@@ -38,27 +38,23 @@ public class TargetTableServiceImpl implements TargetTableService {
     @Override
     public TargetTable changeComment(Long tableId, String comment) {
         TargetTable table = repository.findById(tableId).orElse(null);
-        if (table != null) {
+        if (table == null) return null;                                     // table not found
+        else if (table.getComment().equals(comment)) return table;          // old comment == new comment
+        else {                                                              // old comment != new comment
             table.setComment(comment);
             return repository.save(table);
         }
-        return null;
     }
 
 
     /**
-     * Deletes
+     * Deletes stem table and its mappings
      *
-     * @param database_id database's id
+     * @param table stem table on the OMOP CDM database
      */
 
     @Override
-    public void deleteTablesByDatabaseId(Long database_id) {
-        for (TargetTable table : repository.findAllByTargetDatabaseId(database_id)) {
-            for (TargetField field : table.getFields()) {
-                //fieldService.removeField
-            }
-        }
-
+    public void removeStemTable(TargetTable table) {
+        repository.delete(table);
     }
 }

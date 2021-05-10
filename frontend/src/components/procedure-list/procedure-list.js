@@ -7,6 +7,7 @@ import ETLService from "../../services/etl-list-service";
 import Controls from '../controls/controls';
 import CreateETLForm from '../forms/create-etl/create-new-etl-form';
 import ETLModal from '../modals/create-etl/etl-modal'
+import CreateETLFromFileForm from '../forms/create-etl/create-from-file-form'
 
 const useStyles = makeStyles(theme => ({
     pageContainer: {
@@ -31,8 +32,8 @@ const useStyles = makeStyles(theme => ({
 
 
 export default function ProcedureList() {
-    const classes = useStyles();
 
+    const classes = useStyles();
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(false);
     const [procedures, setProcedures] = useState({ });
@@ -42,7 +43,6 @@ export default function ProcedureList() {
 
 
 
-    
     /**
      * Sends GET request to API to retrieve all ETL procedures
      */
@@ -96,16 +96,15 @@ export default function ProcedureList() {
      * Disables buttons
      * 
      * @param {*} values form values (file and OMOP CDM)
-     * @param {*} resetForm function to reset form
      */
 
-    const createETLProcedure = (values, resetForm) => {
-        // sends request to API and then redirects to created session
+    const createNewETLProcedure = (values) => {
+        // disables button
+        setDisabled(true);
+        // sends request to API and then redirects to created procedure
         ETLService.createETL(values.ehrName, values.ehrFile, values.omop).then(res => {
-            setDisabled(true);
-            resetForm();
             window.location.href = '/procedure/' + res.data;
-        }).then(res => {
+        }).catch(res => {
             console.log(res);
         })
     }
@@ -115,17 +114,17 @@ export default function ProcedureList() {
      * Creates ETL procedure from JSON file and redirects to page of created procedure
      *
      * @param values form values
-     * @param resetForm function to reset from
      */
-    const createETLProcedureFromJSONFile = (values, resetForm) => {
-        // sends request to API and then redirects to created session
+
+    const createETLProcedureFromJSONFile = (values) => {
+        // disables button
+        setDisabled(true);
+        // sends request to API and then redirects to created procedure
         ETLService.createETLFromFile(values.file).then(res => {
             window.location.href = '/procedure/' + res.data;
         }).catch(res => {
             console.log(res);
         })
-        setDisabled(true);
-        resetForm();
     }
 
 
@@ -151,8 +150,6 @@ export default function ProcedureList() {
         setShowCreateETLFromFileModal(false);
     }
 
-
-    
 
     return(
         <div className={classes.pageContainer}>
@@ -180,7 +177,7 @@ export default function ProcedureList() {
                         disabled={disabled}
                         onClick={() => {setShowETLCreationModal(true)}}
                     >
-                        <AttachFileIcon fontSize="large" />
+                        <AddIcon fontSize="large" />
                     </Controls.Button>
 
                     {/* Modal to choose ETL procedure creation method*/}
@@ -212,7 +209,7 @@ export default function ProcedureList() {
                         show={showCreateNewETLModal}
                         setShow={setShowCreateNewETLModal}
                     >
-                        <CreateETLForm addSession={createETLProcedure} back={backToMethodSelection} close={closeCreateModal} />
+                        <CreateETLForm addSession={createNewETLProcedure} back={backToMethodSelection} close={closeCreateModal} />
                     </ETLModal>
 
                     {/* Modal to create ETL procedure from file */}
@@ -221,36 +218,8 @@ export default function ProcedureList() {
                         show={showCreateETLFromFileModal}
                         setShow={setShowCreateETLFromFileModal}
                     >
-
+                        <CreateETLFromFileForm addSession={createETLProcedureFromJSONFile} back={backToMethodSelection} close={closeCreateFromFileModal} />
                     </ETLModal>
-
-                    {/*
-                    <CreateEtlModal
-                        title="Create ETL procedure"
-                        openModal={openETLCreationModal}
-                        setOpenModal={setOpenETLCreationModal}
-                        openCreateNewETLModal={openCreateNewETLModal}
-                        openCreateETLFromFileModal={openCreateETLFromFileModal}
-                    />
-
-                    <CreateNewETLModal
-                        title="Create ETL procedure"
-                        openModal={showCreateNewETLModal}
-                        setOpenModal={setShowCreateNewETLModal}
-                    >
-                        <CreateETLForm addSession={createETLProcedure} close={closeCreateModal} />
-                    </CreateNewETLModal>
-
-                    <CreateETLFromFileModal
-                        title="Create from file"
-                        openModal={openCreateFromFileModal}
-                        setOpenModal={setShowCreateFromFileModal}
-                    >
-                        <FileETLForm addSession={createETLProcedureFromJSONFile} close={closeCreateFromFileModal}/>
-                    </CreateETLFromFileModal>
-                    */}
-
-
                 </div>
             )}
         </div>

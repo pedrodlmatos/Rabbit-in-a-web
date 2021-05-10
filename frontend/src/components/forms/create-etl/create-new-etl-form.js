@@ -13,6 +13,9 @@ const useStyles = makeStyles(theme => ({
         width: "50px",
         marginTop: theme.spacing(1)
     },
+    errorText: {
+        marginLeft: theme.spacing(1),
+    },
     item: {
         marginBottom: theme.spacing(1)
     },
@@ -31,7 +34,6 @@ const useStyles = makeStyles(theme => ({
 
 const initialFValues = {
     ehrName: '',
-    ehrFile: '',
     omop: CDMVersions.filter(function(cdm) { return cdm.id === 'CDMV60' })[0].id,
 }
 
@@ -50,13 +52,17 @@ export default function CreateETLForm(props) {
      * @returns validated fields 
      */
 
-    const validate = (fieldValues = values) => {
+    const validate = (fieldValues=values) => {
         let temp = { ...errors }
 
-        if ('ehrName' in fieldValues) {
+        if ('ehrName' in fieldValues)
             temp.ehrName = fieldValues.ehrName ? "" : "This field is required"
-        } if ('ehrFile' in fieldValues) {
-            temp.ehrFile = fieldValues.ehrFile.name.endsWith('.xlsx') ? "" : "Invalid extension"
+
+        if ('ehrFile' in fieldValues) {
+            if (fieldValues.ehrFile.name === undefined)
+                temp.ehrFile = "This field is required"
+            else
+                temp.ehrFile = fieldValues.ehrFile.name.endsWith('.xlsx') ? "" : "Invalid extension"
         }
 
         setErrors({ ...temp })
@@ -77,7 +83,7 @@ export default function CreateETLForm(props) {
 
 
     /**
-     * Validates form and calls function from parent to create ETL session
+     * Validates form and calls function from parent to create ETL procedure
      *  
      * @param {*} e submit event
      */
@@ -86,7 +92,7 @@ export default function CreateETLForm(props) {
         e.preventDefault();
         if (validate()) {
             setLoading(true);
-            addSession(values, resetForm);
+            addSession(values);
         }
     }
 
@@ -103,6 +109,7 @@ export default function CreateETLForm(props) {
     return (
         <Form onSubmit={handleSubmit}>
             <Grid container>
+                {/* Text input to define EHR database name */}
                 <Grid className={classes.item} item xs={12} sm={6} md={6} lg={6}>
                     <Controls.Input
                         className={classes.element}
@@ -113,7 +120,8 @@ export default function CreateETLForm(props) {
                         error={errors.ehrName}
                     />
                 </Grid>
-                
+
+                {/* File input to choose EHR scan */}
                 <Grid className={classes.item} item xs={12} sm={6} md={6} lg={6}>
                     <Controls.FileInput
                         name="ehrFile"
@@ -122,9 +130,12 @@ export default function CreateETLForm(props) {
                         error={errors.ehrFile}
                         onChange={handleFileChange} 
                     />
-                    <p style={{ color: errors.ehrFile === "" ? "black" : "red" }}>{errors.ehrFile === "" ? values.ehrFile.name : errors.ehrFile}</p>
+                    <p className={classes.errorText} style={{ color: errors.ehrFile === "" ? "black" : "red" }}>
+                        {errors.ehrFile === "" ? values.ehrFile.name : errors.ehrFile}
+                    </p>
                 </Grid>
 
+                {/* Select OMOP CDM version */}
                 <Grid className={classes.item} item xs={6} sm={6} md={6} lg={6}>
                     <Controls.Select
                         className={classes.select}
@@ -135,8 +146,10 @@ export default function CreateETLForm(props) {
                         options={CDMVersions}
                         errors={errors.cdmId}
                     />
+                </Grid>
 
-                    { loading ? 
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                    { loading ?
                         (
                             <div>
                                 <Controls.Button className={classes.button} text="Back" color="default" onClick={back} disabled/>
@@ -151,7 +164,7 @@ export default function CreateETLForm(props) {
                                 <Controls.Button className={classes.button} type="submit" text="Create" />
                                 <Controls.Button className={classes.exitButton} text="Close" color="secondary" onClick={closeModal} />
                             </div>
-                        ) 
+                        )
                     }
                 </Grid>
             </Grid>

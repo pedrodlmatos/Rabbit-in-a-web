@@ -13,9 +13,9 @@ class ETLService {
      * @returns all ETL sessions
      */
 
-    getAllETL = async () => {
+    getAllETL = () => {
         try {
-            return await axios.get(API_URL + 'procedures', { headers: authHeader() })
+            return axios.get(API_URL + 'procedures', { headers: authHeader() })
         } catch (e) {
             console.log(e);
         }
@@ -23,10 +23,10 @@ class ETLService {
 
 
     /**
-     * Sends GET request to API to retrieve session given its Id
+     * Sends GET request to API to retrieve procedure given its Id
      * 
-     * @param {*} id ETL session's id
-     * @returns ETL session
+     * @param {*} id ETL procedure's id
+     * @returns ETL procedure
      */
 
     getETLById = async (id) => {
@@ -40,11 +40,12 @@ class ETLService {
 
 
     /**
-     * Sends POST request to API to create an ETL session
-     * 
+     * Sends POST request to API to create an ETL procedure
+     *
+     * @param name EHR database name
      * @param {*} file file containing Scan Report of the EHR database
      * @param {*} cdm OMOP CDM version
-     * @returns created ETL session created
+     * @returns created ETL procedure created
      */
     
     createETL = async (name, file, cdm) => {
@@ -74,9 +75,9 @@ class ETLService {
     /**
      * Sends PUT request to change the OMOP CDM version
      *
-     * @param etl ETL session
+     * @param etl ETL procedure
      * @param cdm CDM version to change to
-     * @returns {Promise<AxiosResponse<any>>} ETL session with new data
+     * @returns {Promise<AxiosResponse<any>>} ETL procedure with new data
      */
 
     changeTargetDatabase(etl, cdm) {
@@ -112,6 +113,10 @@ class ETLService {
 
     downloadSummaryFile(etl) {
         return axios.get(API_URL + "procedures/summary", { headers: authHeader(), params: {etl: etl }, responseType: "blob"});
+    }
+
+    removeStemTables (etl) {
+        return axios.put(API_URL + "procedures/remove_stem", null, { headers: authHeader(), params:{etl: etl }});
     }
 }
 

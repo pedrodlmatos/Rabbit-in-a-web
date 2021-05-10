@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -65,17 +58,21 @@ public class ETLController {
     @JsonView(Views.ETLSessionsList.class)
     public ResponseEntity<?> getAllETLs() {
         logger.info("ETL CONTROLLER - Requesting all ETL procedures");
+
+        // retrieve all ETL procedures from repository
         List<ETL> response = etlService.getAllETL();
         if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
     /**
-     * Gets an ETL session given its id
+     * Gets an ETL procedure given its id
      *
-     * @param id ETL session's id
-     * @return ETL session
+     * @param id ETL procedure's id
+     * @return ETL procedure
      */
 
     @Operation(summary = "Retrieve a ETL procedure by its id")
@@ -92,16 +89,24 @@ public class ETLController {
                     responseCode = "404",
                     description = "ETL procedure not found",
                     content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Error in request",
+                    content = @Content
             )
     })
     @GetMapping("/procedures/{id}")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> getETLById(@PathVariable Long id) {
         logger.info("ETL CONTROLLER - Requesting ETL procedure with id " + id);
+
+        // retrieve ETL from repository
         ETL response = etlService.getETLWithId(id);
-        if (response == null) {
+        if (response == null)
+            // not found
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -166,7 +171,7 @@ public class ETLController {
     @PostMapping(value = "/procedures/save", consumes = "multipart/form-data")
     public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file) {
         logger.info("ETL CONTROLLER - Creating ETL session from file");
-        ETL etl = etlService.createETLSessionFromFile(file);
+        ETL etl = etlService.createETLProcedureFromFile(file);
 
         if (etl == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -210,6 +215,30 @@ public class ETLController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
+    /**
+     * Adds stem table on both EHR and OMOP CDM databases
+     *
+     * @param etl ETL procedure's id
+     * @return altered ETL procedure
+     */
+
+    @Operation(summary = "Add stem table on EHR and OMOP CDM databases")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL procedure changed with success",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ETL.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL not found",
+                    content = @Content
+            )
+    })
     @PutMapping("/procedures/stem")
     @JsonView(Views.ETLSession.class)
     public ResponseEntity<?> addStemTables(@Param(value = "etl") Long etl) {
@@ -222,7 +251,41 @@ public class ETLController {
 
 
     /**
-     * Gets the file containing all source field and its attributes and relations
+     * Removes stem table on both EHR and OMOP CDM databases
+     *
+     * @param etl ETL procedure's id
+     * @return altered ETL procedure
+     */
+
+    @Operation(summary = "Remove stem table on EHR and OMOP CDM databases")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL procedure changed with success",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ETL.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL not found",
+                    content = @Content
+            )
+    })
+    @PutMapping("/procedures/remove_stem")
+    @JsonView(Views.ETLSession.class)
+    public ResponseEntity<?> removeStemTables(@Param(value = "etl") Long etl) {
+        logger.info("ETL CONTROLLER - Remove stem tables on procedure {}", etl);
+        ETL response = etlService.removeStemTable(etl);
+        if (response == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    /**
+     * Creates the file containing all source fields and its attributes and relations
      *
      * @param etl ETL procedure's id
      * @return source fields file
@@ -250,18 +313,14 @@ public class ETLController {
 
         byte[] content = etlService.createSourceFieldListCSV(etl);
 
-        if (content == null) {
+        if (content == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
 
-        String filename = "sourceList.csv";
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.parseMediaType("application/csv"));
-        header.setContentDispositionFormData(filename, filename);
+        header.setContentDispositionFormData("sourceList.csv", "sourceList.csv");
         header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-
         return new ResponseEntity<>(content, header, HttpStatus.OK);
-
     }
 
 
@@ -293,16 +352,13 @@ public class ETLController {
         logger.info("ETL CONTROLLER - Download target field list CSV of session {}", etl);
 
         byte[] content = etlService.createTargetFieldListCSV(etl);
-        if (content == null) {
+        if (content == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
 
-        String filename = "targetList.csv";
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.parseMediaType("application/csv"));
-        header.setContentDispositionFormData(filename, filename);
+        header.setContentDispositionFormData("targetList.csv", "targetList.csv");
         header.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-
         return new ResponseEntity<>(content, header, HttpStatus.OK);
     }
 
@@ -346,14 +402,36 @@ public class ETLController {
     }
 
 
+    /**
+     * Creates a Word document with the ETL procedure summary
+     *
+     * @param etl ETL procedure's id
+     * @return file content
+     */
+
+    @Operation(summary = "Gets the Word document containing ETL procedure summary")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Retrieves the summary file of a given ETL procedure",
+                    content = { @Content(
+                            mediaType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            schema = @Schema(allOf = byte[].class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL procedure not found",
+                    content = @Content
+            )
+    })
     @GetMapping(value = "/procedures/summary", produces="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     public ResponseEntity<?> getWordDocument(@Param(value = "etl") Long etl) {
         logger.info("ETL CONTROLLER - Download word summary file of procedure {}", etl);
 
         byte[] response = etlService.createWordSummaryFile(etl);
-        if (response == null) {
+        if (response == null)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment;filename=hero.docx");

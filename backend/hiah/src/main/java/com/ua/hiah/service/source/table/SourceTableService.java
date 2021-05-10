@@ -24,4 +24,13 @@ public interface SourceTableService {
      */
 
     SourceTable changeComment(Long tableId, String comment);
+
+
+    /**
+     * Removes stem table and its mappings
+     *
+     * @param table stem table on the EHR database
+     */
+
+    void removeStemTable(SourceTable table);
 }

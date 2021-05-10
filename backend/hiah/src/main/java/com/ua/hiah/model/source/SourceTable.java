@@ -3,7 +3,7 @@ package com.ua.hiah.model.source;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.gson.annotations.Expose;
-import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
@@ -36,7 +36,7 @@ public class SourceTable {
     private String comment;
 
     @Column(name = "stem", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     @Expose
     private boolean stem;
 
@@ -58,7 +58,7 @@ public class SourceTable {
     @OneToMany(mappedBy = "source", cascade = CascadeType.ALL)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
-    private List<FieldMapping> mappings;
+    private List<TableMapping> mappings;
 
 
     // CONSTRUCTORS
@@ -90,6 +90,17 @@ public class SourceTable {
         this.name = name;
         this.stem = stem;
         this.sourceDatabase = sourceDatabase;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+    }
+
+    public SourceTable(String name, boolean stem, int rowCount, int rowsCheckedCount, String comment, SourceDatabase database) {
+        this.name = name;
+        this.stem = stem;
+        this.rowCount = rowCount;
+        this.rowsCheckedCount = rowsCheckedCount;
+        this.comment = comment;
+        this.sourceDatabase = database;
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
     }
@@ -143,11 +154,11 @@ public class SourceTable {
         this.fields = fields;
     }
 
-    public List<FieldMapping> getMappings() {
+    public List<TableMapping> getMappings() {
         return mappings;
     }
 
-    public void setMappings(List<FieldMapping> mappings) {
+    public void setMappings(List<TableMapping> mappings) {
         this.mappings = mappings;
     }
 

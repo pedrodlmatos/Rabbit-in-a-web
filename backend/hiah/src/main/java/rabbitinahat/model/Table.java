@@ -14,6 +14,7 @@ public class Table implements MappableItem {
     private Database database;
     private String name;
     private String description;
+    private boolean stem = false;
     private int rowCount;
     private int rowsCheckedCount;
     private String comment;
@@ -29,6 +30,7 @@ public class Table implements MappableItem {
         super();
         this.database = database;
         this.name = sourceTable.getName();
+        this.stem = sourceTable.isStem();
         this.rowCount = sourceTable.getRowCount();
         this.rowsCheckedCount = sourceTable.getRowsCheckedCount();
         this.comment = sourceTable.getComment();
@@ -38,6 +40,7 @@ public class Table implements MappableItem {
     public Table(TargetTable targetTable, Database database) {
         this.database = database;
         this.name = targetTable.getName();
+        this.stem = targetTable.isStem();
         this.comment = targetTable.getComment();
         this.fields = getFieldsFromTargetTable(targetTable);
     }
@@ -144,7 +147,7 @@ public class Table implements MappableItem {
 
     @Override
     public boolean isStem() {
-        return false;
+        return stem;
     }
 
     @Override

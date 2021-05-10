@@ -21,7 +21,7 @@ class TableMappingService {
     /**
      * Sends a POST request to API to create a new table mapping
      * 
-     * @param {*} etl ETL session id
+     * @param {*} etl ETL procedure id
      * @param {*} source source table id
      * @param {*} target target table id
      * @returns table mapping created
@@ -35,9 +35,9 @@ class TableMappingService {
     /**
      * Sends a DELETE request to delete table mapping
      * 
-     * @param {*} etl_id ETL session id
+     * @param {*} etl_id ETL procedure id
      * @param {*} map_id table mapping id
-     * @returns ETL session
+     * @returns ETL procedure
      */
 
     removeTableMapping(etl_id, map_id) {

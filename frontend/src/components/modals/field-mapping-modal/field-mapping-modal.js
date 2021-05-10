@@ -7,7 +7,7 @@ import FieldService from '../../../services/field-service';
 import Controls from '../../controls/controls';
 import Xarrow from 'react-xarrows/lib';
 import InfoTable from '../../info-table/info-table';
-import TableMappingLogic from '../../session/table-mapping-logic';
+import TableMappingLogic from '../../procedure/table-mapping-logic';
 import FieldMappingLogic from './field-mapping-logic';
 
 
@@ -78,6 +78,7 @@ export default function FieldMappingModal(props) {
 
     const getInformation = () => {
         TableMappingService.getMapping(mappingId).then(res => {
+            console.log(res.data.source)
             let maps = [];
             res.data.fieldMappings.forEach(item => {
                 const arrow = {
@@ -455,8 +456,8 @@ export default function FieldMappingModal(props) {
                                 <Controls.ElementBox
                                     id={sourceTable.name + 't'}
                                     element={sourceTable}
-                                    color='#FF9224'
-                                    border="#A10000"
+                                    color={sourceTable.stem ? "#A000A0" : "#FF9224"}
+                                    border="#000000"
                                 />
                             </Grid>
                             <Grid item xs={3} sm={3} md={3} lg={3}>
@@ -464,7 +465,7 @@ export default function FieldMappingModal(props) {
                                     id={targetTable.name + 't'}
                                     element={targetTable}
                                     color="#53ECEC"
-                                    border="#000F73"
+                                    border="#000000"
                                 />
                                 <Xarrow
                                     start={sourceTable.name + 't'}
@@ -525,7 +526,7 @@ export default function FieldMappingModal(props) {
                                             help="Select first an EHR field and then an OMOP CDM field" 
                                             position="right-end"
                                             color='#FFE3C6'
-                                            border="#A10000"
+                                            border="#000000"
                                             handleSelection={selectSourceField}
                                             createMapping={createFieldMapping} 
                                         />
@@ -545,7 +546,7 @@ export default function FieldMappingModal(props) {
                                             help="Select first an EHR field and then an OMOP CDM field" 
                                             position="right-end"
                                             color="#D5FFFF"
-                                            border="#000F73"
+                                            border="#000000"
                                             handleSelection={selectTargetField}
                                             createMapping={createFieldMapping} 
                                         />

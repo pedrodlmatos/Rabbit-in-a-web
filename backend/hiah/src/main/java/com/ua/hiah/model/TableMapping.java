@@ -81,6 +81,14 @@ public class TableMapping {
         this.fieldMappings = new ArrayList<>();
     }
 
+    public TableMapping(SourceTable sourceTable, TargetTable targetTable, boolean complete, ETL etl) {
+        this.etl = etl;
+        this.source = sourceTable;
+        this.target = targetTable;
+        this.complete = complete;
+        this.fieldMappings = new ArrayList<>();
+    }
+
     // GETTERS AND SETTERS
     public Long getId() {
         return id;

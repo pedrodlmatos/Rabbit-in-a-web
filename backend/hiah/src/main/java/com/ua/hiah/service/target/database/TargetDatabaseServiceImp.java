@@ -8,6 +8,7 @@ import com.ua.hiah.model.target.Concept;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.service.target.table.TargetTableService;
 import rabbitcore.riah_datamodel.ConceptsMap;
 import com.ua.hiah.repository.target.TargetDatabaseRepository;
 import org.apache.commons.csv.CSVFormat;
@@ -30,6 +31,10 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
 
     @Autowired
     private TargetDatabaseRepository repository;
+
+    @Autowired
+    private TargetTableService targetTableService;
+
 
     private static String CONCEPT_ID_HINTS_FILE_NAME = "CDMConceptIDHints_v5.0_02-OCT-19.csv";
 
@@ -156,6 +161,7 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
         for (TargetTable table : targetDatabase.getTables()) {
             TargetTable responseTable = new TargetTable(
                 table.getName(),
+                table.isStem(),
                 table.getComment(),
                 responseDatabase
             );
@@ -192,14 +198,22 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
         return responseDatabase;
     }
 
+
+    /**
+     * Creates stem table on OMOP CDM database
+     *
+     * @param version OMOP CDM version
+     * @param targetDatabase target database object
+     * @return created table
+     */
+
     @Override
     public TargetTable createTargetStemTable(CDMVersion version, TargetDatabase targetDatabase) {
         TargetTable stemTargetTable = new TargetTable(
-                "stem_table",
-                true,
-                targetDatabase
+            "stem_table",
+            true,
+            targetDatabase
         );
-
 
         try {
             StemTableFile stemTableFile = StemTableFile.valueOf(version.name());
@@ -220,8 +234,19 @@ public class TargetDatabaseServiceImp implements TargetDatabaseService{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
+    }
+
+
+    /**
+     * Removes stem table from OMOP CDM database
+     *
+     * @param table stem table
+     */
+
+    @Override
+    public void removeTable(TargetTable table) {
+        targetTableService.removeStemTable(table);
     }
 
 

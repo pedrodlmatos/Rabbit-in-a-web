@@ -50,12 +50,18 @@ public class MappingPanel {
 
         for (MappableItem item : mapping.getSourceItems()) {
             if (isConnected(item))
-                sourceComponents.add(new LabeledRectangle(0, 400, ITEM_WIDTH, ITEM_HEIGHT, item, new Color(255, 128, 0)));
+                if (item.isStem())
+                    sourceComponents.add(new LabeledRectangle(0, 400, ITEM_WIDTH, ITEM_HEIGHT, item, new Color(160, 0, 160)));
+                else
+                    sourceComponents.add(new LabeledRectangle(0, 400, ITEM_WIDTH, ITEM_HEIGHT, item, new Color(255, 128, 0)));
         }
 
         for (MappableItem item : mapping.getTargetItems()) {
             if (isConnected(item))
-                targetComponents.add(new LabeledRectangle(0, 400, ITEM_WIDTH, ITEM_HEIGHT, item, new Color(128, 128, 255)));
+                if (item.isStem())
+                    targetComponents.add(new LabeledRectangle(0, 400, ITEM_WIDTH, ITEM_HEIGHT, item, new Color(160, 0, 160)));
+                else
+                    targetComponents.add(new LabeledRectangle(0, 400, ITEM_WIDTH, ITEM_HEIGHT, item, new Color(128, 128, 255)));
         }
 
         // arrows

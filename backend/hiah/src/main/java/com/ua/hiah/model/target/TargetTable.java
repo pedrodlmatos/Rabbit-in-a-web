@@ -3,11 +3,8 @@ package com.ua.hiah.model.target;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.gson.annotations.Expose;
-import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.views.Views;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -39,7 +36,7 @@ public class TargetTable {
     private String comment;
 
     @Column(name = "stem", nullable = false)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
     @Expose
     private boolean stem;
 
@@ -52,7 +49,7 @@ public class TargetTable {
     @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
-    private List<FieldMapping> mappings;
+    private List<TableMapping> mappings;
 
 
     // CONSTRUCTORS
@@ -83,6 +80,15 @@ public class TargetTable {
         this.name = name;
         this.stem = stem;
         this.targetDatabase = targetDatabase;
+        this.fields = new ArrayList<>();
+        this.mappings = new ArrayList<>();
+    }
+
+    public TargetTable(String name, boolean stem, String comment, TargetDatabase database) {
+        this.name = name;
+        this.stem = stem;
+        this.comment = comment;
+        this.targetDatabase = database;
         this.fields = new ArrayList<>();
         this.mappings = new ArrayList<>();
     }
@@ -122,11 +128,11 @@ public class TargetTable {
     }
 
 
-    public List<FieldMapping> getMappings() {
+    public List<TableMapping> getMappings() {
         return mappings;
     }
 
-    public void setMappings(List<FieldMapping> mappings) {
+    public void setMappings(List<TableMapping> mappings) {
         this.mappings = mappings;
     }
 

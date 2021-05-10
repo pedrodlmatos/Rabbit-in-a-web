@@ -4,6 +4,7 @@ import { Input, Button, InputLabel, makeStyles } from '@material-ui/core'
 const useStyles = makeStyles(theme => ({
     fileInput: {
         marginTop: theme.spacing(1),
+        marginLeft: theme.spacing(1),
         width: "250px"
     }
 }))
@@ -11,7 +12,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function FileInput(props) {
     
-    const { name, type, placeholder, error=null, onChange, ...other } = props;
+    const { name, type, placeholder, onChange, ...other } = props;
     const classes = useStyles();
 
     return ( 

@@ -71,7 +71,7 @@ public class SourceField {
     @JsonIgnore
     private SourceTable table;
 
-    @OneToMany(mappedBy = "source")
+    @OneToMany(mappedBy = "source", cascade = CascadeType.ALL)
     @Column(name = "mappings", nullable = true)
     @JsonIgnore
     private List<FieldMapping> mappings;

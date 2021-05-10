@@ -24,6 +24,7 @@ public class SourceFieldServiceImpl implements SourceFieldService{
         return repository.findById(source_id).orElse(null);
     }
 
+
     /**
      * Changes the comment a field from the EHR database
      *
@@ -35,10 +36,12 @@ public class SourceFieldServiceImpl implements SourceFieldService{
     @Override
     public SourceField changeComment(Long fieldId, String comment) {
         SourceField field = repository.findById(fieldId).orElse(null);
-        if (field != null) {
+
+        if (field == null) return null;                                 // field not found
+        else if (field.getComment().equals(comment)) return field;      // old comment is equal to new comment
+        else {                                                          // new comment is different
             field.setComment(comment);
             return repository.save(field);
         }
-        return null;
     }
 }

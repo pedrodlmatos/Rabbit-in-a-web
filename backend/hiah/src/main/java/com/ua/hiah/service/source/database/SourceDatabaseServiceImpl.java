@@ -6,6 +6,7 @@ import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.source.ValueCount;
+import com.ua.hiah.service.source.table.SourceTableService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import rabbitcore.utilities.ScanFieldName;
@@ -30,6 +31,9 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
 
     @Autowired
     private SourceDatabaseRepository databaseRepository;
+
+    @Autowired
+    private SourceTableService sourceTableService;
 
 
     /**
@@ -111,7 +115,7 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                 }
             }
             database.setTables(tables);
-            scanTemp.delete();
+            if (scanTemp.delete()) { };
             //return databaseRepository.save(database);
             return database;
         } catch (IOException e) {
@@ -136,6 +140,7 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
             // Get table
             SourceTable responseTable = new SourceTable(
                 table.getName(),
+                table.isStem(),
                 table.getRowCount(),
                 table.getRowsCheckedCount(),
                 table.getComment(),
@@ -167,11 +172,18 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                 }
             }
         }
-
         response.setTables(tables);
-        //return databaseRepository.save(response);
         return response;
     }
+
+
+    /**
+     * Adds stem table to EHR database and its mappings (contained in file)
+     *
+     * @param version OMOP CDM version
+     * @param sourceDatabase EHR database object
+     * @return altered source database
+     */
 
     @Override
     public SourceTable createSourceStemTable(CDMVersion version, SourceDatabase sourceDatabase) {
@@ -181,12 +193,12 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
             sourceDatabase
         );
 
-
         try {
             StemTableFile stemTableFile = StemTableFile.valueOf(version.name());
             FileInputStream fileInputStream = new FileInputStream(stemTableFile.fileName);
 
             for (CSVRecord row : CSVFormat.RFC4180.withHeader().parse(new InputStreamReader(fileInputStream))) {
+                // get source fields
                 SourceField field = new SourceField(
                     row.get("COLUMN_NAME").toLowerCase(),
                     row.get("IS_NULLABLE").equals("YES"),
@@ -203,6 +215,18 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
         }
 
         return null;
+    }
+
+
+    /**
+     * Remove stem table from EHR database
+     *
+     * @param table stem table
+     */
+
+    @Override
+    public void removeTable(SourceTable table) {
+        sourceTableService.removeStemTable(table);
     }
 
 

@@ -26,8 +26,6 @@ import rabbitinahat.model.ETL_RIAH;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 
@@ -64,19 +62,8 @@ public class ETLServiceImpl implements ETLService {
         if (targetDatabaseService.CDMExists(cdm)) {
             ETL etl = new ETL();
             etl.setName("ETL procedure " + etlRepository.count());
-
-
-            Instant start = Instant.now();
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
-            Instant end = Instant.now();
-            Duration duration = Duration.between(start, end);
-            logger.info("ETL SERVICE - Loaded OMOP CDM database {} in {} seconds", cdm, duration.getSeconds());
-
-            start = Instant.now();
             etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromScanReport(ehrName, ehrScan));
-            end = Instant.now();
-            duration = Duration.between(start, end);
-            logger.info("ETL SERVICE - Loaded EHR database in {} seconds", duration.getSeconds());
             return etlRepository.save(etl);
         }
         return null;
@@ -91,7 +78,7 @@ public class ETLServiceImpl implements ETLService {
      */
 
     @Override
-    public ETL createETLSessionFromFile(MultipartFile saveFile) {
+    public ETL createETLProcedureFromFile(MultipartFile saveFile) {
         try {
             // write content in a file object
             File tempSaveFile = new File("tempSave.json");
@@ -111,8 +98,6 @@ public class ETLServiceImpl implements ETLService {
             ETL response = new ETL();
             response.setName("ETL procedure " + etlRepository.count());
 
-            // response = etlRepository.save(response);
-
             // create source database from json
             SourceDatabase source = sourceDatabaseService.createDatabaseFromJSON(request.getSourceDatabase());
             response.setSourceDatabase(source);
@@ -125,7 +110,10 @@ public class ETLServiceImpl implements ETLService {
             List<TableMapping> mappings = mappingService.getTableMappingsFromJSON(response, request.getTableMappings(), source, target);
             response.setTableMappings(mappings);
 
-            tempSaveFile.delete();
+            // delete file object
+            if (tempSaveFile.delete()) { }
+
+            // persist
             return etlRepository.save(response);
         } catch (IOException e) {
             e.printStackTrace();
@@ -160,14 +148,13 @@ public class ETLServiceImpl implements ETLService {
 
         if (etl != null) {
             List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
-            sourceTables.sort(Comparator.comparingLong(SourceTable::getId));
+            sourceTables.sort(Comparator.comparingLong(SourceTable::getId));            // sort tables by id
 
             List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
-            targetTables.sort(Comparator.comparingLong(TargetTable::getId));
+            targetTables.sort(Comparator.comparingLong(TargetTable::getId));            // sort tables by id
 
             return etl;
         }
-
         return null;
     }
 
@@ -206,34 +193,75 @@ public class ETLServiceImpl implements ETLService {
     }
 
 
+    /**
+     * Adds stem table on EHR and on OMOP CDM database
+     *
+     * @param etl_id ETL procedure's id
+     * @return altered ETL procedure
+     */
+
     @Override
     public ETL addStemTable(Long etl_id) {
         ETL etl = etlRepository.findById(etl_id).orElse(null);
 
         if (etl != null && !containsStemTable(etl)) {
             CDMVersion version = etl.getTargetDatabase().getVersion();
-
+            // add stem table on EHR database
             SourceDatabase sourceDatabase = etl.getSourceDatabase();
             SourceTable sourceStemTable = sourceDatabaseService.createSourceStemTable(version, sourceDatabase);
             sourceDatabase.getTables().add(sourceStemTable);
             etl.setSourceDatabase(sourceDatabase);
 
+            // add stem table on OMOP CDM database
             TargetDatabase targetDatabase = etl.getTargetDatabase();
             TargetTable targetStemTable = targetDatabaseService.createTargetStemTable(version, targetDatabase);
             targetDatabase.getTables().add(targetStemTable);
             etl.setTargetDatabase(targetDatabase);
 
+            // add mappings from and to stem table
             List<TableMapping> prevTableMappings = etl.getTableMappings();
             List<TableMapping> tableMappings = mappingService.createMappingsWithStemTable(version, targetDatabase, sourceStemTable, etl);
+            System.out.println(tableMappings);
             prevTableMappings.addAll(tableMappings);
             etl.setTableMappings(prevTableMappings);
-
 
             return etlRepository.save(etl);
         }
 
         return null;
 
+    }
+
+
+    /**
+     * Removes stem table from EHR and OMOP CDM database and their respective mapping
+     *
+     * @param etl_id ETL procedure's id
+     * @return altered ETL procedure
+     */
+
+    @Override
+    public ETL removeStemTable(Long etl_id) {
+        ETL etl = etlRepository.findById(etl_id).orElse(null);
+
+        if (etl != null) {
+
+            for (SourceTable table : etl.getSourceDatabase().getTables()) {
+                if (table.isStem()) {
+                    //mappingService.removeTableMappingsFromTable(etl_id, table);
+                    sourceDatabaseService.removeTable(table);
+                }
+            }
+
+            for (TargetTable table : etl.getTargetDatabase().getTables())
+                if (table.isStem()) {
+                    //mappingService.removeTableMappingsToTable(etl_id, table);
+                    targetDatabaseService.removeTable(table);
+                }
+
+            return etlRepository.findById(etl_id).orElse(null);
+        }
+        return null;
     }
 
     private boolean containsStemTable(ETL etl) {
@@ -283,14 +311,18 @@ public class ETLServiceImpl implements ETLService {
     }
 
 
+    /**
+     * Creates the ETL procedure summary file
+     *
+     * @param id ETL procedure's id
+     * @return file content or null
+     */
+
     @Override
     public byte[] createWordSummaryFile(Long id) {
-
         ETL etl = etlRepository.findById(id).orElse(null);
 
         if (etl != null) {
-
-
             // order tables by id
             //List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
             //sourceTables.sort(Comparator.comparingLong(SourceTable::getId));
@@ -301,21 +333,11 @@ public class ETLServiceImpl implements ETLService {
             ETL_RIAH etlRiah = new ETL_RIAH(etl);
 
             byte[] documentData = ETLWordDocumentGenerator.generate(etlRiah);
-            if (documentData != null) {
+            if (documentData != null)
                 return documentData;
-            }
         }
 
         return null;
-
-        /*
-        if (etl != null) {
-            WordDocumentGenerator generator = new WordDocumentGenerator(etl);
-            generator.generateWordDocument(etl);
-        }
-
-         */
-
     }
 
 
@@ -334,7 +356,7 @@ public class ETLServiceImpl implements ETLService {
 
         if (etl != null) {
             try {
-                //String etlJsonStr = JsonWriter.formatJson(JsonWriter.objectToJson(etl));
+                // Create GSON object
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
                 // sort tables and fields by its (to keep original order)

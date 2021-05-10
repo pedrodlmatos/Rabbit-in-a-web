@@ -32,9 +32,9 @@ export default function ProcedureCard(props) {
 
 
     /**
-     * Redirect to ETL session page
+     * Redirect to ETL procedure page
      * 
-     * @param {*} session_id session's id
+     * @param {*} session_id procedure's id
      */
 
     const redirect = (session_id) => {

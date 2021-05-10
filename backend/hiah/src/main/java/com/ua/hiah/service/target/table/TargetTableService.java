@@ -27,10 +27,10 @@ public interface TargetTableService {
 
 
     /**
-     * Deletes
+     * Deletes stem table and its mappings
      *
-     * @param id database's id
+     * @param table stem table on the OMOP CDM database
      */
 
-    void deleteTablesByDatabaseId(Long id);
+    void removeStemTable(TargetTable table);
 }

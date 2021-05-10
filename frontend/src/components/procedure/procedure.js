@@ -1,17 +1,16 @@
-import { Grid, CircularProgress, makeStyles } from '@material-ui/core'
+import { Grid, CircularProgress, makeStyles, Button, Menu, MenuItem, Checkbox, Divider } from '@material-ui/core'
 import React, { useState, useEffect } from 'react'
 import Xarrow from 'react-xarrows/lib';
 import ETLService from '../../services/etl-list-service';
 import TableService from '../../services/table-service';
 import TableMappingService from '../../services/table-mapping-service';
 import Controls from '../controls/controls';
-import HelpModal from '../modals/help-modal/help-modal';
 import FieldMappingModal from '../modals/field-mapping-modal/field-mapping-modal';
 import { CDMVersions } from '../../services/CDMVersions';
 import TableMappingLogic from './table-mapping-logic';
-import FilesModal from '../modals/files-modal/files-modal';
 import SourceTableDetails from './source-table-details';
 import TargetTableDetails from './target-table-details';
+import FilesMethods from './files-methods'
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -60,6 +59,7 @@ export default function Procedure() {
     const [selectedMapping, setSelectedMapping] = useState({});
     const [showHelpModal, setShowHelpModal] = useState(false);
     const [showFilesModal, setShowFilesModal] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
     
     const [selectedTable, setSelectedTable] = useState({})
     const [sourceSelected, setSourceSelected] = useState(false);
@@ -211,21 +211,114 @@ export default function Procedure() {
     
     const handleCDMChange = e => {
         setLoading(true);
-        if (Object.keys(selectedTable).length > 0) {                             // clean state if any table is selected
+        if (Object.keys(selectedTable).length > 0) {
+            // clean state if any table is selected
             setSelectedTable({});
             setSourceSelected(false);
             setShowTableDetails(false);
             setTableDetails([]);
         }
-        if (Object.keys(selectedMapping).length > 0) {                          // clean state if any table mapping is selected
+        if (Object.keys(selectedMapping).length > 0) {
+            // clean state if any table mapping is selected
             setSelectedMapping({});
         }
+        // make API request
         ETLService.changeTargetDatabase(etl.id, e.target.value).then(response => {
             setEtl({...etl, targetDatabase: response.data.targetDatabase });
             setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name);
             setMappings([]);
             setLoading(false);
         });
+    }
+
+
+    /**
+     * Opens the operations menu
+     * 
+     * @param {*} event 
+     */
+
+    const openOperationsMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    }
+
+
+    /**
+     * Closes the operation menu
+     */
+    
+    const closeOperationsMenu = () => {
+        setAnchorEl(null);
+    }
+
+
+    /**
+     * Verifies if there is a stem table
+     *
+     * @returns {boolean}
+     */
+
+    const hasStemTable = () => {
+        let result = false;
+        etl.sourceDatabase.tables.forEach(table => {
+            if (table.stem) result = true;
+        })
+        return result;
+    }
+
+
+    /**
+     * Creates the stem tables on both source (EHR) and target (OMOP CDM) databases
+     */
+
+    const addStemTable = () => {
+        ETLService.addStemTables(etl.id).then(response => {
+            setEtl({
+                ...etl,
+                sourceDatabase: response.data.sourceDatabase,
+                targetDatabase: response.data.targetDatabase
+            });
+            // table mappings
+            let maps = [];
+            response.data.tableMappings.forEach(function(item) {
+                const arrow = {
+                    id: item.id,
+                    start:  item.source,
+                    end: item.target,
+                    complete: item.complete,
+                    logic: item.logic,
+                    color: item.complete ? "black" : "grey"
+                }
+                maps.push(arrow);
+            });
+            setMappings(maps);
+        })
+    }
+
+
+    const removeStemTable = () => {
+        ETLService.removeStemTables(etl.id).then(response => {
+            console.log(response.data);
+            setEtl({
+                ...etl,
+                sourceDatabase: response.data.sourceDatabase,
+                targetDatabase: response.data.targetDatabase
+            });
+            // table mappings
+            let maps = [];
+            response.data.tableMappings.forEach(function(item) {
+                const arrow = {
+                    id: item.id,
+                    start:  item.source,
+                    end: item.target,
+                    complete: item.complete,
+                    logic: item.logic,
+                    color: item.complete ? "black" : "grey"
+                }
+                maps.push(arrow);
+            });
+            setMappings(maps);
+        })
     }
 
 
@@ -237,10 +330,10 @@ export default function Procedure() {
      */
 
     const defineArrowColor = (mapping) => {
-        if (Object.keys(selectedTable).length === 0) return mapping.complete ? 'black' : 'grey'
-        else if (selectedTable.id === mapping.source.id) return 'orange';
-        else if (selectedTable.id === mapping.target.id) return 'blue';
-        else return 'grey';
+        if (Object.keys(selectedTable).length === 0) return mapping.complete ? 'black' : 'grey'         // if table mapping is complete, color is black, grey otherwise
+        else if (selectedTable.id === mapping.source.id) return 'orange';                               // orange if mapping starts in selected table
+        else if (selectedTable.id === mapping.target.id) return 'blue';                                 // blue if mapping ends in selected table
+        else return 'grey';                                                                             // grey otherwise
     }
 
 
@@ -293,24 +386,29 @@ export default function Procedure() {
      */
 
     const selectArrow = (arrow) => {
-        resetArrowsColor();                                                         // change color to grey
+        // change color to grey
+        resetArrowsColor();
+        // clean state
         setSelectedTable({});
         setSourceSelected(false);
         setShowTableDetails(false);
         setTableDetails([]);
         const index = mappings.indexOf(arrow);
-        if (Object.keys(selectedMapping).length === 0) {                            // no arrow is selected
+        if (Object.keys(selectedMapping).length === 0) {
+            // no arrow is selected
             let arrows = mappings;
-            arrows[index].color = "red";
+            arrows[index].color = "red";        // change to red the selected table mapping
             setSelectedMapping(arrow);
             setMappings(arrows);
-        } else if(selectedMapping === arrow) {                                      // select the arrow previous selected to unselect
+        } else if(selectedMapping === arrow) {
+            // select the arrow previous selected to unselect
             setSelectedMapping({});
             resetArrowsColor();
-        } else {                                                                    // select any other unselected arrow
-            resetArrowsColor();                                                     // unselect previous
-            let arrows = mappings;                                                  // select a new one
-            arrows[index].color = "red";
+        } else {
+            // select any other unselected arrow
+            resetArrowsColor();                 // unselect previous
+            let arrows = mappings;              // select a new one
+            arrows[index].color = "red";        // change to red the selected table mapping
             setSelectedMapping(arrow);
             setMappings(arrows);
         }
@@ -557,6 +655,40 @@ export default function Procedure() {
         });
     }
 
+    /**
+     *
+     *
+
+    const fetchSourceFieldsFile = () => {
+        ETLService.downloadSourceFieldsFile(etl.id).then(response => {
+            let blob = new Blob([response.data], { type: 'application/csv', name: 'source_fields.csv' });
+            saveAs(blob, 'source_fields.csv');
+        }).catch(e => console.log(e));
+    }
+
+
+    const fetchTargetFieldsFile = () => {
+        ETLService.downloadTargetFieldsFile(etl.id).then(response => {
+            let blob = new Blob([response.data], { type: 'application/csv', name: 'target_fields.csv' });
+            saveAs(blob, 'target_fields.csv');
+        })
+    }
+
+
+    const fetchSaveFile = () => {
+        ETLService.downloadSaveFile(etl.id).then(response => {
+            let blob = new Blob([JSON.stringify(response.data)], { type: 'application/json', name: 'Scan.json' });
+            saveAs(blob, 'Scan.json');
+        })
+    }
+
+    const fetchSummaryFile = () => {
+        ETLService.downloadSummaryFile(etl.id).then(response => {
+            let blob = new Blob([response.data], { type: 'application/octet-stream' });
+            saveAs(blob, 'table_mappings.docx');
+        })
+    }*/
+
 
     return(
         <div className={classes.tablesArea}>
@@ -570,6 +702,24 @@ export default function Procedure() {
                                 <h1>{ etl.name }</h1>
                             </Grid>
 
+                            {/* Menu (with files, add/remove stem tables) */}
+                            <Controls.Button text="Menu" aria-controls="simple-menu" aria-haspopup={true} onClick={openOperationsMenu} />
+                            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={closeOperationsMenu}>
+                                {/* Stem Tables (add/remove) */}
+                                <MenuItem>
+                                    Stem tables
+                                    <Checkbox edge="end" checked={hasStemTable()} onChange={hasStemTable() ? () => removeStemTable() : () => addStemTable()} />
+                                </MenuItem>
+                                <Divider />
+                                {/*  */}
+                                <MenuItem onClick={() => FilesMethods.fetchSourceFieldsFile(etl.id)}>Source fields list</MenuItem>
+                                <MenuItem onClick={() => FilesMethods.fetchTargetFieldsFile(etl.id)}>Target field list</MenuItem>
+                                <MenuItem onClick={() => FilesMethods.fetchSummaryFile(etl.id)}>Summary</MenuItem>
+                                <Divider />
+                                <MenuItem onClick={() => FilesMethods.fetchSaveFile(etl.id)}>Save session to file</MenuItem>
+                            </Menu>
+
+                            {/*
                             <Grid item xs={2} sm={2} md={2} lg={2}>
                                 <Controls.Button text="Help " onClick={() => setShowHelpModal(true)}>
                                     <i className="fa fa-info"/>
@@ -592,14 +742,14 @@ export default function Procedure() {
                                     />
                                 </Grid>
                             ) : (
-                              <Grid item xs={2} sm={2} md={2} lg={2}>
-                                <Controls.Button
-                                  color="primary"
-                                  text="Add stem table"
-                                  onClick={() => ETLService.addStemTables(etl.id)}
-                                />
-                              </Grid>
-                            ) }
+                                <Grid item xs={2} sm={2} md={2} lg={2}>
+                                    <Controls.Button
+                                        color="primary"
+                                        text="Add stem table"
+                                        onClick={addStemTable}
+                                    />
+                                </Grid>
+                            ) }*/}
                         </Grid>
                             
                         <Grid className={classes.databaseNames} container>

@@ -35,10 +35,11 @@ public class TargetFieldServiceImpl implements TargetFieldService {
     @Override
     public TargetField changeComment(Long fieldId, String comment) {
         TargetField field = repository.findById(fieldId).orElse(null);
-        if (field != null) {
+        if (field == null) return null;                                 // field not found
+        else if (field.getComment().equals(comment)) return field;      // old comment is equals to new
+        else {                                                          // new comment is different
             field.setComment(comment);
             return repository.save(field);
         }
-        return null;
     }
 }

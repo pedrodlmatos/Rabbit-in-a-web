@@ -35,7 +35,32 @@ public interface TargetDatabaseService {
 
     void removeDatabase(Long id);
 
+    /**
+     * Creates a OMOP CDM database from data contained in JSON
+     *
+     * @param targetDatabase database stored in JSON object
+     * @return database altered for specific model
+     */
+
     TargetDatabase createDatabaseFromJSON(TargetDatabase targetDatabase);
 
+
+    /**
+     * Creates stem table on OMOP CDM database
+     *
+     * @param version OMOP CDM version
+     * @param targetDatabase target database object
+     * @return created table
+     */
+
     TargetTable createTargetStemTable(CDMVersion version, TargetDatabase targetDatabase);
+
+
+    /**
+     * Removes stem table from OMOP CDM database
+     *
+     * @param table stem table
+     */
+
+    void removeTable(TargetTable table);
 }

@@ -14,7 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -48,8 +54,8 @@ public class FieldMappingController {
                     )
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "Table mapping not found",
+                    responseCode = "500",
+                    description = "Some parameters not found",
                     content = @Content
             )
     })
@@ -58,7 +64,7 @@ public class FieldMappingController {
         logger.info("FIELD MAPPING CONTROLLER - Add field mapping between {} and {} in table mapping {}", source_id, target_id, tableMap);
         FieldMapping response = service.addFieldMapping(source_id, target_id, tableMap);
         if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

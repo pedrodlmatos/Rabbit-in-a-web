@@ -1,6 +1,9 @@
 package com.ua.hiah.service.fieldMapping;
 
 import com.ua.hiah.model.FieldMapping;
+import com.ua.hiah.model.TableMapping;
+import com.ua.hiah.model.source.SourceField;
+import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.repository.FieldMappingRepository;
 import com.ua.hiah.service.source.field.SourceFieldService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
@@ -37,12 +40,21 @@ public class FieldMappingServiceImpl implements FieldMappingService {
 
     @Override
     public FieldMapping addFieldMapping(Long sourceFieldId, Long targetTableId, Long tableMappingId) {
-        FieldMapping mapping = new FieldMapping(
-            sourceFieldService.getFieldById(sourceFieldId),
-            targetFieldService.getFieldById(targetTableId),
-            tableMappingService.getTableMappingById(tableMappingId)
-        );
-        return repository.save(mapping);
+        SourceField sourceField = sourceFieldService.getFieldById(sourceFieldId);
+        TargetField targetField = targetFieldService.getFieldById(targetTableId);
+        TableMapping tableMapping = tableMappingService.getTableMappingById(tableMappingId);
+
+        // validate
+        if (sourceField != null && targetField != null && tableMapping != null) {
+            FieldMapping mapping = new FieldMapping(
+                    sourceFieldService.getFieldById(sourceFieldId),
+                    targetFieldService.getFieldById(targetTableId),
+                    tableMappingService.getTableMappingById(tableMappingId)
+            );
+            return repository.save(mapping);
+        }
+
+        return null;
     }
 
 
@@ -56,8 +68,7 @@ public class FieldMappingServiceImpl implements FieldMappingService {
     @Override
     public FieldMapping removeFieldMapping(Long fieldMappingId) {
         FieldMapping mapping = repository.findById(fieldMappingId).orElse(null);
-        if (mapping == null)
-            return null;
+        if (mapping == null) return null;
 
         repository.delete(mapping);
         return mapping;
@@ -88,11 +99,11 @@ public class FieldMappingServiceImpl implements FieldMappingService {
     @Override
     public FieldMapping changeMappingLogic(Long fieldMappingId, String logic) {
         FieldMapping mapping = repository.findById(fieldMappingId).orElse(null);
-
-        if (mapping != null) {
+        if (mapping == null) return null;                               // field mapping not found
+        else if (mapping.getLogic().equals(logic)) return mapping;      // old logic == new logic
+        else {                                                          // old logic != new logic
             mapping.setLogic(logic);
             return repository.save(mapping);
         }
-        return null;
     }
 }

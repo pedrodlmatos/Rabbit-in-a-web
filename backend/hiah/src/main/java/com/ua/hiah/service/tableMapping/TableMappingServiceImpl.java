@@ -63,8 +63,7 @@ public class TableMappingServiceImpl implements TableMappingService {
     public TableMapping removeTableMapping(Long map_id) {
         TableMapping mapping = repository.findById(map_id).orElse(null);
 
-        if (mapping == null)
-            return null;
+        if (mapping == null) return null;
 
         repository.delete(mapping);
         return mapping;
@@ -95,12 +94,21 @@ public class TableMappingServiceImpl implements TableMappingService {
 
     @Override
     public TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id) {
-        TableMapping mapping = new TableMapping();
-        mapping.setSource(sourceTableService.getTableById(source_id));
-        mapping.setTarget(targetTableService.getTableById(target_id));
-        mapping.setComplete(false);
-        mapping.setEtl(etlService.getETLWithId(etl_id));
-        return repository.save(mapping);
+        SourceTable sourceTable = sourceTableService.getTableById(source_id);
+        TargetTable targetTable = targetTableService.getTableById(target_id);
+        ETL etl = etlService.getETLWithId(etl_id);
+
+        // validate
+        if (etl != null && sourceTable != null && targetTable != null) {
+            TableMapping mapping = new TableMapping(
+                    sourceTable,
+                    targetTable,
+                    false,
+                    etl
+            );
+            return repository.save(mapping);
+        }
+        return null;
     }
 
 
@@ -116,11 +124,12 @@ public class TableMappingServiceImpl implements TableMappingService {
     public TableMapping changeCompletionStatus(Long tableMappingId, boolean completion) {
         TableMapping mapping = repository.findById(tableMappingId).orElse(null);
 
-        if (mapping != null) {
+        if (mapping == null) return null;                               // mapping not found
+        if (mapping.isComplete() == completion) return mapping;         // completion status don't change
+        else {                                                          // completion status change
             mapping.setComplete(completion);
             return repository.save(mapping);
         }
-        return null;
     }
 
 
@@ -135,12 +144,12 @@ public class TableMappingServiceImpl implements TableMappingService {
     @Override
     public TableMapping changeMappingLogic(Long tableMappingId, String logic) {
         TableMapping mapping = repository.findById(tableMappingId).orElse(null);
-
-        if (mapping != null) {
+        if (mapping == null) return null;
+        else if (mapping.getLogic().equals(logic)) return mapping;
+        else {
             mapping.setLogic(logic);
             return repository.save(mapping);
         }
-        return null;
     }
 
 
@@ -196,6 +205,17 @@ public class TableMappingServiceImpl implements TableMappingService {
         return responseMappings;
     }
 
+
+    /**
+     * Creates mapping to or from a stem table (stored in file)
+     *
+     * @param version OMOP CDM version
+     * @param targetDatabase target database
+     * @param sourceStemTable stem table on EHR database
+     * @param etl ETL procedure object
+     * @return list of created table mappings
+     */
+
     @Override
     public List<TableMapping> createMappingsWithStemTable(CDMVersion version, TargetDatabase targetDatabase, SourceTable sourceStemTable, ETL etl) {
         try {
@@ -218,18 +238,35 @@ public class TableMappingServiceImpl implements TableMappingService {
 
                     if (sourceField != null && targetField != null) {
                         FieldMapping fieldMapping = new FieldMapping(
-                                sourceField,
-                                targetField,
-                                mappingMap.get(targetTableName)
+                            sourceField,
+                            targetField,
+                            mappingMap.get(targetTableName)
                         );
                         mappingMap.get(targetTableName).getFieldMappings().add(fieldMapping);
                     }
                 }
             }
+            mappingMap.clear();
             return mappings;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public void removeTableMappingsFromTable(Long etl_id, SourceTable table) {
+        for (TableMapping tableMapping : repository.findAllByEtl_Id(etl_id)) {
+            if (tableMapping.getSource() == table)
+                repository.delete(tableMapping);
+        }
+    }
+
+    @Override
+    public void removeTableMappingsToTable(Long etl_id, TargetTable table) {
+        for (TableMapping tableMapping : repository.findAllByEtl_Id(etl_id)) {
+            if (tableMapping.getTarget() == table)
+                repository.delete(tableMapping);
+        }
     }
 }

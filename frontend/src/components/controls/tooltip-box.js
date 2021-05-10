@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { makeStyles, Tooltip } from '@material-ui/core';
-import ConnectPointsWrapper from '../session/connect-point-wrapper';
+import ConnectPointsWrapper from '../procedure/connect-point-wrapper';
 
 const useStyles = makeStyles(theme => ({
     unselected: {

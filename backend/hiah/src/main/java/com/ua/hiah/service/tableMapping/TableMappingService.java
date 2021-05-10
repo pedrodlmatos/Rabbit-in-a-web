@@ -6,6 +6,7 @@ import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
+import com.ua.hiah.model.target.TargetTable;
 
 import java.util.List;
 
@@ -97,5 +98,20 @@ public interface TableMappingService {
 
     List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase sourceDatabase, TargetDatabase targetDatabase);
 
+
+    /**
+     * Creates mapping to or from a stem table (stored in file)
+     *
+     * @param version OMOP CDM version
+     * @param targetDatabase target database
+     * @param sourceStemTable stem table on EHR database
+     * @param etl ETL procedure object
+     * @return list of created table mappings
+     */
+
     List<TableMapping> createMappingsWithStemTable(CDMVersion version, TargetDatabase targetDatabase, SourceTable sourceStemTable, ETL etl);
+
+    void removeTableMappingsFromTable(Long etl_id, SourceTable table);
+
+    void removeTableMappingsToTable(Long etl_id, TargetTable table);
 }

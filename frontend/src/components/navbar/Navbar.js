@@ -5,7 +5,7 @@ import { MenuItems } from "./MenuItems";
 import './Navbar.css'
 import Home from "../home/home";
 import Sessions from "../sessionList/ProcedureList";
-import Session from "../session/Procedure";
+import Session from "../procedure/Procedure";
 
 
 export default class Navbar extends Component {

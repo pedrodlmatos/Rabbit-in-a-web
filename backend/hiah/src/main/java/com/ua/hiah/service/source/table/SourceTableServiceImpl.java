@@ -36,10 +36,23 @@ public class SourceTableServiceImpl implements SourceTableService {
     @Override
     public SourceTable changeComment(Long tableId, String comment) {
         SourceTable table = repository.findById(tableId).orElse(null);
-        if (table != null) {
+        if (table == null) return null;                                 // table not found
+        else if (table.getComment().equals(comment)) return table;      // old comment is equals to new
+        else {                                                          // new comment is different
             table.setComment(comment);
             return repository.save(table);
         }
-        return null;
+    }
+
+
+    /**
+     * Removes stem table and its mappings
+     *
+     * @param table stem table on the EHR database
+     */
+
+    @Override
+    public void removeStemTable(SourceTable table) {
+        repository.delete(table);
     }
 }

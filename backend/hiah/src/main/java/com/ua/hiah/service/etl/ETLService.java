@@ -26,7 +26,7 @@ public interface ETLService {
      * @return created ETL procedure
      */
 
-    ETL createETLSessionFromFile(MultipartFile saveFile);
+    ETL createETLProcedureFromFile(MultipartFile saveFile);
 
 
     /**
@@ -59,7 +59,25 @@ public interface ETLService {
     ETL changeTargetDatabase(Long etl_id, String cdm);
 
 
+    /**
+     * Adds stem table on EHR and on OMOP CDM database
+     *
+     * @param etl_id ETL procedure's id
+     * @return altered ETL procedure
+     */
+
     ETL addStemTable(Long etl_id);
+
+
+    /**
+     * Removes stem table from EHR and OMOP CDM database and their respective mapping
+     *
+     * @param etl_id ETL procedure's id
+     * @return altered ETL procedure
+     */
+
+    ETL removeStemTable(Long etl_id);
+
 
     /**
      * Creates the file with source fields summary
@@ -80,6 +98,14 @@ public interface ETLService {
 
     byte[] createTargetFieldListCSV(Long etl_id);
 
+
+    /**
+     * Creates the ETL procedure summary file
+     *
+     * @param id ETL procedure's id
+     * @return file content or null
+     */
+
     byte[] createWordSummaryFile(Long id);
 
 
@@ -93,4 +119,6 @@ public interface ETLService {
      */
 
     byte[] createSavingFile(String filename, Long etl_id);
+
+
 }

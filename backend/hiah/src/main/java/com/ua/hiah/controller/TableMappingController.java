@@ -96,7 +96,7 @@ public class TableMappingController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "ETL session not found",
+                    description = "Some parameters not found",
                     content = @Content
             )
     })
