@@ -1,4 +1,4 @@
-import { Grid, CircularProgress, makeStyles, Button, Menu, MenuItem, Checkbox, Divider } from '@material-ui/core'
+import { Grid, CircularProgress, makeStyles, Menu, MenuItem, Checkbox, Divider } from '@material-ui/core'
 import React, { useState, useEffect } from 'react'
 import Xarrow from 'react-xarrows/lib';
 import ETLService from '../../services/etl-list-service';
@@ -10,7 +10,9 @@ import { CDMVersions } from '../../services/CDMVersions';
 import TableMappingLogic from './table-mapping-logic';
 import SourceTableDetails from './source-table-details';
 import TargetTableDetails from './target-table-details';
-import FilesMethods from './files-methods'
+import FilesMethods from './files-methods';
+import TableOperations from './table-operations';
+import MappingOperations from './mapping-operations';
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -58,7 +60,6 @@ export default function Procedure() {
     const [mappings, setMappings] = useState([]);
     const [selectedMapping, setSelectedMapping] = useState({});
     const [showHelpModal, setShowHelpModal] = useState(false);
-    const [showFilesModal, setShowFilesModal] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     
     const [selectedTable, setSelectedTable] = useState({})
@@ -104,111 +105,11 @@ export default function Procedure() {
 
 
     /**
-     * Defines the color of a table from the EHR database according to table selection
-     *  - If no table is selected -> color = orange
-     *  - If a table from the OMOP CDM is selected -> color = orange
-     *  - If the table from the EHR database is selected:
-     *    - selected table -> color = orange
-     *    - other tables -> color = light orange
-     */
-
-    const defineSourceTableColor = (table) => {
-        if (table.stem) return "#A000A0";                                           // stem table
-        if (sourceSelected && selectedTable.id !== table.id) return "#FFD3A6";      // unselected source table (when a source table is selected)
-        else return "#FF9224";                                                      // selected source source or when none is selected
-    }
-
-
-    /**
-     * Defines the selected table and changes state of current and previous selected table.
-     *
-     *  - If no table is selected, only changes the state of the selected table
-     *  - If there is a table selected, unselect it and then select the new table changing states
-     *  - If select the table that was previous selected, unselects it
-     *
-     * @param table selected source table
-     */
-
-    const selectSourceTable = (table) => {
-        // clean state
-        setSelectedMapping({});
-        if (Object.keys(selectedTable).length === 0) {
-            // all tables are unselected
-            setSelectedTable(table);
-            setSourceSelected(true);
-            selectArrowsFromSource(table);      // change color of mappings that comes from the selected table
-            defineData(table);                  // define fields info
-        } else if (selectedTable === table) {
-            // select the same table -> unselect
-            resetArrowsColor();                 // change color of arrows to grey
-            setSourceSelected(false);     // unselect
-            setShowTableDetails(false);
-            setSelectedTable({});
-            setTableDetails(null);
-        } else {
-            // select any other source table
-            resetArrowsColor();                // change color of arrows to grey
-            setSelectedTable(table);           // change select table information
-            setSourceSelected(true);
-            selectArrowsFromSource(table);     // change color of mappings that comes from the selected table
-            defineData(table);                 // change content of fields table
-        }
-    }
-
-
-    /**
-     * Defines the selected table and changes state of current and previous selected table
-     *
-     * - If no table is selected, only changes the state of the selected table
-     * - If theres is a source table selected, creates arrow
-     * - If select the same table, unselect
-     * - Else selects a different target table
-     *
-     * @param table
-     */
-
-    const selectTargetTable = (table) => {
-        // clean state
-        setSelectedMapping({});
-        if (Object.keys(selectedTable).length === 0) {
-            // no table is selected
-            selectArrowsFromTarget(table);          // change color of mappings that goes to the selected table
-            setSelectedTable(table);                // change select table information
-            setSourceSelected(false);
-            defineData(table);                      // change content of fields table
-        } else if (selectedTable === table) {
-            // select the same table -> unselect
-            resetArrowsColor();                     // change color of arrows to grey
-            setSourceSelected(false);
-            setShowTableDetails(false);
-            setSelectedTable({});             // unselect
-            setTableDetails(null);
-        } else if (sourceSelected) {
-            // source table is selected -> create arrow
-            const source_id = selectedTable.id;
-            //resetArrowsColor();                    // change arrows color to grey
-            //setSelectedTable({})                   // unselects tables
-            createTableMapping(source_id, table.id); // create arrow
-            //setSourceSelected(false);              // clean state
-            //setShowTableDetails(false);
-            //setTableDetails(null);
-        } else {
-            // other target table is selected
-            resetArrowsColor();                      // change color of arrows to grey
-            setSelectedTable(table);                 // change select table information
-            setSourceSelected(false);
-            selectArrowsFromTarget(table);           // change color of mappings that comes from the selected table
-            defineData(table);                       // change content of fields table
-        }
-    }
-
-
-    /**
-     * Changes CDM database 
+     * Changes CDM database
      *
      * @param e change OMOP CDM event
      */
-    
+
     const handleCDMChange = e => {
         setLoading(true);
         if (Object.keys(selectedTable).length > 0) {
@@ -233,6 +134,90 @@ export default function Procedure() {
 
 
     /**
+     * Defines the selected table and changes state of current and previous selected table.
+     *
+     *  - If no table is selected, only changes the state of the selected table
+     *  - If there is a table selected, unselect it and then select the new table changing states
+     *  - If select the table that was previous selected, unselects it
+     *
+     * @param table selected source table
+     */
+
+    const selectSourceTable = (table) => {
+        // clean state
+        setSelectedMapping({});
+        if (Object.keys(selectedTable).length === 0) {
+            // all tables are unselected
+            setSelectedTable(table);
+            setSourceSelected(true);
+            MappingOperations.selectArrowsFromSource(mappings, table);      // change color of mappings that comes from the selected table
+            defineData(table);                                              // define fields info
+        } else if (selectedTable === table) {
+            // select the same table -> unselect
+            MappingOperations.resetArrowsColor(mappings);                   // change color of arrows to grey
+            setSourceSelected(false);                                 // unselect
+            setShowTableDetails(false);
+            setSelectedTable({});
+            setTableDetails(null);
+        } else {
+            // select any other source table
+            MappingOperations.resetArrowsColor(mappings);                   // change color of arrows to grey
+            setSelectedTable(table);                                        // change select table information
+            setSourceSelected(true);
+            MappingOperations.selectArrowsFromSource(mappings, table);      // change color of mappings that comes from the selected table
+            defineData(table);                                              // change content of fields table
+        }
+    }
+
+
+    /**
+     * Defines the selected table and changes state of current and previous selected table
+     *
+     * - If no table is selected, only changes the state of the selected table
+     * - If theres is a source table selected, creates arrow
+     * - If select the same table, unselect
+     * - Else selects a different target table
+     *
+     * @param table
+     */
+
+    const selectTargetTable = (table) => {
+        // clean state
+        setSelectedMapping({});
+        if (Object.keys(selectedTable).length === 0) {
+            // no table is selected
+            MappingOperations.selectArrowsFromTarget(mappings, table);          // change color of mappings that goes to the selected table
+            setSelectedTable(table);                                            // change select table information
+            setSourceSelected(false);
+            defineData(table);                                                  // change content of fields table
+        } else if (selectedTable === table) {
+            // select the same table -> unselect
+            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
+            setSourceSelected(false);
+            setShowTableDetails(false);
+            setSelectedTable({});                                         // unselect
+            setTableDetails(null);
+        } else if (sourceSelected) {
+            // source table is selected -> create arrow
+            const source_id = selectedTable.id;
+            //resetArrowsColor();                                               // change arrows color to grey
+            //setSelectedTable({})                                              // unselects tables
+            createTableMapping(source_id, table.id);                            // create arrow
+            //setSourceSelected(false);                                         // clean state
+            //setShowTableDetails(false);
+            //setTableDetails(null);
+        } else {
+            // other target table is selected
+            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
+            setSelectedTable(table);                                            // change select table information
+            setSourceSelected(false);
+            MappingOperations.selectArrowsFromTarget(mappings, table);          // change color of mappings that comes from the selected table
+            defineData(table);                                                  // change content of fields table
+        }
+    }
+
+
+    /**
      * Opens the operations menu
      * 
      * @param {*} event 
@@ -249,21 +234,6 @@ export default function Procedure() {
     
     const closeOperationsMenu = () => {
         setAnchorEl(null);
-    }
-
-
-    /**
-     * Verifies if there is a stem table
-     *
-     * @returns {boolean}
-     */
-
-    const hasStemTable = () => {
-        let result = false;
-        etl.sourceDatabase.tables.forEach(table => {
-            if (table.stem) result = true;
-        })
-        return result;
     }
 
 
@@ -295,6 +265,9 @@ export default function Procedure() {
         })
     }
 
+    /**
+     * Removes stem table from both databases
+     */
 
     const removeStemTable = () => {
         ETLService.removeStemTables(etl.id).then(response => {
@@ -323,60 +296,6 @@ export default function Procedure() {
 
 
     /**
-     * Defines the color of a table mapping
-     * 
-     * @param {*} mapping table mapping
-     * @returns string
-     */
-
-    const defineArrowColor = (mapping) => {
-        if (Object.keys(selectedTable).length === 0) return mapping.complete ? 'black' : 'grey'         // if table mapping is complete, color is black, grey otherwise
-        else if (selectedTable.id === mapping.source.id) return 'orange';                               // orange if mapping starts in selected table
-        else if (selectedTable.id === mapping.target.id) return 'blue';                                 // blue if mapping ends in selected table
-        else return 'grey';                                                                             // grey otherwise
-    }
-
-
-    /**
-     * Changes color from arrows that start in selected table and makes the
-     * other lighter
-     * 
-     * @param {*} table selected table
-     */
-
-    const selectArrowsFromSource = (table) => {
-        mappings.forEach(element => {
-            element.color = element.start.name === table.name ? 'orange' : 'lightgrey';
-        })
-    }
-
-
-    /**
-     * Changes color from arrows that end in selected table and makes the
-     * other lighter
-     * 
-     * @param {*} table selected table
-     */
-
-    const selectArrowsFromTarget = (table) => {
-        mappings.forEach(element => {
-            element.color = element.end.name === table.name ? 'blue' : 'lightgrey';
-        })
-    }
-
-
-    /**
-     * Unselects all arrows (changes color to grey)
-     */
-
-    const resetArrowsColor = () => {
-        mappings.forEach(element => {
-            element.color = element.complete ? 'black' : 'grey'
-        })
-    }
-
-
-    /**
      * Selects an arrow (changes its color to red)
      *  - If no arrow is previously selected, only selects an arrow
      *  - If selects the arrow previously selected, unselect it
@@ -387,7 +306,7 @@ export default function Procedure() {
 
     const selectArrow = (arrow) => {
         // change color to grey
-        resetArrowsColor();
+        MappingOperations.resetArrowsColor(mappings);
         // clean state
         setSelectedTable({});
         setSourceSelected(false);
@@ -403,17 +322,16 @@ export default function Procedure() {
         } else if(selectedMapping === arrow) {
             // select the arrow previous selected to unselect
             setSelectedMapping({});
-            resetArrowsColor();
+            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
         } else {
             // select any other unselected arrow
-            resetArrowsColor();                 // unselect previous
+            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
             let arrows = mappings;              // select a new one
             arrows[index].color = "red";        // change to red the selected table mapping
             setSelectedMapping(arrow);
             setMappings(arrows);
         }
     }
-
 
 
     /**
@@ -431,7 +349,7 @@ export default function Procedure() {
                 end: res.data.target,
                 complete: res.data.complete,
                 logic: res.data.logic,
-                color: defineArrowColor(res.data)
+                color: MappingOperations.defineArrowColor(selectedTable, res.data)
             }
             setMappings([arrow].concat(mappings));
         }).catch(err => {
@@ -469,7 +387,7 @@ export default function Procedure() {
                     start: item.source,
                     end: item.target,
                     complete: item.complete,
-                    color: defineArrowColor(item)
+                    color: MappingOperations.defineArrowColor(selectedTable, item)
                 }
                 maps = maps.concat(arrow);
             });
@@ -491,12 +409,13 @@ export default function Procedure() {
 
 
     /**
-     * 
-     * @param {*} tableMappingId 
-     * @param {*} completion 
+     * Changes arrow color according to table mapping completion status
+     *
+     * @param tableMappingId table mapping's id
+     * @param completion table mapping completion status
      */
 
-    const changeCompleteStatus = (tableMappingId, completion) => {
+    const getCompleteStatus = (tableMappingId, completion) => {
         mappings.forEach(map => {
             if (map.id === tableMappingId) {
                 map.color = completion ? "black" : "grey";
@@ -564,8 +483,8 @@ export default function Procedure() {
 
     /**
      * Verifies if a source table is connect to a target table
-     * 
-     * @param {*} targetTable target table
+     *
+     * @param {*} targetTable_id target table's id
      * @returns true if are connect, false otherwise
      */
 
@@ -588,7 +507,7 @@ export default function Procedure() {
 
     const connectToTargetTable = e => {
         const targetTable_id = e.target.value[0];
-        
+
         if (connectedToTarget(targetTable_id)) {
             mappings.forEach(item => {
                 if (item.end.id === targetTable_id && item.start.id === selectedTable.id) {
@@ -603,7 +522,7 @@ export default function Procedure() {
 
     /**
      * Verifies if a target table is connected to a source table
-     * 
+     *
      * @param {*} sourceTable_id source table id
      * @returns true if they are connected, false otherwise
      */
@@ -626,7 +545,7 @@ export default function Procedure() {
 
     const connectToSourceTable = e => {
         const sourceTable_id = e.target.value[0];
-        
+
         if (connectedToSource(sourceTable_id)) {
             mappings.forEach(item => {
                 if (item.start.id === sourceTable_id && item.end.id === selectedTable.id) {
@@ -655,40 +574,6 @@ export default function Procedure() {
         });
     }
 
-    /**
-     *
-     *
-
-    const fetchSourceFieldsFile = () => {
-        ETLService.downloadSourceFieldsFile(etl.id).then(response => {
-            let blob = new Blob([response.data], { type: 'application/csv', name: 'source_fields.csv' });
-            saveAs(blob, 'source_fields.csv');
-        }).catch(e => console.log(e));
-    }
-
-
-    const fetchTargetFieldsFile = () => {
-        ETLService.downloadTargetFieldsFile(etl.id).then(response => {
-            let blob = new Blob([response.data], { type: 'application/csv', name: 'target_fields.csv' });
-            saveAs(blob, 'target_fields.csv');
-        })
-    }
-
-
-    const fetchSaveFile = () => {
-        ETLService.downloadSaveFile(etl.id).then(response => {
-            let blob = new Blob([JSON.stringify(response.data)], { type: 'application/json', name: 'Scan.json' });
-            saveAs(blob, 'Scan.json');
-        })
-    }
-
-    const fetchSummaryFile = () => {
-        ETLService.downloadSummaryFile(etl.id).then(response => {
-            let blob = new Blob([response.data], { type: 'application/octet-stream' });
-            saveAs(blob, 'table_mappings.docx');
-        })
-    }*/
-
 
     return(
         <div className={classes.tablesArea}>
@@ -708,7 +593,11 @@ export default function Procedure() {
                                 {/* Stem Tables (add/remove) */}
                                 <MenuItem>
                                     Stem tables
-                                    <Checkbox edge="end" checked={hasStemTable()} onChange={hasStemTable() ? () => removeStemTable() : () => addStemTable()} />
+                                    <Checkbox
+                                        edge="end"
+                                        checked={TableOperations.hasStemTable(etl.sourceDatabase.tables)}
+                                        onChange={TableOperations.hasStemTable(etl.sourceDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
+                                    />
                                 </MenuItem>
                                 <Divider />
                                 {/*  */}
@@ -780,7 +669,7 @@ export default function Procedure() {
                                             clicked={selectedTable.id === item.id}
                                             help="Select first an EHR table and then an OMOP CDM table" 
                                             position="right-end"
-                                            color={defineSourceTableColor(item)}
+                                            color={TableOperations.defineSourceTableColor(sourceSelected, selectedTable, item)}
                                             border="#000000"
                                             handleSelection={selectSourceTable}
                                             createMapping={createTableMapping}
@@ -828,7 +717,7 @@ export default function Procedure() {
                                 closeModal={closeFieldMappingModal}
                                 mappingId={selectedMapping.id}
                                 removeTableMapping={removeTableMapping}
-                                changeMappingCompletion={changeCompleteStatus}
+                                changeMappingCompletion={getCompleteStatus}
                             />
                         </Grid>
                     </Grid>
