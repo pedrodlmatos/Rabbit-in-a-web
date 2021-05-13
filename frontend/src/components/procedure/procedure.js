@@ -588,57 +588,40 @@ export default function Procedure() {
                             </Grid>
 
                             {/* Menu (with files, add/remove stem tables) */}
-                            <Controls.Button text="Menu" aria-controls="simple-menu" aria-haspopup={true} onClick={openOperationsMenu} />
-                            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={closeOperationsMenu}>
-                                {/* Stem Tables (add/remove) */}
-                                <MenuItem>
-                                    Stem tables
-                                    <Checkbox
-                                        edge="end"
-                                        checked={TableOperations.hasStemTable(etl.sourceDatabase.tables)}
-                                        onChange={TableOperations.hasStemTable(etl.sourceDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
-                                    />
-                                </MenuItem>
-                                <Divider />
-                                {/*  */}
-                                <MenuItem onClick={() => FilesMethods.fetchSourceFieldsFile(etl.id)}>Source fields list</MenuItem>
-                                <MenuItem onClick={() => FilesMethods.fetchTargetFieldsFile(etl.id)}>Target field list</MenuItem>
-                                <MenuItem onClick={() => FilesMethods.fetchSummaryFile(etl.id)}>Summary</MenuItem>
-                                <Divider />
-                                <MenuItem onClick={() => FilesMethods.fetchSaveFile(etl.id)}>Save session to file</MenuItem>
-                            </Menu>
-
-                            {/*
                             <Grid item xs={2} sm={2} md={2} lg={2}>
-                                <Controls.Button text="Help " onClick={() => setShowHelpModal(true)}>
-                                    <i className="fa fa-info"/>
-                                </Controls.Button>
-                                <HelpModal modalIsOpen={showHelpModal} closeModal={() => setShowHelpModal(false)}/>
+                                <Controls.Button text="Menu" aria-controls="simple-menu" aria-haspopup={true} onClick={openOperationsMenu} />
+                                <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={closeOperationsMenu}>
+                                    {/* Stem Tables (add/remove) */}
+                                    <MenuItem>
+                                        Stem tables
+                                        <Checkbox
+                                            edge="end"
+                                            checked={TableOperations.hasStemTable(etl.sourceDatabase.tables)}
+                                            onChange={TableOperations.hasStemTable(etl.sourceDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
+                                        />
+                                    </MenuItem>
+                                    <Divider />
+                                    {/*  */}
+                                    <MenuItem onClick={() => FilesMethods.fetchSourceFieldsFile(etl.id)}>Source fields list</MenuItem>
+                                    <MenuItem onClick={() => FilesMethods.fetchTargetFieldsFile(etl.id)}>Target field list</MenuItem>
+                                    <MenuItem onClick={() => FilesMethods.fetchSummaryFile(etl.id)}>Summary</MenuItem>
+                                    <Divider />
+                                    <MenuItem onClick={() => FilesMethods.fetchSaveFile(etl.id)}>Save session to file</MenuItem>
+                                </Menu>
                             </Grid>
 
-                            <Grid item xs={2} sm={2} md={2} lg={2}>
-                                <Controls.Button text="Files" onClick={() => setShowFilesModal(true)} />
-                                <FilesModal etl_id={etl.id} openModal={showFilesModal} closeModal={() => setShowFilesModal(false)} />
-                            </Grid>
-
-
+                            {/* If a table mapping is selected, allow to remove */}
                             { Object.keys(selectedMapping).length !== 0 ? (
                                 <Grid item xs={2} sm={2} md={2} lg={2}>
-                                    <Controls.Button  
-                                        color="secondary" 
-                                        text="Remove" 
-                                        onClick={removeTableMapping} 
+                                    <Controls.Button
+                                        color="secondary"
+                                        text="Remove"
+                                        onClick={removeTableMapping}
                                     />
                                 </Grid>
                             ) : (
-                                <Grid item xs={2} sm={2} md={2} lg={2}>
-                                    <Controls.Button
-                                        color="primary"
-                                        text="Add stem table"
-                                        onClick={addStemTable}
-                                    />
-                                </Grid>
-                            ) }*/}
+                                <></>
+                            )}
                         </Grid>
                             
                         <Grid className={classes.databaseNames} container>
