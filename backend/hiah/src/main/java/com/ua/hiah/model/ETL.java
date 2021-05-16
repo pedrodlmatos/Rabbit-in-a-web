@@ -2,6 +2,7 @@ package com.ua.hiah.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.gson.annotations.Expose;
+import com.ua.hiah.model.auth.User;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.views.Views;
@@ -27,6 +28,14 @@ public class ETL {
     @Expose
     private String name;
 
+    @ManyToMany
+    @JoinTable(
+            name = "etl_users",
+            joinColumns = @JoinColumn(name = "etl_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> users;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id")
     @JsonView(Views.ETLSessionsList.class)
@@ -46,6 +55,7 @@ public class ETL {
 
     // CONSTRUCTORS
     public ETL() {
+        this.users = new ArrayList<>();
         this.tableMappings = new ArrayList<>();
     }
 
@@ -90,6 +100,13 @@ public class ETL {
         this.tableMappings = tableMappings;
     }
 
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
 
     @Override
     public String toString() {

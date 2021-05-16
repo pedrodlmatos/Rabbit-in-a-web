@@ -1,6 +1,7 @@
 package com.ua.hiah.service.etl;
 
 import com.ua.hiah.model.ETL;
+import com.ua.hiah.model.auth.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -13,20 +14,22 @@ public interface ETLService {
      * @param ehrName EHR database name
      * @param ehrScan EHR Scan report
      * @param cdm OMOP CDM version
+     * @param username
      * @return created ETL procedure
      */
 
-    ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm);
+    ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm, User username);
 
 
     /**
      * Creates an ETL procedure from the save file created
      *
      * @param saveFile JSON file containing info about an ETL procedure
+     * @param user
      * @return created ETL procedure
      */
 
-    ETL createETLProcedureFromFile(MultipartFile saveFile);
+    ETL createETLProcedureFromFile(MultipartFile saveFile, User user);
 
 
     /**
@@ -36,6 +39,9 @@ public interface ETLService {
      */
 
     List<ETL> getAllETL();
+
+
+    List<ETL> getETLByUsername(User username);
 
 
     /**
@@ -119,6 +125,4 @@ public interface ETLService {
      */
 
     byte[] createSavingFile(String filename, Long etl_id);
-
-
 }

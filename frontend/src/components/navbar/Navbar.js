@@ -4,7 +4,7 @@ import Documentation from "../documentation/Documentation";
 import { MenuItems } from "./MenuItems";
 import './Navbar.css'
 import Home from "../home/home";
-import Sessions from "../sessionList/ProcedureList";
+import Sessions from "../sessionList/AdminProcedureList";
 import Session from "../procedure/Procedure";
 
 

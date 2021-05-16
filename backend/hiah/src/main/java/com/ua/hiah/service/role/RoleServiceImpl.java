@@ -19,7 +19,7 @@ public class RoleServiceImpl implements RoleService{
     @Override
     public void createRoles() {
 
-        if (repository.count() > 0) {
+        if (repository.count() == 0) {
             logger.info("ROLE SERVICE - Loading database with services");
             for (RoleEnum role : RoleEnum.values())
                 repository.save(new Role(role));

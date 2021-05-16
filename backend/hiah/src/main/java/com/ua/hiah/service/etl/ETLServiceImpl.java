@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
+import com.ua.hiah.model.auth.User;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
@@ -54,16 +55,18 @@ public class ETLServiceImpl implements ETLService {
      * @param ehrName EHR database name
      * @param ehrScan EHR Scan report
      * @param cdm OMOP CDM version
+     * @param user
      * @return created ETL procedure
      */
 
     @Override
-    public ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm) {
+    public ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm, User user) {
         if (targetDatabaseService.CDMExists(cdm)) {
             ETL etl = new ETL();
             etl.setName("ETL procedure " + etlRepository.count());
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
             etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromScanReport(ehrName, ehrScan));
+            etl.getUsers().add(user);
             return etlRepository.save(etl);
         }
         return null;
@@ -74,11 +77,12 @@ public class ETLServiceImpl implements ETLService {
      * Creates an ETL procedure from the save file created
      *
      * @param saveFile JSON file containing info about an ETL procedure
+     * @param user
      * @return created ETL procedure
      */
 
     @Override
-    public ETL createETLProcedureFromFile(MultipartFile saveFile) {
+    public ETL createETLProcedureFromFile(MultipartFile saveFile, User user) {
         try {
             // write content in a file object
             File tempSaveFile = new File("tempSave.json");
@@ -110,6 +114,9 @@ public class ETLServiceImpl implements ETLService {
             List<TableMapping> mappings = mappingService.getTableMappingsFromJSON(response, request.getTableMappings(), source, target);
             response.setTableMappings(mappings);
 
+            // add user to etl object
+            response.getUsers().add(user);
+
             // delete file object
             if (tempSaveFile.delete()) { }
 
@@ -132,6 +139,19 @@ public class ETLServiceImpl implements ETLService {
     @Override
     public List<ETL> getAllETL() {
         return etlRepository.findAll();
+    }
+
+
+    /**
+     *
+     *
+     * @param user
+     * @return
+     */
+
+    @Override
+    public List<ETL> getETLByUsername(User user) {
+        return etlRepository.findAllByUsersContaining(user);
     }
 
 

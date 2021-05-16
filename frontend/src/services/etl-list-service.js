@@ -23,6 +23,21 @@ class ETLService {
 
 
     /**
+     *
+     */
+
+    getUserETL = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        try {
+            return axios.get(API_URL + "user_procedures", { headers: authHeader(), params: { username: user.username } });
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+
+    /**
      * Sends GET request to API to retrieve procedure given its Id
      * 
      * @param {*} id ETL procedure's id
@@ -49,11 +64,13 @@ class ETLService {
      */
     
     createETL = async (name, file, cdm) => {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+
         let formData = new FormData();
         formData.append("file", file);
         
         try {
-            return await axios.post(API_URL + "procedures", formData, { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm } });
+            return await axios.post(API_URL + "procedures", formData, { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm, username: username } });
         } catch (e) {
             console.log(e);
         }
@@ -118,6 +135,8 @@ class ETLService {
     removeStemTables (etl) {
         return axios.put(API_URL + "procedures/remove_stem", null, { headers: authHeader(), params:{etl: etl }});
     }
+
+
 }
 
 export default new ETLService();

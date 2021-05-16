@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-export default function ProcedureList() {
+export default function UserProcedureList() {
 
     const classes = useStyles();
     const [loading, setLoading] = useState(true);
@@ -46,9 +46,9 @@ export default function ProcedureList() {
     /**
      * Sends GET request to API to retrieve all ETL procedures
      */
-    
+
     useEffect(() => {
-        ETLService.getAllETL().then(response => {
+        ETLService.getUserETL().then(response => {
             setProcedures(response.data);
             setLoading(false);
         }).catch(response => {
@@ -94,7 +94,7 @@ export default function ProcedureList() {
     /**
      * Sends POST request to API to create a new ETL procedure
      * Disables buttons
-     * 
+     *
      * @param {*} values form values (file and OMOP CDM)
      */
 
@@ -130,7 +130,7 @@ export default function ProcedureList() {
 
     /**
      * Closes ETL procedure creation modal and reset its form
-     * 
+     *
      * @param {*} resetForm function to reset form
      */
 

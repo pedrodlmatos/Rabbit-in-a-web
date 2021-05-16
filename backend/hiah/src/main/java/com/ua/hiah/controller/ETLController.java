@@ -2,6 +2,8 @@ package com.ua.hiah.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
+import com.ua.hiah.model.auth.User;
+import com.ua.hiah.repository.auth.UserRepository;
 import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +37,9 @@ public class ETLController {
 
     @Autowired
     ETLService etlService;
+
+    @Autowired
+    UserRepository userRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(ETLController.class);
 
@@ -56,6 +62,7 @@ public class ETLController {
     })
     @GetMapping("/procedures")
     @JsonView(Views.ETLSessionsList.class)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllETLs() {
         logger.info("ETL CONTROLLER - Requesting all ETL procedures");
 
@@ -65,6 +72,22 @@ public class ETLController {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/user_procedures")
+    @JsonView(Views.ETLSessionsList.class)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getUserETLs(@Param("username") String username) {
+        logger.info("ETL CONTROLLER - Requesting ETL procedures of user " + username);
+
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            List<ETL> response = etlService.getETLByUsername(user);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
 
@@ -136,12 +159,22 @@ public class ETLController {
             )
     })
     @PostMapping(value = "/procedures", consumes = "multipart/form-data")
-    public ResponseEntity<?> createETLProcedure(@Param(value = "name") String name, @RequestParam("file") MultipartFile file, @Param(value = "cdm") String cdm) {
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> createETLProcedure(
+            @Param(value = "name") String name,
+            @RequestParam("file") MultipartFile file,
+            @Param(value = "cdm") String cdm,
+            @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Creating new ETL procedure");
-        ETL etl = etlService.createETLProcedure(name, file, cdm);
-        if (etl == null)
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(etl.getId(), HttpStatus.CREATED);
+
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            ETL etl = etlService.createETLProcedure(name, file, cdm, user);
+            if (etl != null)
+                return new ResponseEntity<>(etl.getId(), HttpStatus.CREATED);
+
+        }
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
 
@@ -169,14 +202,18 @@ public class ETLController {
             )
     })
     @PostMapping(value = "/procedures/save", consumes = "multipart/form-data")
-    public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file) {
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file, @Param("username") String username) {
         logger.info("ETL CONTROLLER - Creating ETL session from file");
-        ETL etl = etlService.createETLProcedureFromFile(file);
 
-        if (etl == null)
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            ETL etl = etlService.createETLProcedureFromFile(file, user);
+            if (etl != null)
+                return new ResponseEntity<>(etl.getId(), HttpStatus.CREATED);
+        }
 
-        return new ResponseEntity<>(etl.getId(), HttpStatus.CREATED);
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
     // TODO: create ETL session with a custom OMOP CDM file
