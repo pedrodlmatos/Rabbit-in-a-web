@@ -37,6 +37,17 @@ class ETLService {
     }
 
 
+    
+    deleteETLProcedure(id) {
+        try {
+            return axios.delete(API_URL + "procedures", { headers: authHeader(), params: {etl_id: id }});
+            //return axios.get(API_URL + 'procedures', { headers: authHeader() })
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
+
     /**
      * Sends GET request to API to retrieve procedure given its Id
      * 
@@ -80,9 +91,10 @@ class ETLService {
     createETLFromFile = async (file) => {
         let formData = new FormData();
         formData.append("file", file);
+        const username = JSON.parse(localStorage.getItem('user')).username;
 
         try {
-            return await axios.post(API_URL + "procedures/save", formData, { headers: authHeaderMultiPart() });
+            return await axios.post(API_URL + "procedures/save", formData, { headers: authHeaderMultiPart(), params: {username: username} });
         } catch(e) {
             console.log(e);
         }

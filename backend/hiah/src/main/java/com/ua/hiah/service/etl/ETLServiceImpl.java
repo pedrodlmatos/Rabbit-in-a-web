@@ -143,15 +143,35 @@ public class ETLServiceImpl implements ETLService {
 
 
     /**
+     * Retrieves list of ETL procedures managed by user
      *
-     *
-     * @param user
-     * @return
+     * @param user user
+     * @return list of ETL procedures
      */
 
     @Override
     public List<ETL> getETLByUsername(User user) {
         return etlRepository.findAllByUsersContaining(user);
+    }
+
+
+    /**
+     * Deletes ETL procedure given its id
+     *
+     * @param etl_id ETL procedure's id
+     * @return ETL object or null if not found
+     */
+
+    @Override
+    public ETL deleteETLProcedure(Long etl_id) {
+        ETL etl = etlRepository.findById(etl_id).orElse(null);
+
+        if (etl != null) {
+            etlRepository.delete(etl);
+            return etl;
+        }
+
+        return null;
     }
 
 

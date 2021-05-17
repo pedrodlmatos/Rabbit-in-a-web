@@ -19,7 +19,7 @@ public class SourceDatabase {
     private Long id;
 
     @Column(name = "database_name")
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private String databaseName;
 

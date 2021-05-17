@@ -1,6 +1,6 @@
 import React from "react";
 import { makeStyles, Card, CardActions, CardContent, Button, Typography } from '@material-ui/core';
-import { CDMVersions } from "../../services/CDMVersions";
+import { CDMVersions } from "../../../services/CDMVersions";
 
 
 const useStyles = makeStyles(theme => ({

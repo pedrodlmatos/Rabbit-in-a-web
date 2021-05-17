@@ -20,11 +20,11 @@ public class ETL {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     private Long id;
 
     @Column(name = "name", nullable = false)
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private String name;
 
@@ -34,22 +34,23 @@ public class ETL {
             joinColumns = @JoinColumn(name = "etl_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonView(Views.AdminETLProcedureList.class)
     private List<User> users;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id")
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private SourceDatabase sourceDatabase;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id")
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private TargetDatabase targetDatabase;
 
     @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private List<TableMapping> tableMappings;
 

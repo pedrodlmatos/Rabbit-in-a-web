@@ -29,7 +29,7 @@ public class TargetDatabase {
     private CDMVersion version;
 
     @Column(name = "database_name", nullable = false)
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private String databaseName;
 

@@ -3,11 +3,11 @@ import { makeStyles, Grid, CircularProgress, IconButton, Divider } from '@materi
 import AddIcon from '@material-ui/icons/Add';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ProcedureCard from "./procedure-card";
-import ETLService from "../../services/etl-list-service";
-import Controls from '../controls/controls';
-import CreateETLForm from '../forms/create-etl/create-new-etl-form';
-import ETLModal from '../modals/create-etl/etl-modal'
-import CreateETLFromFileForm from '../forms/create-etl/create-from-file-form'
+import ETLService from "../../../services/etl-list-service";
+import Controls from '../../controls/controls';
+import CreateETLForm from '../../forms/create-etl/create-new-etl-form';
+import ETLModal from '../../modals/create-etl/etl-modal'
+import CreateETLFromFileForm from '../../forms/create-etl/create-from-file-form'
 
 const useStyles = makeStyles(theme => ({
     pageContainer: {

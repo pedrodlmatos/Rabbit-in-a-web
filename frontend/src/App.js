@@ -3,12 +3,12 @@ import './App.css';
 import AuthService from './services/auth-service';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import Home from "./components/home/home";
-import AdminProcedureList from './components/procedure-list/admin-procedure-list';
+import AdminProcedureList from './components/procedure-list/admin-procedure-list/admin-procedure-list';
 import Procedure from "./components/procedure/procedure";
 import Documentation from "./components/documentation/Documentation";
 import Login from './components/users/login/login'
 import Register from './components/users/register/Register'
-import UserProcedureList from './components/procedure-list/user-procedure-list'
+import UserProcedureList from './components/procedure-list/user-procedure-list/user-procedure-list'
 
 class App extends Component {
 

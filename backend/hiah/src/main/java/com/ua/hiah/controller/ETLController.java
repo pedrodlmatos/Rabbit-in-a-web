@@ -18,14 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -61,7 +54,7 @@ public class ETLController {
             )
     })
     @GetMapping("/procedures")
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView(Views.AdminETLProcedureList.class)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllETLs() {
         logger.info("ETL CONTROLLER - Requesting all ETL procedures");
@@ -75,6 +68,29 @@ public class ETLController {
     }
 
 
+    /**
+     * Gets all ETL procedures of a given user
+     *
+     * @param username user's username
+     * @return list of ETL procedures
+     */
+
+    @Operation(summary = "Retrieve all ETL sessions of a given user")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL procedures returned",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ETL.class))
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "User not found",
+                    content = @Content
+            )
+    })
     @GetMapping("/user_procedures")
     @JsonView(Views.ETLSessionsList.class)
     @PreAuthorize("hasRole('USER')")
@@ -89,6 +105,24 @@ public class ETLController {
 
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
+
+
+
+    @DeleteMapping("/procedures")
+    @JsonView(Views.ETLSessionsList.class)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteETLProcedure(@Param("etl_id") Long etl_id) {
+        logger.info("ETL CONTROLLER - Deleting ETL procedure with id " + etl_id);
+
+        ETL etl = etlService.deleteETLProcedure(etl_id);
+        if (etl != null) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+
 
 
     /**

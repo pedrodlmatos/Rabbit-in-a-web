@@ -41,7 +41,24 @@ public interface ETLService {
     List<ETL> getAllETL();
 
 
-    List<ETL> getETLByUsername(User username);
+    /**
+     * Retrieves list of ETL procedures managed by user
+     *
+     * @param user user
+     * @return list of ETL procedures
+     */
+
+    List<ETL> getETLByUsername(User user);
+
+
+    /**
+     * Deletes ETL procedure given its id
+     *
+     * @param etl_id ETL procedure's id
+     * @return ETL object or null if not found
+     */
+
+    ETL deleteETLProcedure(Long etl_id);
 
 
     /**
@@ -125,4 +142,6 @@ public interface ETLService {
      */
 
     byte[] createSavingFile(String filename, Long etl_id);
+
+
 }
