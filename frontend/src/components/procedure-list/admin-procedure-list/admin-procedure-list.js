@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles, CircularProgress, withStyles, Table, TableBody, TableContainer, TableCell, TableRow, Paper, TableHead } from '@material-ui/core'
+import { makeStyles, createStyles, CircularProgress, withStyles, Table, TableBody, TableContainer, TableCell, TableRow, Paper, TableHead, TableSortLabel } from '@material-ui/core'
 import ETLService from "../../../services/etl-list-service";
 import { CDMVersions } from '../../../services/CDMVersions';
 import Controls from '../../controls/controls';
@@ -10,7 +10,7 @@ const StyledTableCell = withStyles((theme) => ({
         color: theme.palette.common.white
     },
     body: {
-        fontSize: 14
+        fontSize: 14,
     }
 }))(TableCell);
 
@@ -21,6 +21,26 @@ const StyledTableRow = withStyles((theme) => ({
         }
     }
 }))(TableRow)
+
+
+const StyledTableSortLabel = withStyles((theme) =>
+    createStyles({
+        root: {
+            color: 'white',
+            "&:hover": {
+                color: 'white',
+            },
+            '&$active': {
+                color: 'white',
+            },
+        },
+        active: {},
+        icon: {
+            color: 'inherit !important'
+        },
+    })
+)(TableSortLabel);
+
 
 const useStyles = makeStyles(theme => ({
     pageContainer: {
@@ -53,6 +73,9 @@ export default function AdminProcedureList() {
     const [loading, setLoading] = useState(true);
     const [procedures, setProcedures] = useState([]);
     const [loadingDelete, setLoadingDelete] = useState(false);
+    
+    const [sortBy, setSortBy] = useState("omop");
+    const [sortOrder, setSortOrder] = useState("desc");
 
     const columns = React.useMemo(() => [
         { Header: 'Name', accessor: 'field' },
@@ -71,7 +94,7 @@ export default function AdminProcedureList() {
     useEffect(() => {
         ETLService.getAllETL().then(response => {
             setProcedures(response.data);
-            setLoading(false);
+            setLoading(false);            
         }).catch(response => {
             console.log(response);
         })
@@ -79,13 +102,54 @@ export default function AdminProcedureList() {
 
 
     const deleteETLProcedure = (id) => {
-        setLoadingDelete(true);
         ETLService.deleteETLProcedure(id).then(response => {
             const index = procedures.findIndex(x => x.id === id);
-            const etl = procedures.splice(index, 1);
+            procedures.splice(index, 1);
             setLoadingDelete(false);
-            setProcedures(etl);
         }).catch(e => { console.log(e)})
+    }
+
+
+    const sortData = (paramSort, sortOrder) => {
+        let itemsToSort = JSON.parse(JSON.stringify(procedures));
+        let sortedItems = [];
+        let compareFn = null;
+        
+        switch (paramSort) {
+            case "omop":
+                compareFn = (i, j) => {
+                    let cdmIndexI = CDMVersions.findIndex(function(item) { return item.id === i.targetDatabase.databaseName});
+                    let cdmIndexJ = CDMVersions.findIndex(function(item) { return item.id === j.targetDatabase.databaseName});
+                    if (cdmIndexI < cdmIndexJ)
+                        return sortOrder === "desc" ? -1 : 1;
+                    else if (cdmIndexI > cdmIndexJ)
+                        return sortOrder === "desc" ? 1 : -1;
+                    else
+                        return 0;
+                }
+                break;
+            default:
+                break;
+        }
+
+        sortedItems = itemsToSort.sort(compareFn);
+        return sortedItems;
+    }
+
+
+    const requestSort = (paramToSort) => {        
+        if (paramToSort === sortBy) {
+            // change sort order
+            setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+        } else {
+            // change param sorted by
+            setSortBy(paramToSort);
+            setSortOrder("desc");
+        }
+        let sortedProcedures = sortData(sortBy, sortOrder);
+        setProcedures(sortedProcedures);
+        
+
     }
 
 
@@ -101,18 +165,31 @@ export default function AdminProcedureList() {
                         <Table stickyHeader aria-label="customized table">
                             <TableHead>
                                 <TableRow>
-                                    {columns.map(column => (
-                                        <StyledTableCell align="left">
-                                            {column.Header}
-                                        </StyledTableCell>
-                                    ))}
+                                    <StyledTableCell>Name</StyledTableCell>
+
+                                    <StyledTableCell>EHR Database</StyledTableCell>
+
+                                    <StyledTableCell>
+                                        <StyledTableSortLabel
+                                            active={sortBy === "omop"}
+                                            direction={sortOrder}
+                                            onClick={() => requestSort("omop")}
+                                        >
+                                        </StyledTableSortLabel>
+                                        OMOP CDM
+                                    </StyledTableCell>
+
+                                    <StyledTableCell>Users</StyledTableCell>
+                                    
+                                    <StyledTableCell />
+                                    <StyledTableCell />
                                 </TableRow>
                             </TableHead>
 
                             <TableBody>
-                                {procedures.map(procedure => {
+                                {procedures.map((procedure, i) => {
                                     return(
-                                        <StyledTableRow>
+                                        <StyledTableRow key={i}>
                                             <StyledTableCell component="th" scope="row" align="left">
                                                 {procedure.name}
                                             </StyledTableCell>
@@ -125,22 +202,23 @@ export default function AdminProcedureList() {
                                                 {CDMVersions.filter(function(cdm) { return cdm.id === procedure.targetDatabase.databaseName })[0].name}
                                             </StyledTableCell>
                                             
-                                            <StyledTableCell component="th" scope="row" align="left">{procedure.name}</StyledTableCell>
+                                            <StyledTableCell component="th" scope="row" align="left">
+                                                {procedure.name}
+                                            </StyledTableCell>
 
                                             <StyledTableCell component="th" scope="row" align="left">
                                                 <Controls.Button text="Access" />
                                             </StyledTableCell>
 
                                             <StyledTableCell component="th" scope="row" align="left">
-                                                <Controls.Button  
-                                                    color="secondary" 
-                                                    disabled={loadingDelete}
+                                                <Controls.Button 
+                                                    className={"del"+procedure.id}
+                                                    id="del"
+                                                    text="Delete"
+                                                    color="secondary"
+                                                    disabled={false}
                                                     onClick={() => deleteETLProcedure(procedure.id)}
                                                 >   
-                                                    Delete
-                                                    {loadingDelete && (
-                                                        <CircularProgress color="primary" variant="indeterminate" size={10}/>
-                                                    )}
                                                 </Controls.Button>
                                             </StyledTableCell>
                                         </StyledTableRow>

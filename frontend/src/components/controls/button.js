@@ -8,17 +8,17 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function Button(props) {
-    const { text, size, color, children, variant, disabled, onClick, ...other } = props;
+    const { text, id, size, color, children, variant, disabled, onClick, ...other } = props;
     const classes = useStyles();
 
     return (
-        <MButton 
+        <MButton
             variant={ variant || "contained" }
             size={ size || "medium" }
             color={ color || "primary" }
             disabled={disabled || false}
             onClick={ onClick }
             { ...other }
-            classes={{ label: classes.label }}>{ children } { text }</MButton>
+            classes={{ label: classes.label }}>{ text }  { children }</MButton>
     )
 }
