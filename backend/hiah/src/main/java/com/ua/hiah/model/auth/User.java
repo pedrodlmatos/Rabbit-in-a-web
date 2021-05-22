@@ -1,14 +1,16 @@
 package com.ua.hiah.model.auth;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
+import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 @Entity
 @Table(name = "USERS", uniqueConstraints = {
@@ -23,6 +25,7 @@ public class User {
 
     @NotBlank
     @Size(max = 20)
+    @JsonView({Views.ETLSession.class, Views.AdminETLProcedureList.class})
     private String username;
 
     @NotBlank
@@ -40,7 +43,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private List<Role> roles = new ArrayList<>();
 
     @ManyToMany(mappedBy = "users")
     private List<ETL> etls;
@@ -91,11 +94,33 @@ public class User {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
+    public List<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        //return id.equals(user.id) && username.equals(user.username) && email.equals(user.email) && password.equals(user.password) && roles.equals(user.roles);
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, email, password, roles);
     }
 }

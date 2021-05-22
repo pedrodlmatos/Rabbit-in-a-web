@@ -17,8 +17,6 @@ import com.ua.hiah.repository.ETLRepository;
 import com.ua.hiah.service.source.database.SourceDatabaseService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
 import com.ua.hiah.service.target.database.TargetDatabaseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +25,10 @@ import rabbitinahat.model.ETL_RIAH;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 
@@ -46,7 +47,7 @@ public class ETLServiceImpl implements ETLService {
     @Autowired
     TableMappingService mappingService;
 
-    private static final Logger logger = LoggerFactory.getLogger(ETLServiceImpl.class);
+    private static SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
 
     /**
@@ -67,6 +68,10 @@ public class ETLServiceImpl implements ETLService {
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
             etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromScanReport(ehrName, ehrScan));
             etl.getUsers().add(user);
+
+            // define dates
+            etl.setCreationDate(Date.from(Instant.now()));
+            etl.setModificationDate(Date.from(Instant.now()));
             return etlRepository.save(etl);
         }
         return null;
@@ -117,6 +122,10 @@ public class ETLServiceImpl implements ETLService {
             // add user to etl object
             response.getUsers().add(user);
 
+            // define dates
+            response.setCreationDate(Date.from(Instant.now()));
+            response.setModificationDate(Date.from(Instant.now()));
+
             // delete file object
             if (tempSaveFile.delete()) { }
 
@@ -151,12 +160,26 @@ public class ETLServiceImpl implements ETLService {
 
     @Override
     public List<ETL> getETLByUsername(User user) {
-        return etlRepository.findAllByUsersContaining(user);
+        return etlRepository.findAllByUsersContainingAndDeleted(user, false);
     }
 
 
     /**
-     * Deletes ETL procedure given its id
+     * Verifies if a user is a collaborator of an ETL procedure
+     *
+     * @param etl ETL procedure
+     * @param user user
+     * @return true if user is a collaborator, false otherwise
+     */
+
+    @Override
+    public boolean userHasAccessToEtl(ETL etl, User user) {
+        return etl.getUsers().contains(user);
+    }
+
+
+    /**
+     * Deletes ETL procedure given its id (operation by ADMIN)
      *
      * @param etl_id ETL procedure's id
      * @return ETL object or null if not found
@@ -172,6 +195,27 @@ public class ETLServiceImpl implements ETLService {
         }
 
         return null;
+    }
+
+
+    /**
+     * Marks ETL procedures as deleted
+     *
+     * @param etl ETL procedure object
+     */
+
+    @Override
+    public void markAsDeleted(ETL etl) {
+        etl.setDeleted(true);
+        // define dates
+        etl.setModificationDate(Date.from(Instant.now()));
+        etlRepository.save(etl);
+    }
+
+    @Override
+    public void markAsNotDeleted(ETL etl) {
+        etl.setDeleted(false);
+        etlRepository.save(etl);
     }
 
 
@@ -227,6 +271,9 @@ public class ETLServiceImpl implements ETLService {
             List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
             Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
              */
+
+            // define dates
+            etl.setModificationDate(Date.from(Instant.now()));
             return etlRepository.save(etl);
         }
         return null;
@@ -265,6 +312,9 @@ public class ETLServiceImpl implements ETLService {
             prevTableMappings.addAll(tableMappings);
             etl.setTableMappings(prevTableMappings);
 
+            // define dates
+            etl.setModificationDate(Date.from(Instant.now()));
+
             return etlRepository.save(etl);
         }
 
@@ -299,10 +349,20 @@ public class ETLServiceImpl implements ETLService {
                     targetDatabaseService.removeTable(table);
                 }
 
+            // define dates
+            etl.setModificationDate(Date.from(Instant.now()));
+
             return etlRepository.findById(etl_id).orElse(null);
         }
         return null;
     }
+
+
+    /**
+     *
+     * @param etl
+     * @return
+     */
 
     private boolean containsStemTable(ETL etl) {
         for (SourceTable table : etl.getSourceDatabase().getTables()) {

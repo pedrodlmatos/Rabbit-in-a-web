@@ -11,9 +11,17 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
+
 
 @SpringBootApplication
 public class HiahApplication {
+
+	@PostConstruct
+	void setUTCTimezone() {
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(HiahApplication.class, args);
@@ -36,6 +44,7 @@ class DatabaseLoader implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		roleService.createRoles();
+		userService.createDefaultUser();
 		userService.createDefaultAdmin();
 	}
 }

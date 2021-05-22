@@ -2,8 +2,12 @@ package com.ua.hiah.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
+import com.ua.hiah.model.auth.Role;
+import com.ua.hiah.model.auth.RoleEnum;
 import com.ua.hiah.model.auth.User;
+import com.ua.hiah.repository.auth.RoleRepository;
 import com.ua.hiah.repository.auth.UserRepository;
+import com.ua.hiah.security.services.UserDetailsServiceImpl;
 import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +37,8 @@ public class ETLController {
     ETLService etlService;
 
     @Autowired
-    UserRepository userRepository;
+    UserDetailsServiceImpl userService;
+
 
     private static final Logger logger = LoggerFactory.getLogger(ETLController.class);
 
@@ -97,7 +103,7 @@ public class ETLController {
     public ResponseEntity<?> getUserETLs(@Param("username") String username) {
         logger.info("ETL CONTROLLER - Requesting ETL procedures of user " + username);
 
-        User user = userRepository.findByUsername(username).orElse(null);
+        User user = userService.getUserByUsername(username);
         if (user != null) {
             List<ETL> response = etlService.getETLByUsername(user);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -123,12 +129,50 @@ public class ETLController {
     }
 
 
+    @PutMapping("/procedures_del")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> markProcedureAsDeleted(@Param("etl_id") Long etl_id, @Param("username") String username) {
+        logger.info("ETL CONTROLLER - Mark as deleted ETL procedure with id " + etl_id);
+
+        User user = userService.getUserByUsername(username);
+        System.out.println(user);
+
+        if (user != null) {
+            ETL etl = etlService.getETLWithId(etl_id);
+
+            if (etl != null && etlService.userHasAccessToEtl(etl, user)) {
+                etlService.markAsDeleted(etl);
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @PutMapping("/procedures_undel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> unmarkProcedureAsDeleted(@Param("etl_id") Long etl_id) {
+        logger.info("ETL CONTROLLER - Mark as not deleted ETL procedure with id " + etl_id);
+
+        ETL etl = etlService.getETLWithId(etl_id);
+
+        if (etl != null) {
+            etlService.markAsNotDeleted(etl);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+
 
 
     /**
      * Gets an ETL procedure given its id
      *
      * @param id ETL procedure's id
+     * @param username user's username
      * @return ETL procedure
      */
 
@@ -154,17 +198,25 @@ public class ETLController {
             )
     })
     @GetMapping("/procedures/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @JsonView(Views.ETLSession.class)
-    public ResponseEntity<?> getETLById(@PathVariable Long id) {
+    public ResponseEntity<?> getETLById(@PathVariable Long id, @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Requesting ETL procedure with id " + id);
 
-        // retrieve ETL from repository
+        User user = userService.getUserByUsername(username);
         ETL response = etlService.getETLWithId(id);
-        if (response == null)
-            // not found
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        if (user != null && response != null) {
+            boolean isAdmin = userService.userIsAdmin(user);
+            boolean etlUser = etlService.userHasAccessToEtl(response, user);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+            // user is admin or has permission to access etl procedure
+            if (isAdmin || etlUser) {
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+
+        // etl procedure or user not found or user without access
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
 
@@ -201,7 +253,7 @@ public class ETLController {
             @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Creating new ETL procedure");
 
-        User user = userRepository.findByUsername(username).orElse(null);
+        User user = userService.getUserByUsername(username);
         if (user != null) {
             ETL etl = etlService.createETLProcedure(name, file, cdm, user);
             if (etl != null)
@@ -240,7 +292,7 @@ public class ETLController {
     public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file, @Param("username") String username) {
         logger.info("ETL CONTROLLER - Creating ETL session from file");
 
-        User user = userRepository.findByUsername(username).orElse(null);
+        User user = userService.getUserByUsername(username);
         if (user != null) {
             ETL etl = etlService.createETLProcedureFromFile(file, user);
             if (etl != null)

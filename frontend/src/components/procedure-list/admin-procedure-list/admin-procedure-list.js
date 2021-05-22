@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles, createStyles, CircularProgress, withStyles, Table, TableBody, TableContainer, TableCell, TableRow, Paper, TableHead, TableSortLabel } from '@material-ui/core'
+import { makeStyles, createStyles, Checkbox, CircularProgress, withStyles, Table, TableBody, TableContainer, TableCell, TableRow, Paper, TableHead, TableSortLabel } from '@material-ui/core'
 import ETLService from "../../../services/etl-list-service";
 import { CDMVersions } from '../../../services/CDMVersions';
 import Controls from '../../controls/controls';
+import moment from 'moment';
 
 const StyledTableCell = withStyles((theme) => ({
     head: {
@@ -77,16 +78,6 @@ export default function AdminProcedureList() {
     const [sortBy, setSortBy] = useState("omop");
     const [sortOrder, setSortOrder] = useState("desc");
 
-    const columns = React.useMemo(() => [
-        { Header: 'Name', accessor: 'field' },
-        { Header: 'EHR', accessor: 'type' },
-        { Header: 'OMOP CDM', accessor: 'description' },
-        { Header: 'Users', accessor: 'users'},
-        { Header: '', accessor: ''},
-        { Header: '', accessor: ''},
-    ], [])
-
-
     /**
      * Sends GET request to API to retrieve all ETL procedures
      */
@@ -99,6 +90,11 @@ export default function AdminProcedureList() {
             console.log(response);
         })
     }, []);
+
+
+    const accessETLProcedure = (id) => {
+        window.location.href = '/procedure/' + id;
+    }
 
 
     const deleteETLProcedure = (id) => {
@@ -128,6 +124,42 @@ export default function AdminProcedureList() {
                         return 0;
                 }
                 break;
+            case "deleted":
+                compareFn = (i, j) => {
+                    if (i.deleted === false && j.deleted)
+                        return sortOrder === "desc" ? -1 : 1;
+                    else if (i.deleted && j.deleted === false)
+                        return sortOrder === "desc" ? 1 : -1;
+                    else
+                        return 0; 
+                }
+                break;
+            case "creationDate":
+                compareFn = (i, j) => {
+                    let dateI = moment(i.creationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+                    let dateJ = moment(j.creationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+    
+                    if (dateI > dateJ)
+                        return sortOrder === "desc" ? 1 : -1;
+                    else if (dateI < dateJ)
+                        return sortOrder === "desc" ? -1 : 1;
+                    else
+                        return 0;
+                }
+                break;
+            case "modificationDate":
+                compareFn = (i, j) => {
+                    let dateI = moment(i.modificationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+                    let dateJ = moment(j.modificationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+    
+                    if (dateI > dateJ)
+                        return sortOrder === "desc" ? 1 : -1;
+                    else if (dateI < dateJ)
+                        return sortOrder === "desc" ? -1 : 1;
+                    else
+                        return 0;
+                }
+                break;
             default:
                 break;
         }
@@ -148,8 +180,6 @@ export default function AdminProcedureList() {
         }
         let sortedProcedures = sortData(sortBy, sortOrder);
         setProcedures(sortedProcedures);
-        
-
     }
 
 
@@ -174,9 +204,35 @@ export default function AdminProcedureList() {
                                             active={sortBy === "omop"}
                                             direction={sortOrder}
                                             onClick={() => requestSort("omop")}
-                                        >
-                                        </StyledTableSortLabel>
+                                        />
                                         OMOP CDM
+                                    </StyledTableCell>
+
+                                    <StyledTableCell>
+                                        <StyledTableSortLabel 
+                                            active={sortBy === "deleted"}
+                                            direction={sortOrder}
+                                            onClick={() => requestSort("deleted")}
+                                        />
+                                        Deleted    
+                                    </StyledTableCell>
+
+                                    <StyledTableCell>
+                                        <StyledTableSortLabel 
+                                            active={sortBy === "creationDate"}
+                                            direction={sortOrder}
+                                            onClick={() => requestSort("creationDate")}    
+                                        />
+                                        Creation Date
+                                    </StyledTableCell>
+
+                                    <StyledTableCell>
+                                        <StyledTableSortLabel 
+                                            active={sortBy === "modificationDate"}
+                                            direction={sortOrder}
+                                            onClick={() => requestSort("modificationDate")}    
+                                        />
+                                        Modification Date
                                     </StyledTableCell>
 
                                     <StyledTableCell>Users</StyledTableCell>
@@ -201,18 +257,32 @@ export default function AdminProcedureList() {
                                             <StyledTableCell component="th" scope="row" align="left">
                                                 {CDMVersions.filter(function(cdm) { return cdm.id === procedure.targetDatabase.databaseName })[0].name}
                                             </StyledTableCell>
+
+                                            <StyledTableCell component="th" scope="row" align="left">
+                                                <Checkbox checked={procedure.deleted} />
+                                            </StyledTableCell>
+
+                                            <StyledTableCell component="th" scope="row" align="left">
+                                                {procedure.creationDate}
+                                            </StyledTableCell>
+                                            
+                                            <StyledTableCell component="th" scope="row" align="left">
+                                                {procedure.modificationDate}
+                                            </StyledTableCell>
                                             
                                             <StyledTableCell component="th" scope="row" align="left">
                                                 {procedure.name}
                                             </StyledTableCell>
 
                                             <StyledTableCell component="th" scope="row" align="left">
-                                                <Controls.Button text="Access" />
+                                                <Controls.Button 
+                                                    text="Access"
+                                                    onClick={() => accessETLProcedure(procedure.id)}
+                                                />
                                             </StyledTableCell>
 
                                             <StyledTableCell component="th" scope="row" align="left">
                                                 <Controls.Button 
-                                                    className={"del"+procedure.id}
                                                     id="del"
                                                     text="Delete"
                                                     color="secondary"

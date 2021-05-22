@@ -22,7 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -73,7 +73,7 @@ public class AuthController {
         );
 
         Set<String> strRoles = signupRequest.getRole();
-        Set<Role> roles = new HashSet<>();
+        List<Role> roles = new ArrayList<>();
 
         if (strRoles == null) {
             Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER)

@@ -13,6 +13,7 @@ import TargetTableDetails from './target-table-details';
 import FilesMethods from './files-methods';
 import TableOperations from './table-operations';
 import MappingOperations from './mapping-operations';
+import DeleteModal from '../modals/delete-modal/delete-modal';
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -59,7 +60,7 @@ export default function Procedure() {
     const [omopName, setOmopName] = useState('');
     const [mappings, setMappings] = useState([]);
     const [selectedMapping, setSelectedMapping] = useState({});
-    const [showHelpModal, setShowHelpModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     
     const [selectedTable, setSelectedTable] = useState({})
@@ -130,6 +131,11 @@ export default function Procedure() {
             setMappings([]);
             setLoading(false);
         });
+    }
+
+
+    const deleteETLProcedure = () => {
+        ETLService.markETLProcedureAsDeleted(etl.id);
     }
 
 
@@ -607,6 +613,9 @@ export default function Procedure() {
                                     <MenuItem onClick={() => FilesMethods.fetchSummaryFile(etl.id)}>Summary</MenuItem>
                                     <Divider />
                                     <MenuItem onClick={() => FilesMethods.fetchSaveFile(etl.id)}>Save session to file</MenuItem>
+                                    <Divider />
+                                    <MenuItem style={{color: 'red'}} onClick={() => setShowDeleteModal(true)}>Delete procedure</MenuItem>
+                                    <DeleteModal show={showDeleteModal} setShow={setShowDeleteModal} deleteProcedure={() => deleteETLProcedure()}/>
                                 </Menu>
                             </Grid>
 

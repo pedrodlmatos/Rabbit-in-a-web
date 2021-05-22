@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface ETLRepository extends JpaRepository<ETL, Long> {
 
-    List<ETL> findAllByUsersContaining(User user);
+    List<ETL> findAllByUsersContainingAndDeleted(User user, boolean isDeleted);
 }

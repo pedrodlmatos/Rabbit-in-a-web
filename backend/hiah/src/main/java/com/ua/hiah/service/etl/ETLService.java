@@ -52,13 +52,35 @@ public interface ETLService {
 
 
     /**
-     * Deletes ETL procedure given its id
+     * Verifies if a user is a collaborator of an ETL procedure
+     *
+     * @param etl ETL procedure
+     * @param user user
+     * @return true if user is a collaborator, false otherwise
+     */
+
+    boolean userHasAccessToEtl(ETL etl, User user);
+
+
+    /**
+     * Deletes ETL procedure given its id (operation by ADMIN)
      *
      * @param etl_id ETL procedure's id
      * @return ETL object or null if not found
      */
 
     ETL deleteETLProcedure(Long etl_id);
+
+
+    /**
+     *
+     * @param etl
+     */
+
+    void markAsDeleted(ETL etl);
+
+
+    void markAsNotDeleted(ETL etl);
 
 
     /**
@@ -142,6 +164,7 @@ public interface ETLService {
      */
 
     byte[] createSavingFile(String filename, Long etl_id);
+
 
 
 }

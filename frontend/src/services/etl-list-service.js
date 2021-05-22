@@ -48,6 +48,26 @@ class ETLService {
     }
 
 
+    markETLProcedureAsDeleted(id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        try {
+            return axios.put(API_URL + "procedures_del", null, { headers: authHeader(), params: {etl_id: id, username: username }});
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
+
+    unmarkETLProcedureAsDeleted(id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        try {
+            return axios.put(API_URL + "procedures_undel", null, { headers: authHeader(), params: {etl_id: id, username: username }});
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
+
     /**
      * Sends GET request to API to retrieve procedure given its Id
      * 
@@ -56,8 +76,9 @@ class ETLService {
      */
 
     getETLById = async (id) => {
+        const username = JSON.parse(localStorage.getItem('user')).username;
         try {
-            return await axios.get(API_URL + "procedures/" + id, { headers: authHeader() });
+            return await axios.get(API_URL + "procedures/" + id, { headers: authHeader(), params: {username: username } });
         } catch (e) {
             console.log(e);
         }
