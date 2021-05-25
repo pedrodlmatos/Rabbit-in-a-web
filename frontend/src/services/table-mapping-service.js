@@ -28,7 +28,12 @@ class TableMappingService {
      */
 
     addTableMapping = async (etl, source, target) => {
-        return await axios.post(API_URL + "map", {}, { headers: authHeader(), params: { etl_id: etl, source_id: source, target_id: target } });
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return await axios.post(
+            API_URL + "map", 
+            {}, 
+            { headers: authHeader(), params: { username: username, etl_id: etl, source_id: source, target_id: target } }
+        );
     }
 
 

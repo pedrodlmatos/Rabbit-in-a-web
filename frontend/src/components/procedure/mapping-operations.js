@@ -1,3 +1,5 @@
+import TableMappingService from '../../services/table-mapping-service'
+
 class MappingOperations {
 
     /**
@@ -55,7 +57,6 @@ class MappingOperations {
             element.color = element.complete ? 'black' : 'grey'
         })
     }
-
 }
 
 export default new MappingOperations();

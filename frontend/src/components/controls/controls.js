@@ -8,6 +8,7 @@ import DropdownCheckbox from './dropdown-checkbox';
 import TooltipBox from './tooltip-box';
 import ElementBox from './elementBox';
 import DownloadButton from './download-button';
+import Checkbox from './checkbox';
 
 const Controls = {
     FileInput,
@@ -19,7 +20,8 @@ const Controls = {
     DropdownCheckbox,
     TooltipBox,
     ElementBox,
-    DownloadButton
+    DownloadButton,
+    Checkbox
 }
 
 export default Controls;

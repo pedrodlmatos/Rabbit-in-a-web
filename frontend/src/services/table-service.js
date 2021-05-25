@@ -15,8 +15,12 @@ class TableService {
      * @returns 
      */
     
-    changeTargetTableComment(table, comment) {
-        return axios.put(TARGET_TABLE_URL + "comment", null, { headers: authHeader(), params:{ table: table, comment: comment }});
+    changeTargetTableComment(table, comment, etl_id) {
+        const user = JSON.parse(localStorage.getItem('user'));
+        return axios.put(
+            TARGET_TABLE_URL + "comment", 
+            null, 
+            { headers: authHeader(), params:{ table: table, comment: comment, username: user.username, etl_id: etl_id }});
     }
 
 
@@ -28,8 +32,13 @@ class TableService {
      * @returns 
      */
     
-    changeSourceTableComment(table, comment) {
-        return axios.put(SOURCE_TABLE_URL + "comment", null, { headers: authHeader(), params:{ table: table, comment: comment }});
+    changeSourceTableComment(table, comment, etl_id) {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        return axios.put(
+            SOURCE_TABLE_URL + "comment", 
+            null, 
+            { headers: authHeader(), params:{ table: table, comment: comment, username: user.username, etl_id: etl_id }});
     }
 
 }

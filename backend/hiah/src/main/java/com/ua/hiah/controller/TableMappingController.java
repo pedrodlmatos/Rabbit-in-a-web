@@ -3,6 +3,9 @@ package com.ua.hiah.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
+import com.ua.hiah.model.auth.User;
+import com.ua.hiah.security.services.UserDetailsServiceImpl;
+import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,15 +39,14 @@ public class TableMappingController {
     private static final Logger logger = LoggerFactory.getLogger(TableMappingController.class);
 
     @Autowired
+    private UserDetailsServiceImpl userService;
+
+    @Autowired
+    private ETLService etlService;
+
+    @Autowired
     private TableMappingService service;
 
-
-    /**
-     * Retrieves data from a table mapping given its id
-     *
-     * @param etl_id table mapping id
-     * @return table mapping
-     */
 
     @Operation(summary = "Retrieves a table mapping")
     @ApiResponses(value = {
@@ -75,15 +78,6 @@ public class TableMappingController {
     }
 
 
-    /**
-     * Create a table mapping
-     *
-     * @param etl_id ETL session id
-     * @param source_id Source table id
-     * @param target_id Target table id
-     * @return created table map
-     */
-
     @Operation(summary = "Creates a table mapping")
     @ApiResponses(value = {
             @ApiResponse(
@@ -101,13 +95,35 @@ public class TableMappingController {
             )
     })
     @PostMapping("/map")
-    public ResponseEntity<?> createTableMapping(@Param(value = "elt_id") Long etl_id, @Param(value = "source_id") Long source_id, @Param(value = "target_id") Long target_id) {
-        TableMapping response = service.addTableMapping(source_id, target_id, etl_id);
-        if (response == null)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> createTableMapping(
+            @Param(value = "username") String username,
+            @Param(value = "elt_id") Long etl_id,
+            @Param(value = "source_id") Long source_id,
+            @Param(value = "target_id") Long target_id) {
+        logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
+
+        // get User
+        User user = userService.getUserByUsername(username);
+        if (user == null)
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
-        logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        ETL etl = etlService.getETLWithId(etl_id);
+        if (etl == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
+        if (etlService.userHasAccessToEtl(etl, user)) {
+            TableMapping response = service.addTableMapping(source_id, target_id, etl_id);
+            if (response == null)
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            else {
+                // update modification date
+                etl = etlService.getETLWithId(etl_id);
+                etlService.updateModificationDate(etl);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
 

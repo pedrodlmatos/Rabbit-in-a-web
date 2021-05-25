@@ -43,13 +43,13 @@ public class ETL {
     private List<User> users;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "sourceDatabase_id", referencedColumnName = "id")
+    @JoinColumn(name = "source_database_id", referencedColumnName = "id")
     @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private SourceDatabase sourceDatabase;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "targetDatabase_id", referencedColumnName = "id")
+    @JoinColumn(name = "target_database_id", referencedColumnName = "id")
     @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
     private TargetDatabase targetDatabase;
@@ -63,13 +63,13 @@ public class ETL {
     @JsonView(Views.AdminETLProcedureList.class)
     private boolean deleted;
 
-    @Column(name = "creationDate", nullable = false)
+    @Column(name = "creation_date", nullable = false)
     @JsonView(Views.AdminETLProcedureList.class)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy HH:mm", timezone = "UTC")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
 
-    @Column(name = "modificationDate", nullable = false)
+    @Column(name = "modification_date", nullable = false)
     @JsonView(Views.AdminETLProcedureList.class)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy HH:mm", timezone = "UTC")
     @Temporal(TemporalType.TIMESTAMP)

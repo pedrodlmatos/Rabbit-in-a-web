@@ -134,8 +134,13 @@ export default function Procedure() {
     }
 
 
+    /**
+     * Delete (mark as deleted) the open ETL procedure and redirect to the user's
+     * ETL procedures list page
+     */
+
     const deleteETLProcedure = () => {
-        ETLService.markETLProcedureAsDeleted(etl.id);
+        ETLService.markETLProcedureAsDeleted(etl.id).then(window.location.href = '/procedures');
     }
 
 
@@ -224,26 +229,6 @@ export default function Procedure() {
 
 
     /**
-     * Opens the operations menu
-     * 
-     * @param {*} event 
-     */
-
-    const openOperationsMenu = (event) => {
-        setAnchorEl(event.currentTarget);
-    }
-
-
-    /**
-     * Closes the operation menu
-     */
-    
-    const closeOperationsMenu = () => {
-        setAnchorEl(null);
-    }
-
-
-    /**
      * Creates the stem tables on both source (EHR) and target (OMOP CDM) databases
      */
 
@@ -277,7 +262,6 @@ export default function Procedure() {
 
     const removeStemTable = () => {
         ETLService.removeStemTables(etl.id).then(response => {
-            console.log(response.data);
             setEtl({
                 ...etl,
                 sourceDatabase: response.data.sourceDatabase,
@@ -468,7 +452,7 @@ export default function Procedure() {
     const saveComment = () => {
         setLoadingSaveTableComment(true);
         if (sourceSelected) {
-            TableService.changeSourceTableComment(selectedTable.id, selectedTable.comment).then(response => {
+            TableService.changeSourceTableComment(selectedTable.id, selectedTable.comment, etl.id).then(response => {
                 const index = etl.sourceDatabase.tables.findIndex(x => x.id === response.data.id);
                 etl.sourceDatabase.tables[index].comment = response.data.comment;
                 setLoadingSaveTableComment(false);
@@ -476,7 +460,7 @@ export default function Procedure() {
                 console.log(error);
             });
         } else {
-            TableService.changeTargetTableComment(selectedTable.id, selectedTable.comment).then(response => {
+            TableService.changeTargetTableComment(selectedTable.id, selectedTable.comment, etl.id).then(response => {
                 const index = etl.targetDatabase.tables.findIndex(x => x.id === response.data.id);
                 etl.targetDatabase.tables[index].comment = response.data.comment;
                 setLoadingSaveTableComment(false);
@@ -532,6 +516,7 @@ export default function Procedure() {
      * @param {*} sourceTable_id source table id
      * @returns true if they are connected, false otherwise
      */
+    
     const connectedToSource = (sourceTable_id) => {
         let result = false;
         mappings.forEach(item => {
@@ -595,8 +580,8 @@ export default function Procedure() {
 
                             {/* Menu (with files, add/remove stem tables) */}
                             <Grid item xs={2} sm={2} md={2} lg={2}>
-                                <Controls.Button text="Menu" aria-controls="simple-menu" aria-haspopup={true} onClick={openOperationsMenu} />
-                                <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={closeOperationsMenu}>
+                                <Controls.Button text="Menu" aria-controls="simple-menu" aria-haspopup={true} onClick={(event) => setAnchorEl(event.currentTarget)} />
+                                <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={(event) => setAnchorEl(null)}>
                                     {/* Stem Tables (add/remove) */}
                                     <MenuItem>
                                         Stem tables

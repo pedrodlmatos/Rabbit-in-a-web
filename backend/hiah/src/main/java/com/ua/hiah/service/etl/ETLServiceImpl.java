@@ -11,6 +11,7 @@ import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetTable;
+import org.springframework.transaction.annotation.Transactional;
 import rabbitcore.utilities.ETLSummaryGenerator;
 import rabbitcore.utilities.files.Row;
 import com.ua.hiah.repository.ETLRepository;
@@ -33,6 +34,7 @@ import java.util.List;
 
 
 @Service
+@Transactional
 public class ETLServiceImpl implements ETLService {
 
     @Autowired
@@ -177,6 +179,12 @@ public class ETLServiceImpl implements ETLService {
         return etl.getUsers().contains(user);
     }
 
+    @Override
+    public void updateModificationDate(ETL etl) {
+        etl.setModificationDate(Date.from(Instant.now()));
+        etlRepository.save(etl);
+    }
+
 
     /**
      * Deletes ETL procedure given its id (operation by ADMIN)
@@ -261,7 +269,7 @@ public class ETLServiceImpl implements ETLService {
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
             // remove previous cdm and mappings
             mappingService.removeTableMappingsFromETL(etl.getId());
-            targetDatabaseService.removeDatabase(previous.getId());
+            //targetDatabaseService.removeDatabase(previous.getId());
 
             // order tables by id
             /*

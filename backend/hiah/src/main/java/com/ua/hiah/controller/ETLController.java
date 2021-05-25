@@ -2,11 +2,7 @@ package com.ua.hiah.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
-import com.ua.hiah.model.auth.Role;
-import com.ua.hiah.model.auth.RoleEnum;
 import com.ua.hiah.model.auth.User;
-import com.ua.hiah.repository.auth.RoleRepository;
-import com.ua.hiah.repository.auth.UserRepository;
 import com.ua.hiah.security.services.UserDetailsServiceImpl;
 import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.views.Views;
@@ -20,13 +16,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+// TODO: create ETL session with a custom OMOP CDM file
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -42,11 +50,6 @@ public class ETLController {
 
     private static final Logger logger = LoggerFactory.getLogger(ETLController.class);
 
-    /**
-     * Retrieves a list with all ETL procedures
-     *
-     * @return ETL procedures
-     */
 
     @Operation(summary = "Retrieve all ETL sessions")
     @ApiResponses(value = {
@@ -73,13 +76,6 @@ public class ETLController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
-    /**
-     * Gets all ETL procedures of a given user
-     *
-     * @param username user's username
-     * @return list of ETL procedures
-     */
 
     @Operation(summary = "Retrieve all ETL sessions of a given user")
     @ApiResponses(value = {
@@ -113,7 +109,19 @@ public class ETLController {
     }
 
 
-
+    @Operation(summary = "Deletes and ETL procedures")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL procedure deleted",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL procedure not found",
+                    content = @Content
+            )
+    })
     @DeleteMapping("/procedures")
     @JsonView(Views.ETLSessionsList.class)
     @PreAuthorize("hasRole('ADMIN')")
@@ -129,14 +137,33 @@ public class ETLController {
     }
 
 
+    @Operation(summary = "Marks an ETL procedure as deleted (made by USER)")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL procedures changed",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ETL.class))
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL procedure not found",
+                    content = @Content
+            )
+    })
     @PutMapping("/procedures_del")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> markProcedureAsDeleted(@Param("etl_id") Long etl_id, @Param("username") String username) {
         logger.info("ETL CONTROLLER - Mark as deleted ETL procedure with id " + etl_id);
 
         User user = userService.getUserByUsername(username);
-        System.out.println(user);
-
         if (user != null) {
             ETL etl = etlService.getETLWithId(etl_id);
 
@@ -150,6 +177,27 @@ public class ETLController {
     }
 
 
+    @Operation(summary = "Marks an ETL procedure as not deleted (made by ADMIN)")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL procedures changed",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ETL.class))
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "ETL procedure not found",
+                    content = @Content
+            )
+    })
     @PutMapping("/procedures_undel")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> unmarkProcedureAsDeleted(@Param("etl_id") Long etl_id) {
@@ -165,16 +213,6 @@ public class ETLController {
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
-
-
-
-    /**
-     * Gets an ETL procedure given its id
-     *
-     * @param id ETL procedure's id
-     * @param username user's username
-     * @return ETL procedure
-     */
 
     @Operation(summary = "Retrieve a ETL procedure by its id")
     @ApiResponses(value = {
@@ -220,14 +258,6 @@ public class ETLController {
     }
 
 
-    /**
-     * Creates an ETL procedure with Scan Report
-     *
-     * @param file file created by White Rabbit that contains info about EHR database
-     * @param cdm OMOP CDM version to use
-     * @return created procedure or error
-     */
-
     @Operation(summary = "Create an ETL procedure")
     @ApiResponses(value = {
             @ApiResponse(
@@ -264,13 +294,6 @@ public class ETLController {
     }
 
 
-    /**
-     * Creates an ETL procedure from a JSON file that contains a summary of an ETL procedure
-     *
-     * @param file JSON summary file
-     * @return ETL procedure created, error if file is invalid
-     */
-
     @Operation(summary = "Creates an ETL procedure from a JSON summary file")
     @ApiResponses(value = {
             @ApiResponse(
@@ -302,15 +325,6 @@ public class ETLController {
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
-    // TODO: create ETL session with a custom OMOP CDM file
-
-    /**
-     * Changes the OMOP CDM version in a given ETL procedure
-     *
-     * @param etl ETL procedure's id
-     * @param cdm OMOP CDM version to change to
-     * @return altered ETL or error
-     */
 
     @Operation(summary = "Change OMOP CDM version in ETL procedure")
     @ApiResponses(value = {
@@ -330,21 +344,30 @@ public class ETLController {
     })
     @PutMapping("/procedures/targetDB")
     @JsonView(Views.ETLSession.class)
-    public ResponseEntity<?> changeTargetDatabase(@Param(value = "etl") Long etl, @Param(value = "cdm") String cdm) {
-        logger.info("ETL CONTROLLER - Change target database of procedure {} to {}", etl, cdm);
-        ETL response = etlService.changeTargetDatabase(etl, cdm);
-        if (response == null)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeTargetDatabase(
+            @Param(value = "username") String username,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "cdm") String cdm) {
+        logger.info("ETL CONTROLLER - Change target database of procedure {} to {}", etl_id, cdm);
+
+        User user = userService.getUserByUsername(username);
+        if (user == null)
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+
+        ETL etl = etlService.getETLWithId(etl_id);
+        if (etl == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
+        if (etlService.userHasAccessToEtl(etl, user)) {
+            ETL response = etlService.changeTargetDatabase(etl_id, cdm);
+            if (response == null)
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
-
-    /**
-     * Adds stem table on both EHR and OMOP CDM databases
-     *
-     * @param etl ETL procedure's id
-     * @return altered ETL procedure
-     */
 
     @Operation(summary = "Add stem table on EHR and OMOP CDM databases")
     @ApiResponses(value = {
@@ -373,13 +396,6 @@ public class ETLController {
     }
 
 
-    /**
-     * Removes stem table on both EHR and OMOP CDM databases
-     *
-     * @param etl ETL procedure's id
-     * @return altered ETL procedure
-     */
-
     @Operation(summary = "Remove stem table on EHR and OMOP CDM databases")
     @ApiResponses(value = {
             @ApiResponse(
@@ -406,13 +422,6 @@ public class ETLController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
-    /**
-     * Creates the file containing all source fields and its attributes and relations
-     *
-     * @param etl ETL procedure's id
-     * @return source fields file
-     */
 
     @Operation(summary = "Gets file of the source fields")
     @ApiResponses(value = {
@@ -447,13 +456,6 @@ public class ETLController {
     }
 
 
-    /**
-     * Gets the file containing all target fields and its attributes and relations
-     *
-     * @param etl ETL procedure's id
-     * @return target fields file
-     */
-
     @Operation(summary = "Gets file of the target fields")
     @ApiResponses(value = {
             @ApiResponse(
@@ -486,13 +488,6 @@ public class ETLController {
     }
 
 
-    /**
-     * Retrieves the JSON file of an ETL procedure
-     *
-     * @param etl ETL procedure's id
-     * @return ETL summary JSON file, error if not found
-     */
-
     @Operation(summary = "Gets the JSON file containing all ETL procedure information")
     @ApiResponses(value = {
             @ApiResponse(
@@ -523,14 +518,7 @@ public class ETLController {
         header.set("Content-Disposition", "attachment; filename=Scan.json");
         return new ResponseEntity<>(content, header, HttpStatus.OK);
     }
-
-
-    /**
-     * Creates a Word document with the ETL procedure summary
-     *
-     * @param etl ETL procedure's id
-     * @return file content
-     */
+    
 
     @Operation(summary = "Gets the Word document containing ETL procedure summary")
     @ApiResponses(value = {

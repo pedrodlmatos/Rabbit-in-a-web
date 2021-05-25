@@ -9,6 +9,9 @@ import Xarrow from 'react-xarrows/lib';
 import InfoTable from '../../info-table/info-table';
 import TableMappingLogic from '../../procedure/table-mapping-logic';
 import FieldMappingLogic from './field-mapping-logic';
+import SourceFieldDetails from './source-field-details'
+import MappingOperations from '../../procedure/mapping-operations'
+import TargetFieldDetails from './target-field-details'
 
 
 const useStyles = makeStyles(theme => ({
@@ -58,27 +61,12 @@ export default function FieldMappingModal(props) {
     const [savingFieldMappingLogic, setSavingFieldMappingLogic] = useState(false);
 
 
-    const targetColumns = React.useMemo(() => [
-        { Header: 'Concept ID', accessor: 'conceptId' },
-        { Header: 'Concept Name', accessor: 'conceptName' },
-        { Header: 'Class', accessor: 'conceptClassId' },
-        { Header: 'Standard ?', accessor: 'standardConcept' }
-    ], [])
-
-    const sourceColumns = React.useMemo(() => [
-        { Header: 'Value', accessor: 'value' },
-        { Header: 'Frequency', accessor: 'frequency' },
-        { Header: 'Percentage', accessor: 'percentage'}
-    ], [])
-    
-
     /**
      * 
      */
 
     const getInformation = () => {
         TableMappingService.getMapping(mappingId).then(res => {
-            console.log(res.data.source)
             let maps = [];
             res.data.fieldMappings.forEach(item => {
                 const arrow = {
@@ -222,6 +210,7 @@ export default function FieldMappingModal(props) {
 
     const defineSourceFieldData = (field) => {
         let data = [];
+        setFieldInfo(data);
         if (field.valueCounts.length === 0) {
             setShowTable(false);
         } else {
@@ -357,6 +346,110 @@ export default function FieldMappingModal(props) {
             setShowDeleteFieldMappingButton(true);
             setShowFieldMappingLogic(true);
         }
+    }
+
+
+    /**
+     * Verifies if a source field is connected to a target field
+     *
+     * @param {*} targetField_id target table's id
+     * @returns true if are connect, false otherwise
+     */
+
+    const connectedToTarget = (targetField_id) => {
+        let result = false;
+        fieldMappings.forEach(item => {
+            if (item.end.id === targetField_id && item.start.id === selectedField.id) {
+                result = true;
+            }
+        })
+        return result;
+    }
+
+
+    /**
+     * Creates a field mapping between two fields or removes it if already exists
+     *
+     * @param {*} e check event
+     */
+
+    const connectToTargetField = e => {
+        const targetField_id = e.target.value[0];
+
+        if (connectedToTarget(targetField_id)) {
+            fieldMappings.forEach(item => {
+                if (item.end.id === targetField_id && item.start.id === selectedField.id) {
+                    removeMapping(mappingId, item.id);
+                }
+            })
+        } else {
+            createFieldMapping(selectedField.id, targetField_id);
+        }
+    }
+
+    /**
+     * Verifies if a target table is connected to a source table
+     *
+     * @param {*} sourceField_id source table id
+     * @returns true if they are connected, false otherwise
+     */
+
+    const connectedToSource = (sourceField_id) => {
+        let result = false;
+        fieldMappings.forEach(item => {
+            if (item.start.id === sourceField_id && item.end.id === selectedField.id) {
+                result = true;
+            }
+        })
+        return result;
+    }
+
+
+    /**
+     * Creates a table mapping between two tables or removes it if already exists
+     *
+     * @param {*} e check event
+     */
+
+    const connectToSourceField = e => {
+        const sourceField_id = e.target.value[0];
+
+        if (connectedToSource(sourceField_id)) {
+            fieldMappings.forEach(item => {
+                if (item.start.id === sourceField_id && item.end.id === selectedField.id) {
+                    removeMapping(mappingId, item.id);
+                }
+            })
+        } else {
+            createFieldMapping(sourceField_id, selectedField.id);
+        }
+    }
+
+
+    /**
+     * Makes a call to API to delete a field mapping and replace the previous with ones received
+     *
+     * @param {*} tableMapping_id ETL id
+     * @param {*} fieldMapping_id table mapping id
+     */
+
+    const removeMapping = (tableMapping_id, fieldMapping_id) => {
+        FieldMappingService.removeFieldMapping(tableMapping_id, fieldMapping_id).then(res => {
+            let maps = []
+            res.data.forEach(function(item) {
+                const arrow = {
+                    id: item.id,
+                    start: item.source,
+                    end: item.target,
+                    complete: item.complete,
+                    color: "grey"
+                }
+                maps = maps.concat(arrow);
+            });
+            setFieldMappings(maps);
+        }).catch(res => {
+            console.log(res);
+        })
     }
 
 
@@ -577,62 +670,43 @@ export default function FieldMappingModal(props) {
                                     save={saveTableMappingLogic}
                                 />
 
-                                { showFieldInfo ? (
+                                { showFieldInfo && (
                                     <div className={classes.fieldDetails}>
-                                        <h6><strong>Field name: </strong>{selectedField.name}</h6>
-                                        <h6><strong>Field type: </strong>{selectedField.type}</h6>
                                         { sourceSelected ? (
-                                            <div>
-                                                { showTable ? (
-                                                    <InfoTable columns={sourceColumns} data={fieldInfo} />
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </div>
+                                            <SourceFieldDetails
+                                                field={selectedField}
+                                                fieldInfo={fieldInfo}
+                                                setFieldInfo={setFieldInfo}
+                                                onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
+                                                saveComment={saveFieldComment}
+                                                omopFields={targetTable.fields}
+                                                verify={connectedToTarget}
+                                                connect={connectToTargetField}
+                                            />
                                         ) : (
-                                            
-                                            <div>
-                                                <h6><strong>Field description: </strong>{selectedField.description}</h6>
-                                                { showTable ? (
-                                                    <InfoTable columns={targetColumns} data={fieldInfo}/>
-                                                ) : (
-                                                    <>
-                                                    </>
-                                                ) }
-                                            </div>
-                                        ) }
-
-                                        <Controls.Input 
-                                            value={selectedField.comment === null ? "" : selectedField.comment}
-                                            name="comment"
-                                            fullWidth={true}
-                                            label="Comment"
-                                            placeholder="Edit table comment"
-                                            rows={3} 
-                                            onChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
-                                        />
-
-                                        <Controls.Button
-                                            className={classes.button}
-                                            text="Save"
-                                            onClick={saveFieldComment}
-                                        />
+                                            <TargetFieldDetails
+                                                field={selectedField}
+                                                fieldInfo={fieldInfo}
+                                                setFieldInfo={setFieldInfo}
+                                                onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
+                                                saveComment={saveFieldComment}
+                                                ehrFields={sourceTable.fields}
+                                                verify={connectedToSource}
+                                                connect={connectToSourceField}
+                                            />
+                                        )}
                                     </div>
-                                ) : (
-                                    <>
-                                    </>
-                                ) }
+                                )}
 
-                                { showFieldMappingLogic ? (
+                                { showFieldMappingLogic && (
                                     <FieldMappingLogic 
                                         value={selectedFieldMapping.logic}
                                         disabled={savingFieldMappingLogic}
                                         onChange={(e) => setSelectedFieldMapping({...selectedFieldMapping, logic: e.target.value})}
                                         save={saveFieldMappingLogic}
+                                        omopFields={targetTable.fields}
                                     />
-                                ) : (
-                                    <></>
-                                ) }    
+                                )}
                             </Grid>
                         </Grid>
                     </DialogContent>

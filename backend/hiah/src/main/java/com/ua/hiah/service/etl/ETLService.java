@@ -62,6 +62,9 @@ public interface ETLService {
     boolean userHasAccessToEtl(ETL etl, User user);
 
 
+    void updateModificationDate(ETL etl);
+
+
     /**
      * Deletes ETL procedure given its id (operation by ADMIN)
      *
@@ -164,7 +167,4 @@ public interface ETLService {
      */
 
     byte[] createSavingFile(String filename, Long etl_id);
-
-
-
 }

@@ -1,9 +1,7 @@
 package com.ua.hiah.service.target.table;
 
-import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.repository.target.TargetTableRepository;
-import com.ua.hiah.service.target.field.TargetFieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,9 +36,9 @@ public class TargetTableServiceImpl implements TargetTableService {
     @Override
     public TargetTable changeComment(Long tableId, String comment) {
         TargetTable table = repository.findById(tableId).orElse(null);
-        if (table == null) return null;                                     // table not found
-        else if (table.getComment().equals(comment)) return table;          // old comment == new comment
-        else {                                                              // old comment != new comment
+        if (table == null) return null;                                                                   // table not found
+        else if (table.getComment() != null && table.getComment().equals(comment)) return table;          // old comment == new comment
+        else {                                                                                            // old comment != new comment
             table.setComment(comment);
             return repository.save(table);
         }

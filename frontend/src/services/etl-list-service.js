@@ -130,8 +130,13 @@ class ETLService {
      * @returns {Promise<AxiosResponse<any>>} ETL procedure with new data
      */
 
-    changeTargetDatabase(etl, cdm) {
-        return axios.put(API_URL + "procedures/targetDB", null, { headers: authHeader(), params:{etl: etl, cdm: cdm }});
+    changeTargetDatabase(etl_id, cdm) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return axios.put(
+            API_URL + "procedures/targetDB", 
+            null, 
+            { headers: authHeader(), params:{ username: username, etl_id: etl_id, cdm: cdm }}
+        );
     }
 
 
