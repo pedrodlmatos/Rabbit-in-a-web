@@ -1,40 +1,45 @@
 package com.ua.hiah.error;
 
+import com.ua.hiah.error.exceptions.EntityNotFoundException;
+import com.ua.hiah.error.exceptions.UnauthorizedAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@ControllerAdvice
+@ControllerAdvice(annotations = RestController.class)
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // Error 400
+    @ExceptionHandler(value = EntityNotFoundException.class)
+    protected ResponseEntity<?> handleETLNotFound(RuntimeException ex) {
+        String error = "ETL procedure not found";
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+        apiError.setMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(value = UnauthorizedAccessException.class)
+    protected ResponseEntity<?> handleUnauthorizedAccess(RuntimeException ex) {
+        ApiError error = new ApiError(HttpStatus.UNAUTHORIZED);
+        error.setMessage(ex.getMessage());
+        return buildResponseEntity(error);
+    }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            final MethodArgumentNotValidException ex,
-            final HttpHeaders headers,
-            final HttpStatus status,
-            final WebRequest request) {
-
-        logger.info(ex.getClass().getName());
-
-        final List<String> errors = new ArrayList<>();
-        for (final FieldError error : ex.getBindingResult().getFieldErrors())
-            errors.add(error.getField() + ": " + error.getDefaultMessage());
-
-        for (final ObjectError error : ex.getBindingResult().getGlobalErrors())
-            errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
-
-        final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), errors);
-        return handleExceptionInternal(ex, apiError, headers, apiError.getStatus(), request);
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        String error = "Internal error";
+        ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, error, ex);
+        return buildResponseEntity(apiError);
     }
+
+    private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
+    }
+
+
+
 }

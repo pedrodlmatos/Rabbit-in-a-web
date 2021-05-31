@@ -9,30 +9,6 @@ import java.util.List;
 public interface ETLService {
 
     /**
-     * Creates a new ETL procedure
-     *
-     * @param ehrName EHR database name
-     * @param ehrScan EHR Scan report
-     * @param cdm OMOP CDM version
-     * @param username
-     * @return created ETL procedure
-     */
-
-    ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm, User username);
-
-
-    /**
-     * Creates an ETL procedure from the save file created
-     *
-     * @param saveFile JSON file containing info about an ETL procedure
-     * @param user
-     * @return created ETL procedure
-     */
-
-    ETL createETLProcedureFromFile(MultipartFile saveFile, User user);
-
-
-    /**
      * Retrieve all ETL procedure
      *
      * @return list with ETL procedures
@@ -44,11 +20,65 @@ public interface ETLService {
     /**
      * Retrieves list of ETL procedures managed by user
      *
-     * @param user user
+     * @param username user
      * @return list of ETL procedures
      */
 
-    List<ETL> getETLByUsername(User user);
+    List<ETL> getETLByUsername(String username);
+
+
+    /**
+     * Retrieves and ETL procedure's by its id and if user has access to it
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return ETL procedure if user has access to it, error otherwise
+     */
+
+    ETL getETLWithId(Long etl_id, String username);
+
+
+    /**
+     * Creates a new ETL procedure
+     *
+     * @param ehrName EHR database name
+     * @param ehrScan EHR Scan report
+     * @param cdm OMOP CDM version
+     * @param username
+     * @return created ETL procedure
+     */
+
+    ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm, String username);
+
+
+    /**
+     * Creates an ETL procedure from the save file created
+     *
+     * @param saveFile JSON file containing info about an ETL procedure
+     * @param username
+     * @return created ETL procedure
+     */
+
+    ETL createETLProcedureFromFile(MultipartFile saveFile, String username);
+
+
+    /**
+     * Deletes ETL procedure given its id (operation by ADMIN)
+     *
+     * @param etl_id ETL procedure's id
+     */
+
+    void deleteETLProcedure(Long etl_id);
+
+
+    /**
+     * Marks an ETL procedure as deleted but doesn't remove it from database
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     */
+
+    void markAsDeleted(Long etl_id, String username);
 
 
     /**
@@ -62,28 +92,152 @@ public interface ETLService {
     boolean userHasAccessToEtl(ETL etl, User user);
 
 
+    /**
+     * Verifies if a user is a collaborator of an ETL procedure
+     *
+     * @param etl_id ETL procedure's id
+     * @param username user's username
+     * @return true if user is a collaborator, false otherwise
+     */
+
+    boolean userHasAccessToEtl(Long etl_id, String username);
+
+
+    /**
+     * Marks an ETL procedure as not deleted
+     *
+     * @param etl_id ETL procedure's id
+     */
+
+    void markAsNotDeleted(Long etl_id);
+
+
+    /**
+     * Changes the OMOP CDM version of an ETL procedure and removes the previous OMOP CDM used
+     *
+     * @param etl_id ETL procedure's id
+     * @param cdm OMOP CDM version to change to
+     * @param username
+     * @return modified ETL procedure
+     */
+
+    ETL changeTargetDatabase(Long etl_id, String cdm, String username);
+
+
+    /**
+     * Adds stem table on EHR and on OMOP CDM database
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return altered ETL procedure
+     */
+
+    ETL addStemTable(Long etl_id, String username);
+
+
+    /**
+     * Removes stem table from EHR and OMOP CDM database and their respective mapping
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return altered ETL procedure
+     */
+
+    ETL removeStemTable(Long etl_id, String username);
+
+
+    /**
+     * Creates a JSON file with the current state of an ETL procedure given its id
+     * (can be used later to create an ETL procedure using a file)
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return ETL content as JSON object
+     */
+
+    byte[] createSavingFile(Long etl_id, String username);
+
+
+    /**
+     * Creates the file with source fields summary
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return source field summary
+     */
+
+    byte[] createSourceFieldListCSV(Long etl_id, String username);
+
+
+    /**
+     * Creates the file with target fields summary
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return target field summary
+     */
+
+    byte[] createTargetFieldListCSV(Long etl_id, String username);
+
+
+    /**
+     * Creates the ETL procedure summary file
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return file content or null
+     */
+
+    byte[] createWordSummaryFile(Long etl_id, String username);
+
+
+    /**
+     * Updates the modification date of an ETL procedure
+     *
+     * @param etl_id ETL procedure's id
+     */
+
+    void updateModificationDate(Long etl_id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     void updateModificationDate(ETL etl);
 
 
-    /**
-     * Deletes ETL procedure given its id (operation by ADMIN)
-     *
-     * @param etl_id ETL procedure's id
-     * @return ETL object or null if not found
-     */
-
-    ETL deleteETLProcedure(Long etl_id);
 
 
-    /**
-     *
-     * @param etl
-     */
-
-    void markAsDeleted(ETL etl);
 
 
-    void markAsNotDeleted(ETL etl);
 
 
     /**
@@ -96,75 +250,5 @@ public interface ETLService {
     ETL getETLWithId(Long id);
 
 
-    /**
-     * Changes the OMOP CDM version of an ETL procedure and removes the previous OMOP CDM used
-     *
-     * @param etl_id ETL procedure's id
-     * @param cdm OMOP CDM version to change to
-     * @return modified ETL procedure
-     */
 
-    ETL changeTargetDatabase(Long etl_id, String cdm);
-
-
-    /**
-     * Adds stem table on EHR and on OMOP CDM database
-     *
-     * @param etl_id ETL procedure's id
-     * @return altered ETL procedure
-     */
-
-    ETL addStemTable(Long etl_id);
-
-
-    /**
-     * Removes stem table from EHR and OMOP CDM database and their respective mapping
-     *
-     * @param etl_id ETL procedure's id
-     * @return altered ETL procedure
-     */
-
-    ETL removeStemTable(Long etl_id);
-
-
-    /**
-     * Creates the file with source fields summary
-     *
-     * @param etl_id ETL procedure's id
-     * @return source field summary
-     */
-
-    byte[] createSourceFieldListCSV(Long etl_id);
-
-
-    /**
-     * Creates the file with target fields summary
-     *
-     * @param etl_id ETL procedure's id
-     * @return target field summary
-     */
-
-    byte[] createTargetFieldListCSV(Long etl_id);
-
-
-    /**
-     * Creates the ETL procedure summary file
-     *
-     * @param id ETL procedure's id
-     * @return file content or null
-     */
-
-    byte[] createWordSummaryFile(Long id);
-
-
-    /**
-     * Creates a JSON file with the current state of an ETL procedure given its id
-     * (can be used later to create an ETL procedure using a file)
-     *
-     * @param filename filename to store data
-     * @param etl_id ETL procedure's id
-     * @return ETL content as JSON object
-     */
-
-    byte[] createSavingFile(String filename, Long etl_id);
 }

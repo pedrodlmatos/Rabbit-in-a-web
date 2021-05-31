@@ -20,10 +20,12 @@ public interface TargetTableService {
      *
      * @param tableId table's id
      * @param comment comment to change tp
+     * @param etl_id ETL procedure's id
+     * @param username user's username
      * @return altered table
      */
 
-    TargetTable changeComment(Long tableId, String comment);
+    TargetTable changeComment(Long tableId, String comment, Long etl_id, String username);
 
 
     /**

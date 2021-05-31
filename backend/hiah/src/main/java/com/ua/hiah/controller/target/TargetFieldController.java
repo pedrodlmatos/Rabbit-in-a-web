@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,14 +29,6 @@ public class TargetFieldController {
 
     private static final Logger logger = LoggerFactory.getLogger(TargetFieldController.class);
 
-    /**
-     * Change field comment
-     *
-     * @param field field's id
-     * @param comment comment to change to
-     * @return altered field
-     */
-
     @Operation(summary = "Change comment of field from the OMOP CDM database")
     @ApiResponses(value = {
             @ApiResponse(
@@ -47,20 +40,43 @@ public class TargetFieldController {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
-                    description = "Field not found",
+                    description = "ETL not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Target Table not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
                     content = @Content
             )
     })
     @PutMapping("/comment")
-    public ResponseEntity<?> changeFieldComment(@Param(value = "field") Long field, @Param(value = "comment") String comment) {
-        logger.info("TARGET FIELD CONTROLLER - Change field {} comment", field);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeFieldComment(
+            @Param(value = "fieldId") Long fieldId,
+            @Param(value = "comment") String comment,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
+        logger.info("TARGET FIELD CONTROLLER - Change field {} comment", fieldId);
 
-        TargetField response = fieldService.changeComment(field, comment);
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        TargetField response = fieldService.changeComment(fieldId, comment, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
-
 }

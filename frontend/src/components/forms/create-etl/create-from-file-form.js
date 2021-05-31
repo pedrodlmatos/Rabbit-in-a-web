@@ -98,8 +98,8 @@ export default function CreateETLFromFileForm(props) {
                         name="file"
                         type="file"
                         placeholder="Upload Scan file"
-                        error={errors.file}
-                        onChange={handleFileChange} 
+                        onChange={handleFileChange}
+                        errors={errors.file}
                     />
                     <p className={classes.errorText} style={{ color: errors.file === "" ? "black" : "red" }}>
                         {errors.file === "" ? values.file.name : errors.file}

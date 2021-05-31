@@ -103,7 +103,7 @@ export default function UserProcedureList() {
         setDisabled(true);
         // sends request to API and then redirects to created procedure
         ETLService.createETL(values.ehrName, values.ehrFile, values.omop).then(res => {
-            window.location.href = '/procedure/' + res.data;
+            window.location.href = '/procedure/' + res.data.id;
         }).catch(res => {
             console.log(res);
         })
@@ -121,7 +121,7 @@ export default function UserProcedureList() {
         setDisabled(true);
         // sends request to API and then redirects to created procedure
         ETLService.createETLFromFile(values.file).then(res => {
-            window.location.href = '/procedure/' + res.data;
+            window.location.href = '/procedure/' + res.data.id;
         }).catch(res => {
             console.log(res);
         })

@@ -20,8 +20,10 @@ public interface SourceFieldService {
      *
      * @param field field's id
      * @param comment comment to change to
+     * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return changed field
      */
 
-    SourceField changeComment(Long field, String comment);
+    SourceField changeComment(Long field, String comment, Long etl_id, String username);
 }

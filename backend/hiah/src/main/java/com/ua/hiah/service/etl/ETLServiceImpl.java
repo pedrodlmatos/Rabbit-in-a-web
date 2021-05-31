@@ -3,6 +3,8 @@ package com.ua.hiah.service.etl;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
+import com.ua.hiah.error.exceptions.EntityNotFoundException;
+import com.ua.hiah.error.exceptions.UnauthorizedAccessException;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
@@ -11,6 +13,7 @@ import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
 import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.security.services.UserDetailsServiceImpl;
 import org.springframework.transaction.annotation.Transactional;
 import rabbitcore.utilities.ETLSummaryGenerator;
 import rabbitcore.utilities.files.Row;
@@ -26,7 +29,6 @@ import rabbitinahat.model.ETL_RIAH;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.Date;
@@ -41,6 +43,9 @@ public class ETLServiceImpl implements ETLService {
     ETLRepository etlRepository;
 
     @Autowired
+    UserDetailsServiceImpl userService;
+
+    @Autowired
     TargetDatabaseService targetDatabaseService;
 
     @Autowired
@@ -49,7 +54,80 @@ public class ETLServiceImpl implements ETLService {
     @Autowired
     TableMappingService mappingService;
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+
+    /**
+     * Retrieve all ETL procedure
+     *
+     * @return list with ETL procedures
+     */
+
+    @Override
+    public List<ETL> getAllETL() {
+        return etlRepository.findAll();
+    }
+
+
+    /**
+     * Retrieves list of ETL procedures managed by user
+     *
+     * @param username user
+     * @return list of ETL procedures
+     */
+
+    @Override
+    public List<ETL> getETLByUsername(String username) {
+        User user = userService.getUserByUsername(username);
+        // user not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        return etlRepository.findAllByUsersContainingAndDeleted(user, false);
+    }
+
+
+    /**
+     * Retrieves and ETL procedure's by its id and if user has access to it
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return ETL procedure if user has access to it, error otherwise
+     */
+
+    @Override
+    public ETL getETLWithId(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        // username not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        // user has access to ETL or is admin
+        if (userHasAccessToEtl(etl, user) || userService.userIsAdmin(user)) {
+            return etl;
+        } else {
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+        }
+    }
+
+
+    /**
+     * Retrieves an ETL procedure by its id
+     *
+     * @param id ETL procedure's id
+     * @return ETL session
+     */
+
+    @Override
+    public ETL getETLWithId(Long id) {
+        ETL etl = etlRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", id.toString()));
+
+        List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
+        sourceTables.sort(Comparator.comparingLong(SourceTable::getId));            // sort tables by id
+
+        List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
+        targetTables.sort(Comparator.comparingLong(TargetTable::getId));            // sort tables by id
+
+        return etl;
+    }
 
 
     /**
@@ -58,12 +136,16 @@ public class ETLServiceImpl implements ETLService {
      * @param ehrName EHR database name
      * @param ehrScan EHR Scan report
      * @param cdm OMOP CDM version
-     * @param user
+     * @param username User's username
      * @return created ETL procedure
      */
 
     @Override
-    public ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm, User user) {
+    public ETL createETLProcedure(String ehrName, MultipartFile ehrScan, String cdm, String username) {
+        User user = userService.getUserByUsername(username);
+        // user not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
         if (targetDatabaseService.CDMExists(cdm)) {
             ETL etl = new ETL();
             etl.setName("ETL procedure " + etlRepository.count());
@@ -75,8 +157,9 @@ public class ETLServiceImpl implements ETLService {
             etl.setCreationDate(Date.from(Instant.now()));
             etl.setModificationDate(Date.from(Instant.now()));
             return etlRepository.save(etl);
+        } else {
+            throw new EntityNotFoundException(CDMVersion.class, "OMOP CDM", cdm);
         }
-        return null;
     }
 
 
@@ -84,12 +167,16 @@ public class ETLServiceImpl implements ETLService {
      * Creates an ETL procedure from the save file created
      *
      * @param saveFile JSON file containing info about an ETL procedure
-     * @param user
+     * @param username User's username
      * @return created ETL procedure
      */
 
     @Override
-    public ETL createETLProcedureFromFile(MultipartFile saveFile, User user) {
+    public ETL createETLProcedureFromFile(MultipartFile saveFile, String username) {
+        User user = userService.getUserByUsername(username);
+        // user not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
         try {
             // write content in a file object
             File tempSaveFile = new File("tempSave.json");
@@ -134,35 +221,47 @@ public class ETLServiceImpl implements ETLService {
             // persist
             return etlRepository.save(response);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
-        return null;
-    }
-
-
-
-    /**
-     * Retrieve all ETL procedure
-     *
-     * @return list with ETL procedures
-     */
-
-    @Override
-    public List<ETL> getAllETL() {
-        return etlRepository.findAll();
     }
 
 
     /**
-     * Retrieves list of ETL procedures managed by user
+     * Deletes ETL procedure given its id (operation by ADMIN)
      *
-     * @param user user
-     * @return list of ETL procedures
+     * @param etl_id ETL procedure's id
      */
 
     @Override
-    public List<ETL> getETLByUsername(User user) {
-        return etlRepository.findAllByUsersContainingAndDeleted(user, false);
+    public void deleteETLProcedure(Long etl_id) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        etlRepository.delete(etl);
+    }
+
+
+    /**
+     * Marks an ETL procedure as deleted but doesn't remove it from database
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     */
+
+    @Override
+    public void markAsDeleted(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        // user not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        if (userHasAccessToEtl(etl, user)) {
+            etl.setDeleted(true);
+            etl.setModificationDate(Date.from(Instant.now()));
+            etlRepository.save(etl);
+        } else {
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+        }
     }
 
 
@@ -179,75 +278,38 @@ public class ETLServiceImpl implements ETLService {
         return etl.getUsers().contains(user);
     }
 
-    @Override
-    public void updateModificationDate(ETL etl) {
-        etl.setModificationDate(Date.from(Instant.now()));
-        etlRepository.save(etl);
-    }
-
 
     /**
-     * Deletes ETL procedure given its id (operation by ADMIN)
+     * Verifies if a user is a collaborator of an ETL procedure
      *
      * @param etl_id ETL procedure's id
-     * @return ETL object or null if not found
+     * @param username user's username
+     * @return true if user is a collaborator, false otherwise
      */
 
     @Override
-    public ETL deleteETLProcedure(Long etl_id) {
-        ETL etl = etlRepository.findById(etl_id).orElse(null);
+    public boolean userHasAccessToEtl(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
 
-        if (etl != null) {
-            etlRepository.delete(etl);
-            return etl;
-        }
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
-        return null;
+        return userHasAccessToEtl(etl, user);
     }
 
 
     /**
-     * Marks ETL procedures as deleted
+     * Marks an ETL procedure as not deleted
      *
-     * @param etl ETL procedure object
+     * @param etl_id ETL procedure's id
      */
 
     @Override
-    public void markAsDeleted(ETL etl) {
-        etl.setDeleted(true);
-        // define dates
-        etl.setModificationDate(Date.from(Instant.now()));
-        etlRepository.save(etl);
-    }
+    public void markAsNotDeleted(Long etl_id) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));;
 
-    @Override
-    public void markAsNotDeleted(ETL etl) {
         etl.setDeleted(false);
         etlRepository.save(etl);
-    }
-
-
-    /**
-     * Retrieves an ETL procedure by its id
-     *
-     * @param id ETL procedure's id
-     * @return ETL session
-     */
-
-    @Override
-    public ETL getETLWithId(Long id) {
-        ETL etl = etlRepository.findById(id).orElse(null);
-
-        if (etl != null) {
-            List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
-            sourceTables.sort(Comparator.comparingLong(SourceTable::getId));            // sort tables by id
-
-            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
-            targetTables.sort(Comparator.comparingLong(TargetTable::getId));            // sort tables by id
-
-            return etl;
-        }
-        return null;
     }
 
 
@@ -256,15 +318,19 @@ public class ETLServiceImpl implements ETLService {
      *
      * @param etl_id ETL procedure's id
      * @param cdm OMOP CDM version to change to
+     * @param username User's username
      * @return modified ETL procedure
      */
 
     @Override
-    public ETL changeTargetDatabase(Long etl_id, String cdm) {
-        ETL etl = etlRepository.findById(etl_id).orElse(null);
+    public ETL changeTargetDatabase(Long etl_id, String cdm, String username) {
+        User user = userService.getUserByUsername(username);
+        // user not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
 
-        if (etl != null) {
-            TargetDatabase previous = etl.getTargetDatabase();
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        if (userHasAccessToEtl(etl, user)) {
             // create an OMOP CDM from a different version
             etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
             // remove previous cdm and mappings
@@ -272,19 +338,19 @@ public class ETLServiceImpl implements ETLService {
             //targetDatabaseService.removeDatabase(previous.getId());
 
             // order tables by id
-            /*
-            List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
-            Collections.sort(sourceTables, Comparator.comparingLong(SourceTable::getId));
+        /*
+        List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
+        Collections.sort(sourceTables, Comparator.comparingLong(SourceTable::getId));
 
-            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
-            Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
-             */
+        List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
+        Collections.sort(targetTables, Comparator.comparingLong(TargetTable::getId));
+         */
 
             // define dates
             etl.setModificationDate(Date.from(Instant.now()));
             return etlRepository.save(etl);
-        }
-        return null;
+        } else
+            throw new UnauthorizedAccessException(User.class, username, etl_id);
     }
 
 
@@ -292,42 +358,61 @@ public class ETLServiceImpl implements ETLService {
      * Adds stem table on EHR and on OMOP CDM database
      *
      * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return altered ETL procedure
      */
 
     @Override
-    public ETL addStemTable(Long etl_id) {
-        ETL etl = etlRepository.findById(etl_id).orElse(null);
+    public ETL addStemTable(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
 
-        if (etl != null && !containsStemTable(etl)) {
-            CDMVersion version = etl.getTargetDatabase().getVersion();
-            // add stem table on EHR database
-            SourceDatabase sourceDatabase = etl.getSourceDatabase();
-            SourceTable sourceStemTable = sourceDatabaseService.createSourceStemTable(version, sourceDatabase);
-            sourceDatabase.getTables().add(sourceStemTable);
-            etl.setSourceDatabase(sourceDatabase);
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
-            // add stem table on OMOP CDM database
-            TargetDatabase targetDatabase = etl.getTargetDatabase();
-            TargetTable targetStemTable = targetDatabaseService.createTargetStemTable(version, targetDatabase);
-            targetDatabase.getTables().add(targetStemTable);
-            etl.setTargetDatabase(targetDatabase);
+        if (userHasAccessToEtl(etl, user)) {
+            if (!containsStemTable(etl)) {
+                CDMVersion version = etl.getTargetDatabase().getVersion();
+                // add stem table on EHR database
+                SourceDatabase sourceDatabase = etl.getSourceDatabase();
+                SourceTable sourceStemTable = sourceDatabaseService.createSourceStemTable(version, sourceDatabase);
+                sourceDatabase.getTables().add(sourceStemTable);
+                etl.setSourceDatabase(sourceDatabase);
 
-            // add mappings from and to stem table
-            List<TableMapping> prevTableMappings = etl.getTableMappings();
-            List<TableMapping> tableMappings = mappingService.createMappingsWithStemTable(version, targetDatabase, sourceStemTable, etl);
-            System.out.println(tableMappings);
-            prevTableMappings.addAll(tableMappings);
-            etl.setTableMappings(prevTableMappings);
+                // add stem table on OMOP CDM database
+                TargetDatabase targetDatabase = etl.getTargetDatabase();
+                TargetTable targetStemTable = targetDatabaseService.createTargetStemTable(version, targetDatabase);
+                targetDatabase.getTables().add(targetStemTable);
+                etl.setTargetDatabase(targetDatabase);
 
-            // define dates
-            etl.setModificationDate(Date.from(Instant.now()));
+                // add mappings from and to stem table
+                List<TableMapping> prevTableMappings = etl.getTableMappings();
+                List<TableMapping> tableMappings = mappingService.createMappingsWithStemTable(version, targetDatabase, sourceStemTable, etl);
+                prevTableMappings.addAll(tableMappings);
+                etl.setTableMappings(prevTableMappings);
 
-            return etlRepository.save(etl);
+                // define dates
+                etl.setModificationDate(Date.from(Instant.now()));
+                return etlRepository.save(etl);
+            } else
+                return etl;
+        } else
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+    /**
+     * Verifies if a database has a stem table
+     *
+     * @param etl ETL procedure
+     * @return true if already has stem table, false otherwise
+     */
+
+    private boolean containsStemTable(ETL etl) {
+        for (SourceTable table : etl.getSourceDatabase().getTables()) {
+            if (table.isStem())
+                return true;
         }
-
-        return null;
-
+        return false;
     }
 
 
@@ -335,15 +420,18 @@ public class ETLServiceImpl implements ETLService {
      * Removes stem table from EHR and OMOP CDM database and their respective mapping
      *
      * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return altered ETL procedure
      */
 
     @Override
-    public ETL removeStemTable(Long etl_id) {
-        ETL etl = etlRepository.findById(etl_id).orElse(null);
+    public ETL removeStemTable(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
 
-        if (etl != null) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
+        if (userHasAccessToEtl(etl, user)) {
             for (SourceTable table : etl.getSourceDatabase().getTables()) {
                 if (table.isStem()) {
                     //mappingService.removeTableMappingsFromTable(etl_id, table);
@@ -359,93 +447,9 @@ public class ETLServiceImpl implements ETLService {
 
             // define dates
             etl.setModificationDate(Date.from(Instant.now()));
-
             return etlRepository.findById(etl_id).orElse(null);
-        }
-        return null;
-    }
-
-
-    /**
-     *
-     * @param etl
-     * @return
-     */
-
-    private boolean containsStemTable(ETL etl) {
-        for (SourceTable table : etl.getSourceDatabase().getTables()) {
-            if (table.isStem())
-                return true;
-        }
-        return false;
-    }
-
-
-    /**
-     * Creates the file with source fields summary
-     *
-     * @param etl_id ETL procedure's id
-     * @return source field summary
-     */
-
-    @Override
-    public byte[] createSourceFieldListCSV(Long etl_id) {
-        ETL etl = etlRepository.findById(etl_id).orElse(null);
-
-        if (etl != null) {
-            List<Row> rows = ETLSummaryGenerator.createSourceFieldList(etl);
-            return ETLSummaryGenerator.writeCSV("sourceList.csv", rows);
-        }
-        return null;
-    }
-
-
-    /**
-     * Creates the file with target fields summary
-     *
-     * @param etl_id ETL procedure's id
-     * @return target field summary
-     */
-
-    @Override
-    public byte[] createTargetFieldListCSV(Long etl_id) {
-        ETL etl = etlRepository.findById(etl_id).orElse(null);
-
-        if (etl != null) {
-            List<Row> rows = ETLSummaryGenerator.createTargetFieldList(etl);
-            return ETLSummaryGenerator.writeCSV("targetList.csv", rows);
-        }
-        return null;
-    }
-
-
-    /**
-     * Creates the ETL procedure summary file
-     *
-     * @param id ETL procedure's id
-     * @return file content or null
-     */
-
-    @Override
-    public byte[] createWordSummaryFile(Long id) {
-        ETL etl = etlRepository.findById(id).orElse(null);
-
-        if (etl != null) {
-            // order tables by id
-            //List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
-            //sourceTables.sort(Comparator.comparingLong(SourceTable::getId));
-
-            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
-            targetTables.sort(Comparator.comparingLong(TargetTable::getId));
-
-            ETL_RIAH etlRiah = new ETL_RIAH(etl);
-
-            byte[] documentData = ETLWordDocumentGenerator.generate(etlRiah);
-            if (documentData != null)
-                return documentData;
-        }
-
-        return null;
+        } else
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
     }
 
 
@@ -453,16 +457,19 @@ public class ETLServiceImpl implements ETLService {
      * Creates a JSON file with the current state of an ETL procedure given its id
      * (can be used later to create an ETL procedure using a file)
      *
-     * @param filename filename to store data
      * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return ETL content as JSON object
      */
 
     @Override
-    public byte[] createSavingFile(String filename, Long etl_id) {
-        ETL etl = etlRepository.findById(etl_id).orElse(null);
+    public byte[] createSavingFile(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
 
-        if (etl != null) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        if (userHasAccessToEtl(etl, user)) {
             try {
                 // Create GSON object
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
@@ -477,16 +484,141 @@ public class ETLServiceImpl implements ETLService {
                 // transform ETL object to json object (keeping only needed attributes)
                 String etlJsonStr = gson.toJson(etl);
 
-                FileOutputStream fileOutputStream = new FileOutputStream(filename);
+                FileOutputStream fileOutputStream = new FileOutputStream("Scan.json");
                 //GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);
                 OutputStreamWriter out = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
                 out.write(etlJsonStr);
 
                 return etlJsonStr.getBytes(StandardCharsets.UTF_8);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException();
             }
-        }
-        return null;
+        } else
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+
+
+    /**
+     * Creates the file with source fields summary
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return source field summary
+     */
+
+    @Override
+    public byte[] createSourceFieldListCSV(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        if (userHasAccessToEtl(etl, user)) {
+            List<Row> rows = ETLSummaryGenerator.createSourceFieldList(etl);
+            return ETLSummaryGenerator.writeCSV("sourceList.csv", rows);
+        } else
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+    /**
+     * Creates the file with target fields summary
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return target field summary
+     */
+
+    @Override
+    public byte[] createTargetFieldListCSV(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        if (userHasAccessToEtl(etl, user)) {
+            List<Row> rows = ETLSummaryGenerator.createTargetFieldList(etl);
+            return ETLSummaryGenerator.writeCSV("targetList.csv", rows);
+        } else
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+    /**
+     * Creates the ETL procedure summary file
+     *
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return file content or null
+     */
+
+    @Override
+    public byte[] createWordSummaryFile(Long etl_id, String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        if (userHasAccessToEtl(etl, user)) {
+            // order tables by id
+            //List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
+            //sourceTables.sort(Comparator.comparingLong(SourceTable::getId));
+
+            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
+            targetTables.sort(Comparator.comparingLong(TargetTable::getId));
+
+            ETL_RIAH etlRiah = new ETL_RIAH(etl);
+
+            byte[] documentData = ETLWordDocumentGenerator.generate(etlRiah);
+            if (documentData != null)
+                return documentData;
+            else
+                throw new RuntimeException();
+        } else
+            throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+    @Override
+    public void updateModificationDate(Long etl_id) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+        etl.setModificationDate(Date.from(Instant.now()));
+        etlRepository.save(etl);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public void updateModificationDate(ETL etl) {
+        etl.setModificationDate(Date.from(Instant.now()));
+        etlRepository.save(etl);
     }
 }

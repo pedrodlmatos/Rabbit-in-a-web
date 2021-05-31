@@ -1,6 +1,7 @@
 package com.ua.hiah.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.ua.hiah.error.exceptions.UnauthorizedAccessException;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.model.auth.User;
@@ -39,13 +40,10 @@ public class TableMappingController {
     private static final Logger logger = LoggerFactory.getLogger(TableMappingController.class);
 
     @Autowired
-    private UserDetailsServiceImpl userService;
+    private TableMappingService service;
 
     @Autowired
     private ETLService etlService;
-
-    @Autowired
-    private TableMappingService service;
 
 
     @Operation(summary = "Retrieves a table mapping")
@@ -62,19 +60,31 @@ public class TableMappingController {
                     responseCode = "404",
                     description = "Table mapping not found",
                     content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
             )
-
     })
-    @GetMapping("/map/{etl_id}")
+    @GetMapping("/map/{tableMappingId}")
     @JsonView(Views.TableMapping.class)
-    public ResponseEntity<?> getTableMapping(@PathVariable Long etl_id) {
-        logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + etl_id);
-        TableMapping response = service.getTableMappingById(etl_id);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getTableMapping(@PathVariable Long tableMappingId, @Param(value = "etl_id") Long etl_id, @Param(value = "username") String username) {
+        logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + tableMappingId);
 
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        TableMapping response = service.getTableMappingById(tableMappingId, etl_id, username);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
@@ -90,50 +100,40 @@ public class TableMappingController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Some parameters not found",
+                    description = "Table mapping not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
                     content = @Content
             )
     })
     @PostMapping("/map")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> createTableMapping(
-            @Param(value = "username") String username,
-            @Param(value = "elt_id") Long etl_id,
             @Param(value = "source_id") Long source_id,
-            @Param(value = "target_id") Long target_id) {
+            @Param(value = "target_id") Long target_id,
+            @Param(value = "username") String username,
+            @Param(value = "elt_id") Long etl_id) {
         logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
 
-        // get User
-        User user = userService.getUserByUsername(username);
-        if (user == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        ETL etl = etlService.getETLWithId(etl_id);
-        if (etl == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        if (etlService.userHasAccessToEtl(etl, user)) {
-            TableMapping response = service.addTableMapping(source_id, target_id, etl_id);
-            if (response == null)
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            else {
-                // update modification date
-                etl = etlService.getETLWithId(etl_id);
-                etlService.updateModificationDate(etl);
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        TableMapping response = service.addTableMapping(source_id, target_id, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
 
-
-    /**
-     * Deletes a table mapping
-     *
-     * @param map_id table mapping id
-     * @param etl_id ETL session id
-     * @return ETL session (with other table mappings)
-     */
 
     @Operation(summary = "Deletes a table mapping")
     @ApiResponses(value = {
@@ -152,30 +152,34 @@ public class TableMappingController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "ETL session not found",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
                     content = @Content
             )
     })
     @DeleteMapping("/map")
-    public ResponseEntity<?> removeTableMapping(@Param(value="map_id") Long map_id, @Param(value="etl_id") Long etl_id) {
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> removeTableMapping(
+            @Param(value = "map_id") Long map_id,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
         logger.info("TABLE MAPPING CONTROLLER - Removed table mapping with id " + map_id);
-        TableMapping response = service.removeTableMapping(map_id);
 
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        List<TableMapping> res = service.getTableMappingFromETL(etl_id);
-        return new ResponseEntity<>(res, HttpStatus.OK);
+        service.removeTableMapping(map_id, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
     }
 
-
-    /**
-     * Changes the completion status of a table mapping
-     *
-     * @param map_id table mapping id
-     * @param completion completion status to change to
-     * @return table mapping altered
-     */
 
     @Operation(summary = "Change table mapping completion status")
     @ApiResponses(value = {
@@ -191,27 +195,37 @@ public class TableMappingController {
                     responseCode = "404",
                     description = "Table mapping not found",
                     content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
             )
     })
     @PutMapping("/map/{map_id}/complete")
-    public ResponseEntity<?> editCompleteMapping(@PathVariable Long map_id, @Param(value = "completion") boolean completion) {
+    public ResponseEntity<?> editCompleteMapping(
+            @PathVariable Long map_id,
+            @Param(value = "completion") boolean completion,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
         logger.info("TABLE MAPPING CONTROLLER - Change completion status of mapping " + map_id);
-        TableMapping response = service.changeCompletionStatus(map_id, completion);
 
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        TableMapping response = service.changeCompletionStatus(map_id, completion, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
 
-
-    /**
-     * Changes the logic of a table mapping
-     *
-     * @param map_id table mapping id
-     * @param logic table mapping logic
-     * @return table mapping altered
-     */
 
     @Operation(summary = "Change table mapping logic")
     @ApiResponses(value = {
@@ -227,16 +241,34 @@ public class TableMappingController {
                     responseCode = "404",
                     description = "Table mapping not found",
                     content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
             )
     })
     @PutMapping("/map/{map_id}/logic")
-    public ResponseEntity<?> editMappingLogic(@PathVariable Long map_id, @Param(value = "logic") String logic) {
+    public ResponseEntity<?> editMappingLogic(
+            @PathVariable Long map_id,
+            @Param(value = "logic") String logic,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
         logger.info("TABLE MAPPING - Change mapping logic of mapping " + map_id);
-        TableMapping response = service.changeMappingLogic(map_id, logic);
 
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        TableMapping response = service.changeMappingLogic(map_id, logic, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
 }

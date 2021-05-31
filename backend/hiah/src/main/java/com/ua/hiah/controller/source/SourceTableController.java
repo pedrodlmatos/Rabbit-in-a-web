@@ -31,12 +31,6 @@ public class SourceTableController {
     @Autowired
     private SourceTableService tableService;
 
-    @Autowired
-    private ETLService etlService;
-
-    @Autowired
-    private UserDetailsServiceImpl userService;
-
     private static final Logger logger = LoggerFactory.getLogger(SourceTableController.class);
 
     @Operation(summary = "Change comment of a table from the EHR database")
@@ -50,43 +44,43 @@ public class SourceTableController {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
-                    description = "Table not found",
+                    description = "ETL not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "SourceTable not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
                     content = @Content
             )
     })
     @PutMapping("/comment")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> changeTableComment(
-            @Param(value = "table") Long table,
+            @Param(value = "table_id") Long table_id,
             @Param(value = "comment") String comment,
             @Param(value = "username") String username,
             @Param(value = "etl_id") Long etl_id) {
-        logger.info("SOURCE TABLE CONTROLLER - Change table {} comment", table);
+        logger.info("SOURCE TABLE CONTROLLER - Change table {} comment", table_id);
 
-        // get user
-        User user = userService.getUserByUsername(username);
-        if (user == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        // get etl
-        ETL etl = etlService.getETLWithId(etl_id);
-        if (etl == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        // verify if user has access to etl
-        if (etlService.userHasAccessToEtl(etl, user)) {
-            // get table
-            SourceTable response = tableService.changeComment(table, comment);
-            if (response == null)
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            else {
-                // update etl modification date
-                etl = etlService.getETLWithId(etl_id);
-                etlService.updateModificationDate(etl);
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        SourceTable response = tableService.changeComment(table_id, comment, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
 }

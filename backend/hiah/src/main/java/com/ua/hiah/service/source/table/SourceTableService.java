@@ -18,12 +18,15 @@ public interface SourceTableService {
     /**
      * Changes the comment of a table of the EHR database
      *
-     * @param tableId table's id
+     *
+     * @param table_id table's id
      * @param comment comment to change to
+     * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return changed table
      */
 
-    SourceTable changeComment(Long tableId, String comment);
+    SourceTable changeComment(Long table_id, String comment, Long etl_id, String username);
 
 
     /**

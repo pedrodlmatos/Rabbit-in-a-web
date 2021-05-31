@@ -12,20 +12,59 @@ public interface FieldMappingService {
      * @param sourceFieldId source field's id
      * @param targetTableId target field's id
      * @param tableMappingId table mapping's id
+     * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return created table mapping
      */
 
-    FieldMapping addFieldMapping(Long sourceFieldId, Long targetTableId, Long tableMappingId);
+    FieldMapping addFieldMapping(Long sourceFieldId, Long targetTableId, Long tableMappingId, Long etl_id, String username);
 
 
     /**
      * Deletes a field mapping
      *
      * @param fieldMappingId field mapping id
-     * @return deleted mapping
+     * @param etl_id ETL procedure's id
+     * @param username User's username
      */
 
-    FieldMapping removeFieldMapping(Long fieldMappingId);
+    void removeFieldMapping(Long fieldMappingId, Long etl_id, String username);
+
+
+    /**
+     * Changes the logic of a given field mapping
+     *
+     * @param fieldMappingId field mapping's id
+     * @param logic logic to change to
+     * @param etl_id ETL procedure's id
+     * @param username user's username
+     * @return altered logic
+     */
+
+    FieldMapping changeMappingLogic(Long fieldMappingId, String logic, Long etl_id, String username);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -38,13 +77,7 @@ public interface FieldMappingService {
     List<FieldMapping> getFieldMappingsFromTableMapping(Long tableMappingId);
 
 
-    /**
-     * Changes the logic of a given field mapping
-     *
-     * @param fieldMappingId field mapping's id
-     * @param logic logic to change to
-     * @return altered logic
-     */
 
-    FieldMapping changeMappingLogic(Long fieldMappingId, String logic);
+
+
 }

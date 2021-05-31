@@ -100,17 +100,42 @@ export default function AdminProcedureList() {
     }, []);
 
 
+    /**
+     * Redirects for the ETL procedure page
+     *
+     * @param id
+     */
+
     const accessETLProcedure = (id) => {
         window.location.href = '/procedure/' + id;
     }
 
 
-    const deleteETLProcedure = (id) => {
-        ETLService.deleteETLProcedure(id).then(response => {
-            const index = procedures.findIndex(x => x.id === id);
-            procedures.splice(index, 1);
-        }).catch(e => { console.log(e)})
+    /**
+     * Deletes an ETL procedure, removing it from table
+     *
+     * @param etl_id ETL procedure's id
+     */
+
+    const deleteETLProcedure = (etl_id) => {
+        ETLService.deleteETLProcedure(etl_id).then(() => {
+            let new_procedures = []
+            procedures.forEach(function(p) {
+                if (p.id !== etl_id)
+                    new_procedures.push(p);
+            })
+            setProcedures(new_procedures);
+            sortData(sortBy, sortOrder);
+        });
     }
+
+
+    /**
+     * Verifies if an ETL procedure is marked as deleted
+     *
+     * @param id
+     * @returns {boolean}
+     */
 
     const getDeletionStatus = (id) => {
         let result = false;
@@ -120,6 +145,12 @@ export default function AdminProcedureList() {
         return result;
     }
 
+
+    /**
+     * Changes the deletion status of a given ETL procedure
+     *
+     * @param procedure ETL procedure
+     */
     // TODO: refactor (fix)
     const handleETLProcedureDeletion = (procedure) => {
         if (procedure.deleted) {
@@ -129,9 +160,10 @@ export default function AdminProcedureList() {
                     if (item.id === procedure.id)
                         item.deleted = false;
 
-                    procedures_new = procedures_new.concat(item);
+                    procedures_new.push(item);
                 })
                 setProcedures(procedures_new);
+                sortData(sortBy, sortOrder);
             });
         } else {
             ETLService.markETLProcedureAsDeleted(procedure.id)
@@ -140,14 +172,22 @@ export default function AdminProcedureList() {
                     procedures.forEach(item => {
                         if (item.id === procedure.id)
                             item.deleted = true;
-
-                        procedures_new = procedures_new.concat(item);
+                        procedures_new.push(item);
                     })
                     setProcedures(procedures_new);
+                    sortData(sortBy, sortOrder);
                 });
         }
     }
 
+
+    /**
+     * Sorts the list of ETL procedures according to the parameter and order
+     *
+     * @param paramSort parameter to sort to (OMOP CDM, creation date, modification date)
+     * @param sortOrder sort order (descendent or ascendant)
+     * @returns {*|*[]} list of sorted items
+     */
 
     const sortData = (paramSort, sortOrder) => {
         let itemsToSort = JSON.parse(JSON.stringify(procedures));
@@ -211,6 +251,12 @@ export default function AdminProcedureList() {
         return sortedItems;
     }
 
+
+    /**
+     * Defines the parameter to sort by and the order and sort list of procedures
+     *
+     * @param paramToSort Parameter to sort by
+     */
 
     const requestSort = (paramToSort) => {        
         if (paramToSort === sortBy) {
@@ -331,8 +377,7 @@ export default function AdminProcedureList() {
                                                     color="secondary"
                                                     disabled={false}
                                                     onClick={() => deleteETLProcedure(procedure.id)}
-                                                >
-                                                </Controls.Button>
+                                                />
                                             </StyledTableCell>
                                         </StyledTableRow>
                                     )

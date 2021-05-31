@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,13 +29,6 @@ public class SourceFieldController {
 
     private static final Logger logger = LoggerFactory.getLogger(SourceFieldController.class);
 
-    /**
-     * Change field comment
-     *
-     * @param field field's id
-     * @param comment comment to change to
-     * @return altered source field
-     */
 
     @Operation(summary = "Change the comment of a field from the EHR database")
     @ApiResponses(value = {
@@ -47,20 +41,43 @@ public class SourceFieldController {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
-                    description = "Field not found",
+                    description = "ETL not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Source Field not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
                     content = @Content
             )
     })
     @PutMapping("/comment")
-    public ResponseEntity<?> changeFieldComment(@Param(value = "field") Long field, @Param(value = "comment") String comment) {
-        logger.info("SOURCE FIELD CONTROLLER - Change field {} comment", field);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeFieldComment(
+            @Param(value = "fieldId") Long fieldId,
+            @Param(value = "comment") String comment,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
+        logger.info("SOURCE FIELD CONTROLLER - Change field {} comment", fieldId);
 
-        SourceField response = fieldService.changeComment(field, comment);
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        SourceField response = fieldService.changeComment(fieldId, comment, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
-
 }

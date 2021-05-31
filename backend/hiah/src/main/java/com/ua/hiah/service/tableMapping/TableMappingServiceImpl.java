@@ -1,5 +1,7 @@
 package com.ua.hiah.service.tableMapping;
 
+import com.ua.hiah.error.exceptions.EntityNotFoundException;
+import com.ua.hiah.error.exceptions.UnauthorizedAccessException;
 import com.ua.hiah.model.*;
 import com.ua.hiah.model.source.SourceDatabase;
 import com.ua.hiah.model.source.SourceField;
@@ -43,43 +45,30 @@ public class TableMappingServiceImpl implements TableMappingService {
      * Gets a table mapping given its id
      *
      * @param map_id table mapping id
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     * @return table mapping if found, null otherwise
+     */
+
+    @Override
+    public TableMapping getTableMappingById(Long map_id, Long etl_id, String username) {
+        if (etlService.userHasAccessToEtl(etl_id, username))
+            return repository.findById(map_id).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", map_id.toString()));
+        else
+            throw new UnauthorizedAccessException(TableMapping.class, username, etl_id);
+    }
+
+
+    /**
+     * Gets a table mapping given its id
+     *
+     * @param map_id table mapping id
      * @return table mapping if found, null otherwise
      */
 
     @Override
     public TableMapping getTableMappingById(Long map_id) {
-        return repository.findById(map_id).orElse(null);
-    }
-
-
-    /**
-     * Deletes a table mapping given its id
-     *
-     * @param map_id table mapping id
-     * @return deleted mapping
-     */
-
-    @Override
-    public TableMapping removeTableMapping(Long map_id) {
-        TableMapping mapping = repository.findById(map_id).orElse(null);
-
-        if (mapping == null) return null;
-
-        repository.delete(mapping);
-        return mapping;
-    }
-
-
-    /**
-     * Gets all table mappings from a given ETL procedure
-     *
-     * @param etl_id ETL procedure's id
-     * @return list with table mappings
-     */
-
-    @Override
-    public List<TableMapping> getTableMappingFromETL(Long etl_id) {
-        return repository.findAllByEtl_Id(etl_id);
+        return repository.findById(map_id).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", map_id.toString()));
     }
 
 
@@ -89,26 +78,50 @@ public class TableMappingServiceImpl implements TableMappingService {
      * @param source_id source table's id
      * @param target_id target table's id
      * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return created table mapping
      */
 
     @Override
-    public TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id) {
-        SourceTable sourceTable = sourceTableService.getTableById(source_id);
-        TargetTable targetTable = targetTableService.getTableById(target_id);
-        ETL etl = etlService.getETLWithId(etl_id);
+    public TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id, String username) {
+        if (etlService.userHasAccessToEtl(etl_id, username)) {
+            SourceTable sourceTable = sourceTableService.getTableById(source_id);
+            TargetTable targetTable = targetTableService.getTableById(target_id);
+            ETL etl = etlService.getETLWithId(etl_id);
 
-        // validate
-        if (etl != null && sourceTable != null && targetTable != null) {
+            // validate
             TableMapping mapping = new TableMapping(
                     sourceTable,
                     targetTable,
                     false,
                     etl
             );
+
+            // update modification date
+            etlService.updateModificationDate(etl_id);
             return repository.save(mapping);
-        }
-        return null;
+        } else
+            throw new UnauthorizedAccessException(TableMapping.class, username, etl_id);
+    }
+
+
+    /**
+     * Deletes a table mapping given its id
+     *
+     * @param map_id table mapping id
+     * @param etl_id ETL procedure's id
+     * @param username User's username
+     */
+
+    @Override
+    public void removeTableMapping(Long map_id, Long etl_id, String username) {
+        if (etlService.userHasAccessToEtl(etl_id, username)) {
+            TableMapping tableMapping = repository.findById(map_id).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", map_id.toString()));
+            //update modification date
+            etlService.updateModificationDate(etl_id);
+            repository.delete(tableMapping);
+        } else
+            throw new UnauthorizedAccessException(TableMapping.class, username, map_id);
     }
 
 
@@ -117,19 +130,25 @@ public class TableMappingServiceImpl implements TableMappingService {
      *
      * @param tableMappingId table mapping id
      * @param completion state to change to
+     * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return altered table mapping
      */
 
     @Override
-    public TableMapping changeCompletionStatus(Long tableMappingId, boolean completion) {
-        TableMapping mapping = repository.findById(tableMappingId).orElse(null);
+    public TableMapping changeCompletionStatus(Long tableMappingId, boolean completion, Long etl_id, String username) {
+        if (etlService.userHasAccessToEtl(etl_id, username)) {
+            TableMapping mapping = repository.findById(tableMappingId).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", tableMappingId.toString()));
 
-        if (mapping == null) return null;                               // mapping not found
-        if (mapping.isComplete() == completion) return mapping;         // completion status don't change
-        else {                                                          // completion status change
-            mapping.setComplete(completion);
-            return repository.save(mapping);
-        }
+            if (mapping.isComplete() == completion) return mapping;         // completion status don't change
+            else {                                                          // completion status change
+                mapping.setComplete(completion);
+                // update modification date
+                etlService.updateModificationDate(etl_id);
+                return repository.save(mapping);
+            }
+        } else
+            throw new UnauthorizedAccessException(TableMapping.class, username, tableMappingId);
     }
 
 
@@ -138,30 +157,26 @@ public class TableMappingServiceImpl implements TableMappingService {
      *
      * @param tableMappingId table mapping id
      * @param logic logic to change to
+     * @param etl_id ETL procedure's id
+     * @param username User's username
      * @return altered table mapping
      */
 
     @Override
-    public TableMapping changeMappingLogic(Long tableMappingId, String logic) {
-        TableMapping mapping = repository.findById(tableMappingId).orElse(null);
-        if (mapping == null) return null;
-        else if (mapping.getLogic().equals(logic)) return mapping;
-        else {
-            mapping.setLogic(logic);
-            return repository.save(mapping);
-        }
-    }
+    public TableMapping changeMappingLogic(Long tableMappingId, String logic, Long etl_id, String username) {
+        if (etlService.userHasAccessToEtl(etl_id, username)) {
+            TableMapping mapping = repository.findById(tableMappingId).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", tableMappingId.toString()));
 
+            if (mapping.getLogic() != null && mapping.getLogic().equals(logic)) return mapping;
+            else {
+                mapping.setLogic(logic);
+                // update modification date
+                etlService.updateModificationDate(etl_id);
+                return repository.save(mapping);
+            }
 
-    /**
-     * Removes all table mappings of a given ETL procedures
-     *
-     * @param etl_id ETL procedure's id
-     */
-
-    @Override
-    public void removeTableMappingsFromETL(long etl_id) {
-        repository.deleteAllByEtl_Id(etl_id);
+        } else
+            throw new UnauthorizedAccessException(TableMapping.class, username, tableMappingId);
     }
 
 
@@ -191,10 +206,10 @@ public class TableMappingServiceImpl implements TableMappingService {
 
                     if (sourceField != null && targetField != null) {
                         FieldMapping responseFieldMapping = new FieldMapping(
-                            sourceField,
-                            targetField,
-                            fieldMapping.getLogic(),
-                            responseMapping
+                                sourceField,
+                                targetField,
+                                fieldMapping.getLogic(),
+                                responseMapping
                         );
                         responseMapping.getFieldMappings().add(responseFieldMapping);
                     }
@@ -203,6 +218,18 @@ public class TableMappingServiceImpl implements TableMappingService {
             }
         }
         return responseMappings;
+    }
+
+
+    /**
+     * Removes all table mappings of a given ETL procedures
+     *
+     * @param etl_id ETL procedure's id
+     */
+
+    @Override
+    public void removeTableMappingsFromETL(long etl_id) {
+        repository.deleteAllByEtl_Id(etl_id);
     }
 
 
@@ -238,9 +265,9 @@ public class TableMappingServiceImpl implements TableMappingService {
 
                     if (sourceField != null && targetField != null) {
                         FieldMapping fieldMapping = new FieldMapping(
-                            sourceField,
-                            targetField,
-                            mappingMap.get(targetTableName)
+                                sourceField,
+                                targetField,
+                                mappingMap.get(targetTableName)
                         );
                         mappingMap.get(targetTableName).getFieldMappings().add(fieldMapping);
                     }
@@ -253,6 +280,72 @@ public class TableMappingServiceImpl implements TableMappingService {
         }
         return null;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Gets all table mappings from a given ETL procedure
+     *
+     * @param etl_id ETL procedure's id
+     * @return list with table mappings
+     */
+
+    @Override
+    public List<TableMapping> getTableMappingFromETL(Long etl_id) {
+        return repository.findAllByEtl_Id(etl_id);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public void removeTableMappingsFromTable(Long etl_id, SourceTable table) {

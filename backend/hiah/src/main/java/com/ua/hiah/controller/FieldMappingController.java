@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,14 +35,6 @@ public class FieldMappingController {
     @Autowired
     private FieldMappingService service;
 
-    /**
-     * Creates a field mapping
-     *
-     * @param tableMap Table mapping id
-     * @param source_id Source field id
-     * @param target_id Target field id
-     * @return created field mapping or error
-     */
 
     @Operation(summary = "Creates a field mapping with a field from the EHR database and other from the OMOP CDM")
     @ApiResponses(value = {
@@ -54,29 +47,42 @@ public class FieldMappingController {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "500",
-                    description = "Some parameters not found",
+                    description = "Internal error",
                     content = @Content
             )
     })
     @PostMapping("/create")
-    public ResponseEntity<?> createFieldMapping(@Param(value = "tableMap") Long tableMap, @Param(value = "source_id") Long source_id, @Param(value = "target_id") Long target_id) {
-        logger.info("FIELD MAPPING CONTROLLER - Add field mapping between {} and {} in table mapping {}", source_id, target_id, tableMap);
-        FieldMapping response = service.addFieldMapping(source_id, target_id, tableMap);
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> createFieldMapping(
+            @Param(value = "tableMappingId") Long tableMappingId,
+            @Param(value = "sourceFieldId") Long sourceFieldId,
+            @Param(value = "targetFieldId") Long targetFieldId,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
+        logger.info("FIELD MAPPING CONTROLLER - Add field mapping between {} and {} in table mapping {}", sourceFieldId, targetFieldId, tableMappingId);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        FieldMapping response = service.addFieldMapping(sourceFieldId, targetFieldId, tableMappingId, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
     }
 
-
-    /**
-     * Removes a field mapping given its id
-     *
-     * @param tableMappingId Table mapping id
-     * @param fieldMappingId Field mapping id
-     * @return list with other field mappings
-     */
 
     @Operation(summary = "Deletes a field mapping")
     @ApiResponses(value = {
@@ -89,34 +95,44 @@ public class FieldMappingController {
                     )
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "Field mapping not found",
-                    content = { @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = FieldMapping.class))
-                    )}
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
             )
     })
     @DeleteMapping("/remove")
-    public ResponseEntity<?> removeFieldMapping(@Param(value="tableMappingId") Long tableMappingId, @Param(value="fieldMappingId") Long fieldMappingId) {
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> removeFieldMapping(
+            @Param(value = "fieldMappingId") Long fieldMappingId,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
         logger.info("FIELD MAPPING CONTROLLER - Removed field mapping with id " + fieldMappingId);
-        FieldMapping response = service.removeFieldMapping(fieldMappingId);
 
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-        List<FieldMapping> res = service.getFieldMappingsFromTableMapping(tableMappingId);
-        return new ResponseEntity<>(res, HttpStatus.OK);
+        service.removeFieldMapping(fieldMappingId, etl_id, username);
+        return ResponseEntity
+                .status(HttpStatus.OK).build();
     }
 
-
-    /**
-     * Changes the logic of a field mapping
-     *
-     * @param id field mapping id
-     * @param logic field mapping logic
-     * @return field mapping altered
-     */
 
     @Operation(summary = "Change field mapping logic")
     @ApiResponses(value = {
@@ -129,19 +145,41 @@ public class FieldMappingController {
                     )}
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
-                    description = "Table mapping not found",
+                    description = "Field mapping not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
                     content = @Content
             )
     })
     @PutMapping("/map/{id}/logic")
-    public ResponseEntity<?> editMappingLogic(@PathVariable Long id, @Param(value = "logic") String logic) {
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> editMappingLogic(
+            @PathVariable Long id,
+            @Param(value = "logic") String logic,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
         logger.info("FIELD MAPPING - Change mapping logic of mapping " + id);
-        FieldMapping response = service.changeMappingLogic(id, logic);
 
-        if (response == null)
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
+        FieldMapping response = service.changeMappingLogic(id, logic, etl_id, username);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

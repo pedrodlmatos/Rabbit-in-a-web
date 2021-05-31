@@ -1,34 +1,51 @@
 package com.ua.hiah.error;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
 public class ApiError {
 
     private HttpStatus status;
-    private String message;
-    private List<String> errors;
 
-    public ApiError(HttpStatus status, String message, List<String> errors) {
-        super();
-        this.status = status;
-        this.message = message;
-        this.errors = errors;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+    private LocalDateTime timestamp;
+    private String message;
+    private String debugMessage;
+    private List<ApiSubError> subErrors;
+
+    public ApiError() {
+        timestamp = LocalDateTime.now();
     }
 
-    public ApiError(HttpStatus status, String message, String error) {
+    public ApiError(HttpStatus status) {
+        this();
+        this.status = status;
+    }
+
+
+    public ApiError(HttpStatus status, Throwable ex) {
+        this();
+        this.status = status;
+        this.message = "Unexpected error";
+        this.debugMessage = ex.getLocalizedMessage();
+    }
+
+    public ApiError(HttpStatus status, String message, Throwable ex) {
+        this();
         this.status = status;
         this.message = message;
-        errors = Arrays.asList(error);
+        this.debugMessage = ex.getLocalizedMessage();
     }
 
     public HttpStatus getStatus() {
         return status;
     }
 
-    public void setStatus(final HttpStatus status) {
+    public void setStatus(HttpStatus status) {
         this.status = status;
     }
 
@@ -36,20 +53,7 @@ public class ApiError {
         return message;
     }
 
-    public void setMessage(final String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(final List<String> errors) {
-        this.errors = errors;
-    }
-
-    public void setError(final String error) {
-        errors = Arrays.asList(error);
-    }
-
 }

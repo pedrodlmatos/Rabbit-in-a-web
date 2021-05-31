@@ -59,7 +59,7 @@ export function useForm(initialFValues, validateOnChange = false, validate) {
 
 
     return {
-        values, setValues,
+        values,
         errors, setErrors,
         handleInputChange,
         handleFileChange,

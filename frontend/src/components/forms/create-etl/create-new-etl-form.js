@@ -116,8 +116,8 @@ export default function CreateETLForm(props) {
                         label="EHR Name"
                         placeholder="EHR database name"
                         name="ehrName"
-                        onChange={handleInputChange}
                         error={errors.ehrName}
+                        onChange={handleInputChange}
                     />
                 </Grid>
 
@@ -127,8 +127,8 @@ export default function CreateETLForm(props) {
                         name="ehrFile"
                         type="file"
                         placeholder="Upload EHR scan"
+                        onChange={handleFileChange}
                         error={errors.ehrFile}
-                        onChange={handleFileChange} 
                     />
                     <p className={classes.errorText} style={{ color: errors.ehrFile === "" ? "black" : "red" }}>
                         {errors.ehrFile === "" ? values.ehrFile.name : errors.ehrFile}
