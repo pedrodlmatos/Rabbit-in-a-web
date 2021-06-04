@@ -10,8 +10,10 @@ import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.model.auth.User;
 import com.ua.hiah.model.source.SourceDatabase;
+import com.ua.hiah.model.source.SourceField;
 import com.ua.hiah.model.source.SourceTable;
 import com.ua.hiah.model.target.TargetDatabase;
+import com.ua.hiah.model.target.TargetField;
 import com.ua.hiah.model.target.TargetTable;
 import com.ua.hiah.security.services.UserDetailsServiceImpl;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ import rabbitinahat.model.ETL_RIAH;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -102,6 +105,18 @@ public class ETLServiceImpl implements ETLService {
 
         // user has access to ETL or is admin
         if (userHasAccessToEtl(etl, user) || userService.userIsAdmin(user)) {
+            // sort field from the EHR database by id
+            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
+                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            // sort tables from the EHR database by id
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+
+            // sort fields from the OMOP CDM database by id
+            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
+                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            // sort tables from the OMOP CDM database by id
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+
             return etl;
         } else {
             throw new UnauthorizedAccessException(ETL.class, username, etl_id);
@@ -120,11 +135,17 @@ public class ETLServiceImpl implements ETLService {
     public ETL getETLWithId(Long id) {
         ETL etl = etlRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", id.toString()));
 
-        List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
-        sourceTables.sort(Comparator.comparingLong(SourceTable::getId));            // sort tables by id
+        // sort field from the EHR database by id
+        for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
+            sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+        // sort tables from the EHR database by id
+        etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
 
-        List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
-        targetTables.sort(Comparator.comparingLong(TargetTable::getId));            // sort tables by id
+        // sort fields from the OMOP CDM database by id
+        for (TargetTable targetTable : etl.getTargetDatabase().getTables())
+            targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+        // sort tables from the OMOP CDM database by id
+        etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
 
         return etl;
     }
@@ -255,7 +276,7 @@ public class ETLServiceImpl implements ETLService {
 
         ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
-        if (userHasAccessToEtl(etl, user)) {
+        if (userHasAccessToEtl(etl, user) || userService.userIsAdmin(user)) {
             etl.setDeleted(true);
             etl.setModificationDate(Date.from(Instant.now()));
             etlRepository.save(etl);
@@ -474,12 +495,17 @@ public class ETLServiceImpl implements ETLService {
                 // Create GSON object
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
-                // sort tables and fields by its (to keep original order)
-                List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
-                sourceTables.sort(Comparator.comparingLong(SourceTable::getId));
+                // sort field from the EHR database by id
+                for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
+                    sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+                // sort tables from the EHR database by id
+                etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
 
-                List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
-                targetTables.sort(Comparator.comparingLong(TargetTable::getId));
+                // sort fields from the OMOP CDM database by id
+                for (TargetTable targetTable : etl.getTargetDatabase().getTables())
+                    targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+                // sort tables from the OMOP CDM database by id
+                etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
 
                 // transform ETL object to json object (keeping only needed attributes)
                 String etlJsonStr = gson.toJson(etl);
@@ -516,6 +542,18 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
         if (userHasAccessToEtl(etl, user)) {
+            // sort field from the EHR database by id
+            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
+                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            // sort tables from the EHR database by id
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+
+            // sort fields from the OMOP CDM database by id
+            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
+                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            // sort tables from the OMOP CDM database by id
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+
             List<Row> rows = ETLSummaryGenerator.createSourceFieldList(etl);
             return ETLSummaryGenerator.writeCSV("sourceList.csv", rows);
         } else
@@ -539,6 +577,18 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
         if (userHasAccessToEtl(etl, user)) {
+            // sort field from the EHR database by id
+            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
+                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            // sort tables from the EHR database by id
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+
+            // sort fields from the OMOP CDM database by id
+            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
+                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            // sort tables from the OMOP CDM database by id
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+
             List<Row> rows = ETLSummaryGenerator.createTargetFieldList(etl);
             return ETLSummaryGenerator.writeCSV("targetList.csv", rows);
         } else
@@ -562,12 +612,17 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
         if (userHasAccessToEtl(etl, user)) {
-            // order tables by id
-            //List<SourceTable> sourceTables = etl.getSourceDatabase().getTables();
-            //sourceTables.sort(Comparator.comparingLong(SourceTable::getId));
+            // sort field from the EHR database by id
+            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
+                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            // sort tables from the EHR database by id
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
 
-            List<TargetTable> targetTables = etl.getTargetDatabase().getTables();
-            targetTables.sort(Comparator.comparingLong(TargetTable::getId));
+            // sort fields from the OMOP CDM database by id
+            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
+                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            // sort tables from the OMOP CDM database by id
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
 
             ETL_RIAH etlRiah = new ETL_RIAH(etl);
 

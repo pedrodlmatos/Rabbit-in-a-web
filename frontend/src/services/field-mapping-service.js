@@ -6,25 +6,67 @@ const API_URL = environment.FIELD_MAP_URL;
 
 class FieldMappingService {
 
-    addFieldMapping(tableMap, source, target) {
-        return axios.post(API_URL + "create", null, { headers: authHeader(), params: { tableMap: tableMap, source_id: source, target_id: target } });
+    /**
+     *
+     * @param tableMappingId
+     * @param sourceFieldId
+     * @param targetFieldId
+     * @param etl_id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    addFieldMapping(tableMappingId, sourceFieldId, targetFieldId, etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return axios.post(
+            API_URL + "create",
+            null,
+            {
+                headers: authHeader(),
+                params: {
+                    tableMappingId: tableMappingId,
+                    sourceFieldId: sourceFieldId,
+                    targetFieldId: targetFieldId,
+                    etl_id: etl_id,
+                    username: username
+                }
+            }
+        );
     }
 
-    removeFieldMapping(tableMapping_id, fieldMapping_id) {
-        return axios.delete(API_URL + "remove", { headers: authHeader(), params: { tableMappingId: tableMapping_id, fieldMappingId: fieldMapping_id } })
+
+    /**
+     *
+     *
+     * @param fieldMappingId
+     * @param etl_id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    removeFieldMapping(fieldMappingId, etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return axios.delete(
+            API_URL + "remove",
+            { headers: authHeader(), params: { fieldMappingId: fieldMappingId, etl_id: etl_id, username: username } }
+        );
     }
 
 
     /**
      * Sends a PUT request to change table mapping logic
-     * 
-     * @param {*} map_id table mapping id
-     * @param {*} logic mapping logic
-     * @returns table mapping edited
+     *
+     * @param fieldMappingId table mapping id
+     * @param logic mapping logic
+     * @param etl_id
+     * @returns
      */
 
-    editMappingLogic(map_id, logic) {
-        return axios.put(API_URL + "map/" + map_id + "/logic", null, { headers: authHeader(), params: { logic: logic }})
+    editMappingLogic(fieldMappingId, logic, etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return axios.put(
+            API_URL + "map/" + fieldMappingId + "/logic",
+            null,
+            { headers: authHeader(), params: { logic: logic, etl_id: etl_id, username: username }}
+        );
     }
 
 }

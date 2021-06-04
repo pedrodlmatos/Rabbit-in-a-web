@@ -278,7 +278,7 @@ public class ETLController {
             )
     })
     @PutMapping("/procedures_del")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> markProcedureAsDeleted(@Param("etl_id") Long etl_id, @Param("username") String username) {
         logger.info("ETL CONTROLLER - Mark as deleted ETL procedure with id " + etl_id);
 
@@ -542,7 +542,9 @@ public class ETLController {
     })
     @GetMapping(value = "/procedures/sourceCSV")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getSourceFieldListCSV(@Param(value = "etl_id") Long etl_id, @Param(value = "username") String username) {
+    public ResponseEntity<?> getSourceFieldListCSV(
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Download source field list CSV of session {}", etl_id);
 
         byte[] content = etlService.createSourceFieldListCSV(etl_id, username);

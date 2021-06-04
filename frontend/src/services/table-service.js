@@ -10,9 +10,9 @@ class TableService {
     /**
      * Sends PUT request to change comment of a source table
      *
-     * @param table table's id
+     * @param table_id table's id
      * @param comment comment to change to
-     * @param etl_id
+     * @param etl_id ETL procedure's id
      * @returns
      */
 

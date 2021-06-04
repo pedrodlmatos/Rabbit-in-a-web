@@ -115,8 +115,8 @@ public class SourceDatabaseServiceImpl implements SourceDatabaseService {
                 }
             }
             database.setTables(tables);
-            if (scanTemp.delete()) { };
-            //return databaseRepository.save(database);
+            if (scanTemp.delete()) { }
+
             return database;
         } catch (IOException e) {
             e.printStackTrace();

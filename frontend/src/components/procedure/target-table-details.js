@@ -1,3 +1,8 @@
+/**
+ * Table with information about a table from the OMOP CDM (name)
+ * and its fields (field names, data type and description)
+ */
+
 import { makeStyles } from '@material-ui/core';
 import React from 'react'
 import Controls from '../controls/controls';

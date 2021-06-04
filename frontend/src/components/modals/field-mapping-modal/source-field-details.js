@@ -16,7 +16,6 @@ export default function SourceFieldDetails(props) {
     const classes = useStyles();
     const { field, fieldInfo, setFieldInfo, onCommentChange, saveComment, omopFields, verify, connect } = props;
     const showFieldInfo = Object.keys(fieldInfo).length !== 0;
-    console.log(omopFields)
 
     return(
         <div>

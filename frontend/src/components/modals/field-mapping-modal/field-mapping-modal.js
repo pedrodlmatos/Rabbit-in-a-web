@@ -6,11 +6,10 @@ import FieldMappingService from '../../../services/field-mapping-service';
 import FieldService from '../../../services/field-service';
 import Controls from '../../controls/controls';
 import Xarrow from 'react-xarrows/lib';
-import InfoTable from '../../info-table/info-table';
 import TableMappingLogic from '../../procedure/table-mapping-logic';
 import FieldMappingLogic from './field-mapping-logic';
 import SourceFieldDetails from './source-field-details'
-import MappingOperations from '../../procedure/mapping-operations'
+import MappingOperations from '../../utilities/mapping-operations'
 import TargetFieldDetails from './target-field-details'
 
 
@@ -37,9 +36,10 @@ const useStyles = makeStyles(theme => ({
 
 export default function FieldMappingModal(props) {
     const classes = useStyles();
-    const { openModal, closeModal, mappingId, removeTableMapping, changeMappingCompletion } = props;
+    const { openModal, closeModal, etl_id, tableMappingId, removeTableMapping, changeMappingCompletion, updateTableMappingLogic } = props;
     
     const [loading, setLoading] = useState(true);
+
     const [sourceTable, setSourceTable] = useState({});
     const [targetTable, setTargetTable] = useState({});
     const [complete, setComplete] = useState(false);
@@ -55,36 +55,41 @@ export default function FieldMappingModal(props) {
     const [showTable, setShowTable] = useState(false);
 
     const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
-    const [showDeleteFieldMappingButton, setShowDeleteFieldMappingButton] = useState(false);
+    const [showDeleteFieldMappingButton, setShowDeleteFieldMappingButton] = useState(false);    // might delete
 
     const [showFieldMappingLogic, setShowFieldMappingLogic] = useState(false);
     const [savingFieldMappingLogic, setSavingFieldMappingLogic] = useState(false);
 
 
     /**
-     * 
+     * Retrieves information about table mapping from API
+     *
+     * TODO: pass info as props
      */
 
     const getInformation = () => {
-        TableMappingService.getMapping(mappingId).then(res => {
-            let maps = [];
-            res.data.fieldMappings.forEach(item => {
-                const arrow = {
-                    id: item.id,
-                    start: item.source.name,
-                    end: item.target.name,
-                    logic: item.logic,
-                    color: 'grey'
-                }
-                maps = maps.concat(arrow);
-            })
-            setFieldMappings(maps);
-            setSourceTable(res.data.source);
-            setTargetTable(res.data.target);
-            setComplete(res.data.complete);
-            setTableMappingLogic(res.data.logic);
-            setLoading(false);
-        });
+        TableMappingService
+            .getMapping(tableMappingId, etl_id)
+            .then(res => {
+                let maps = [];
+                res.data.fieldMappings.forEach(item => {
+                    const arrow = {
+                        id: item.id,
+                        start: item.source,
+                        end: item.target,
+                        logic: item.logic,
+                        color: 'grey'
+                    }
+                    maps = maps.concat(arrow);
+                })
+
+                setFieldMappings(maps);
+                setSourceTable(res.data.source);
+                setTargetTable(res.data.target);
+                setComplete(res.data.complete);
+                setTableMappingLogic(res.data.logic);
+                setLoading(false);
+            });
     }
 
 
@@ -93,12 +98,12 @@ export default function FieldMappingModal(props) {
      */
 
     const handleCompletionChange = () => {
-        TableMappingService.editCompleteMapping(mappingId, !complete).then(res => { 
-            setComplete(res.data.complete);
-            changeMappingCompletion(mappingId, res.data.complete)
-        }).catch(res => {
-            console.log(res);
-        })
+        TableMappingService
+            .editCompleteMapping(tableMappingId, !complete, etl_id)
+            .then(res => {
+                setComplete(res.data.complete);
+                changeMappingCompletion(tableMappingId, res.data.complete)
+            }).catch(res => { console.log(res) })
     }
 
     
@@ -109,12 +114,13 @@ export default function FieldMappingModal(props) {
     const saveTableMappingLogic = () => {
         setLoadingSaveTableMappingLogic(true);
         // make request to API
-        TableMappingService.editMappingLogic(mappingId, tableMappingLogic).then(response => {
-            setTableMappingLogic(response.data.logic);
-            setLoadingSaveTableMappingLogic(false);
-        }).catch(error => {
-            console.log(error);
-        });
+        TableMappingService
+            .editMappingLogic(tableMappingId, tableMappingLogic, etl_id)
+            .then(response => {
+                setTableMappingLogic(response.data.logic);
+                updateTableMappingLogic(tableMappingId, tableMappingLogic);
+                setLoadingSaveTableMappingLogic(false);
+            }).catch(error => { console.log(error) });
     }
 
 
@@ -133,25 +139,28 @@ export default function FieldMappingModal(props) {
         setSelectedFieldMapping({});
         setShowFieldMappingLogic(false);
         setShowDeleteFieldMappingButton(false);
-        if (Object.keys(selectedField).length === 0) {                             // no field is selected
+        if (Object.keys(selectedField).length === 0) {
+            // no field is selected
             setSelectedField(field);
-            setSourceSelected(true);                                               // change color of mappings that comes from the selected table
-            selectArrowsFromSource(field);
-            setShowFieldInfo(true);                                                // define fields info
-            defineSourceFieldData(field);
-        } else if (selectedField === field) {                                      // select the same table
-            resetArrowsColor();                                                    // change color of arrows to grey
-            setSelectedField({});                                                  // unselect
+            setSourceSelected(true);                                               // change color of mappings that comes from the selected field
+            MappingOperations.selectMappingsFromSource(fieldMappings, field);
+            defineSourceFieldData(field);                                                // define fields info
+            setShowFieldInfo(true);
+        } else if (selectedField === field) {
+            // select the same table
+            MappingOperations.resetMappingColor(fieldMappings);                           // change color of mappings to grey
+            setSelectedField({});                                                   // unselect
             setSourceSelected(false);
             setShowFieldInfo(false);
             setFieldInfo([]);
-        } else {                                                                   // select any other source table
-            resetArrowsColor();                                                    // change color of arrows to grey
-            setSelectedField(field);                                               // change select table information
+        } else {
+            // select any other source table
+            MappingOperations.resetMappingColor(fieldMappings);                           // change color of arrows to grey
+            setSelectedField(field);                                                      // change selected field information
             setSourceSelected(true);
-            selectArrowsFromSource(field);                                         // change color of mappings that comes from the selected table
-            setShowFieldInfo(true);                                                // change content of fields table
+            MappingOperations.selectMappingsFromSource(fieldMappings, field);             // change color of mappings that comes from the selected field
             defineSourceFieldData(field);
+            setShowFieldInfo(true);                                                 // change content of fields table
         }
     }
 
@@ -172,32 +181,37 @@ export default function FieldMappingModal(props) {
         setSelectedFieldMapping({});
         setShowFieldMappingLogic(false);
         setShowDeleteFieldMappingButton(false);
-        if (Object.keys(selectedField).length === 0) {                              // no field is selected
-            selectArrowsFromTarget(field);                                          // change color of mappings that goes to the selected field
+
+        if (Object.keys(selectedField).length === 0) {
+            // no field is selected
+            MappingOperations.selectMappingsToTarget(fieldMappings, field)          // change color of mappings that goes to the selected field
             setSelectedField(field);                                                // change select field information
             setSourceSelected(false);
-            setShowFieldInfo(true);                                                 // change content of fields table
             defineTargetFieldData(field);
-        } else if (selectedField === field) {                                       // select the same field -> unselect
-            resetArrowsColor();                                                     // change color of arrows to grey
-            setSelectedField({});                                                   // unselect
+            setShowFieldInfo(true);                                           // change content of fields table
+        } else if (selectedField === field) {
+            // select the same field -> unselect
+            MappingOperations.resetMappingColor(fieldMappings);                     // change color of mappings to grey
+            setSelectedField({});                                             // unselect
             setSourceSelected(false);
             setShowFieldInfo(false);
             setFieldInfo([]);
-        } else if (sourceSelected) {                                                // source field is selected -> create arrow
-            resetArrowsColor();                                                     // change arrows color to grey
-            createFieldMapping(selectedField.id, field.id);                         // create arrow
-            setSelectedField({});                                                   // unselects fields
-            setSourceSelected(false);                                               // clean state
-            setShowFieldInfo(false);
-            setFieldInfo([]);
-        } else {                                                                    // other target field is selected
-            resetArrowsColor();                                                     // change color of arrows to grey
+        } else if (sourceSelected) {
+            // source field is selected -> create field mapping
+            //resetArrowsColor();                                                     // change arrows color to grey
+            createFieldMapping(selectedField.id, field.id);                           // create arrow
+            //setSelectedField({});                                                   // unselects fields
+            //setSourceSelected(false);                                               // clean state
+            //setShowFieldInfo(false);
+            //setFieldInfo([]);
+        } else {
+            // other target field is selected
+            MappingOperations.resetMappingColor(fieldMappings);                     // change color of mappings to grey
             setSelectedField(field);                                                // change select table information
             setSourceSelected(false);
-            selectArrowsFromTarget(field);                                          // change color of mappings that comes from the selected table
-            setShowFieldInfo(true);                                                 // change content of fields table
+            MappingOperations.selectMappingsToTarget(fieldMappings, field)          // change color of mappings that goes to the selected field
             defineTargetFieldData(field);
+            setShowFieldInfo(true);                                           // change content of fields table
         }
     }
 
@@ -211,9 +225,9 @@ export default function FieldMappingModal(props) {
     const defineSourceFieldData = (field) => {
         let data = [];
         setFieldInfo(data);
-        if (field.valueCounts.length === 0) {
-            setShowTable(false);
-        } else {
+
+        if (field.valueCounts.length === 0) setShowTable(false);
+        else {
             field.valueCounts.forEach(element => {
                 data.push({
                     value: element.value,
@@ -235,9 +249,8 @@ export default function FieldMappingModal(props) {
 
     const defineTargetFieldData = (field) => {
         let data = [];
-        if (field.concepts.length === 0) {
-            setShowTable(false);
-        } else {
+        if (field.concepts.length === 0) setShowTable(false);
+        else {
             field.concepts.forEach(element => {
                 data.push({
                     conceptId: element.conceptId,
@@ -249,99 +262,81 @@ export default function FieldMappingModal(props) {
             setFieldInfo(data);
             setShowTable(true);
         }
-        
     }
 
 
     /**
-     * Changes color from arrows that start in selected field and makes the
-     * other lighter
-     * 
-     * @param {*} table selected table
+     * Sends request to API to create a mapping between two fields
+     *
+     * @param sourceFieldId source field id
+     * @param targetFieldId target field id
      */
 
-    const selectArrowsFromSource = (field) => { 
-        fieldMappings.forEach(element => {
-            element.color = element.start === field.name ? 'orange' : 'lightgrey';
+    const createFieldMapping = (sourceFieldId, targetFieldId) => {
+        // verify if table mapping between those tables already exists
+        let exists = false;
+        fieldMappings.forEach(function (item) {
+            if (item.start.id === sourceFieldId && item.end.id === targetFieldId) exists = true;
         })
+
+        // if doesn't exist -> create
+        if (!exists) {
+            FieldMappingService
+                .addFieldMapping(tableMappingId, sourceFieldId, targetFieldId, etl_id)
+                .then(res => {
+                    const arrow = {
+                        id: res.data.id,
+                        start: res.data.source,
+                        end: res.data.target,
+                        logic: res.data.logic,
+                        color: MappingOperations.defineMappingColor(selectedField, res.data),
+                    }
+                    setFieldMappings(fieldMappings.concat(arrow));
+                }).catch(res => { console.log(res) });
+        }
     }
 
 
     /**
-     * Changes color from arrows that end in selected field and makes the
-     * other lighter
+     * Selects field mapping (changes its color to red)
+     *  - If no field mapping is previously selected, only selects a field mapping
+     *  - If selects the field mapping previously selected, unselect it
+     *  - If selects other field mapping, unselects previous and selects the new one
      * 
-     * @param {*} field selected field
+     * @param fieldMapping selected field mapping
      */
 
-    const selectArrowsFromTarget = (field) => {
-        fieldMappings.forEach(element => {
-            element.color = element.end === field.name ? 'blue' : 'lightgrey';
-        })
-    }
+    const selectMapping = (fieldMapping) => {
+        const index = fieldMappings.indexOf(fieldMapping);
 
+        if (Object.keys(selectedFieldMapping).length === 0) {
+            // no field mapping is selected
+            setShowFieldInfo(false);                                                // unselect field
+            setSelectedField({});
 
-    /**
-     * Unselects all arrows (changes color to grey)
-     */
-
-    const resetArrowsColor = () => {
-        fieldMappings.forEach(element => {
-            element.color = 'grey';
-        })
-    }
-
-
-    /**
-     * 
-     * @param {*} startField 
-     * @param {*} endField 
-     */
-
-    const createFieldMapping = (startField_id, endField_id) => {
-        FieldMappingService.addFieldMapping(mappingId, startField_id, endField_id).then(res => {
-            const arrow = {
-                id: res.data.id,
-                start: res.data.source.name,
-                end: res.data.target.name,
-                logic: res.data.logic,
-                color: 'grey',
-            }
-            setFieldMappings(fieldMappings.concat(arrow));
-        }).catch(res => {
-            console.log(res);
-        });
-    }
-
-
-    /**
-     * Selects an arrow (changes its color to red)
-     *  - If no arrow is previously selected, only selects an arrow
-     *  - If selects the arrow previously selected, unselect it
-     *  - If selects other arrow, unselects previous and selects the new one
-     * 
-     * @param {*} mapping selected field mapping
-     */
-
-    const selectMapping = (mapping) => {
-        const index = fieldMappings.indexOf(mapping);
-        if (Object.keys(selectedFieldMapping).length === 0) {                       // no arrow is selected
+            MappingOperations.resetMappingColor(fieldMappings);                          // reset mapping colors to grey
             let arrows = fieldMappings;
             arrows[index].color = "red";
-            setSelectedFieldMapping(mapping);
+            setSelectedFieldMapping(fieldMapping);
             setFieldMappings(arrows);
             setShowDeleteFieldMappingButton(true);
             setShowFieldMappingLogic(true);
-        } else if(selectedFieldMapping === mapping) {                               // select the arrow previous selected to unselect
-            resetArrowsColor();
+        } else if(selectedFieldMapping === fieldMapping) {
+            // select the arrow previous selected to unselect
+            MappingOperations.resetMappingColor(fieldMappings);                         // reset mapping colors to grey
             setSelectedFieldMapping({});
             setShowDeleteFieldMappingButton(false);
             setShowFieldMappingLogic(false);
-        } else {                                                                    // select any other unselected arrow         
-            resetArrowsColor();                                                     // unselect previous
+        } else {
+            // no field mapping is selected
+            setShowFieldInfo(false);                                              // unselect field
+            setSelectedField({});
+
+            // select any other unselected arrow
+            MappingOperations.resetMappingColor(fieldMappings);                         // reset mapping colors to grey
             let arrows = fieldMappings;
             arrows[index].color = "red";
-            setSelectedFieldMapping(mapping);                                       // select a new one
+            setSelectedFieldMapping(fieldMapping);                                      // select a new one
             setFieldMappings(arrows);
             setShowDeleteFieldMappingButton(true);
             setShowFieldMappingLogic(true);
@@ -350,101 +345,33 @@ export default function FieldMappingModal(props) {
 
 
     /**
-     * Verifies if a source field is connected to a target field
-     *
-     * @param {*} targetField_id target table's id
-     * @returns true if are connect, false otherwise
+     * Makes request to API to remove the selected field mapping
      */
 
-    const connectedToTarget = (targetField_id) => {
-        let result = false;
-        fieldMappings.forEach(item => {
-            if (item.end.id === targetField_id && item.start.id === selectedField.id) {
-                result = true;
-            }
-        })
-        return result;
-    }
-
-
-    /**
-     * Creates a field mapping between two fields or removes it if already exists
-     *
-     * @param {*} e check event
-     */
-
-    const connectToTargetField = e => {
-        const targetField_id = e.target.value[0];
-
-        if (connectedToTarget(targetField_id)) {
-            fieldMappings.forEach(item => {
-                if (item.end.id === targetField_id && item.start.id === selectedField.id) {
-                    removeMapping(mappingId, item.id);
-                }
+    const removeSelectedFieldMapping = () => {
+        FieldMappingService
+            .removeFieldMapping(selectedFieldMapping.id, etl_id)
+            .then(() => {
+                const index = fieldMappings.findIndex(x => x.id === selectedFieldMapping.id);
+                fieldMappings.splice(index);
+                setSelectedFieldMapping({});
+                setShowDeleteFieldMappingButton(false);
             })
-        } else {
-            createFieldMapping(selectedField.id, targetField_id);
-        }
-    }
-
-    /**
-     * Verifies if a target table is connected to a source table
-     *
-     * @param {*} sourceField_id source table id
-     * @returns true if they are connected, false otherwise
-     */
-
-    const connectedToSource = (sourceField_id) => {
-        let result = false;
-        fieldMappings.forEach(item => {
-            if (item.start.id === sourceField_id && item.end.id === selectedField.id) {
-                result = true;
-            }
-        })
-        return result;
-    }
-
-
-    /**
-     * Creates a table mapping between two tables or removes it if already exists
-     *
-     * @param {*} e check event
-     */
-
-    const connectToSourceField = e => {
-        const sourceField_id = e.target.value[0];
-
-        if (connectedToSource(sourceField_id)) {
-            fieldMappings.forEach(item => {
-                if (item.start.id === sourceField_id && item.end.id === selectedField.id) {
-                    removeMapping(mappingId, item.id);
-                }
-            })
-        } else {
-            createFieldMapping(sourceField_id, selectedField.id);
-        }
     }
 
 
     /**
      * Makes a call to API to delete a field mapping and replace the previous with ones received
      *
-     * @param {*} tableMapping_id ETL id
-     * @param {*} fieldMapping_id table mapping id
+     * @param fieldMappingId table mapping id
      */
 
-    const removeMapping = (tableMapping_id, fieldMapping_id) => {
-        FieldMappingService.removeFieldMapping(tableMapping_id, fieldMapping_id).then(res => {
+    const removeMapping = (fieldMappingId) => {
+        FieldMappingService.removeFieldMapping(fieldMappingId, etl_id).then(() => {
             let maps = []
-            res.data.forEach(function(item) {
-                const arrow = {
-                    id: item.id,
-                    start: item.source,
-                    end: item.target,
-                    complete: item.complete,
-                    color: "grey"
-                }
-                maps = maps.concat(arrow);
+            fieldMappings.forEach(function(item) {
+                if (item.id !== fieldMappingId)
+                    maps = maps.concat(item);
             });
             setFieldMappings(maps);
         }).catch(res => {
@@ -454,87 +381,118 @@ export default function FieldMappingModal(props) {
 
 
     /**
-     * Removes the selected field mapping
+     * Verifies if a source field is connected to a target field
+     *
+     * @param targetFieldId target table's id
+     * @returns true if are connected, false otherwise
      */
 
-    const deleteFieldMapping = () => {
-        FieldMappingService.removeFieldMapping(mappingId, selectedFieldMapping.id).then(() => {
-            const index = fieldMappings.findIndex(x => x.id === selectedFieldMapping.id);
-            fieldMappings.splice(index);
-            setSelectedFieldMapping({});
-            setShowDeleteFieldMappingButton(false);
+    const connectedToTargetField = (targetFieldId) => {
+        let result = false;
+        fieldMappings.forEach(item => {
+            if (item.end.id === targetFieldId && item.start.id === selectedField.id) result = true;
         })
+        return result;
     }
 
 
-    
     /**
-     * 
+     * Creates a field mapping between the selecte source field and the checked target field or removes it if already exists
+     *
+     * @param e check event with selected target field
      */
 
-    const saveFieldComment = () => {
-        if (sourceSelected) {
-            FieldService.changeSourceTableComment(selectedField.id, selectedField.comment).then(response => {
-                let fields = []
-                sourceTable.fields.forEach(item => {
-                    if (item.id === response.data.id) {
-                        fields = fields.concat(response.data)
-                    } else {
-                        fields = fields.concat(item)
-                    }
-                })
-                sourceTable.fields = fields;
+    const connectToTargetField = e => {
+        const targetFieldId = e.target.value[0];
 
-                setSourceTable({
-                    ...sourceTable,
-                    fields: fields
-                })
-            }).catch(error => {
-                console.log(error);
-            });
+        if (connectedToTargetField(targetFieldId)) {
+            fieldMappings.forEach(item => {
+                if (item.end.id === targetFieldId && item.start.id === selectedField.id) removeMapping(item.id);
+            })
         } else {
-            FieldService.changeTargetTableComment(selectedField.id, selectedField.comment).then(response => {
-                let fields = []
-                targetTable.fields.forEach(item => {
-                    if (item.id === response.data.id) {
-                        fields = fields.concat(response.data)
-                    } else {
-                        fields = fields.concat(item)
-                    }
-                })
-                targetTable.fields = fields;
-
-                setTargetTable({
-                    ...targetTable,
-                    fields: fields
-                })
-
-            }).catch(error => {
-                console.log(error);
-            });
+            createFieldMapping(selectedField.id, targetFieldId);
         }
     }
 
 
     /**
-     * 
+     * Verifies if a target field is connected to a source field
+     *
+     * @param sourceFieldId source table id
+     * @returns true if they are connected, false otherwise
+     */
+
+    const connectedToSourceField = (sourceFieldId) => {
+        let result = false;
+        fieldMappings.forEach(item => {
+            if (item.start.id === sourceFieldId && item.end.id === selectedField.id) result = true;
+        })
+        return result;
+    }
+
+
+    /**
+     * Creates a field mapping between the selected target field and the checked source field or removes it if already exists
+     *
+     * @param {*} e check event with checked source field
+     */
+
+    const connectToSourceField = e => {
+        const sourceFieldId = e.target.value[0];
+
+        if (connectedToSourceField(sourceFieldId)) {
+            fieldMappings.forEach(item => {
+                if (item.start.id === sourceFieldId && item.end.id === selectedField.id) removeMapping(item.id);
+            })
+        } else
+            createFieldMapping(sourceFieldId, selectedField.id);
+    }
+
+
+    /**
+     * Sends request to save comment of field from EHR database
+     */
+
+    const saveSourceFieldComment = () => {
+        FieldService
+            .changeSourceFieldComment(selectedField.id, selectedField.comment, etl_id)
+            .then(response => {
+                const index = sourceTable.fields.findIndex(x => x.id === response.data.id);
+                sourceTable.fields[index].comment = response.data.comment;
+            }).catch(error => { console.log(error) });
+    }
+
+
+    /**
+     * Sends request to save comment of field from OMOP CDM database
+     */
+
+    const saveTargetFieldComment = () => {
+        FieldService
+            .changeTargetFieldComment(selectedField.id, selectedField.comment, etl_id)
+            .then(response => {
+                const index = targetTable.fields.findIndex(x => x.id === response.data.id);
+                targetTable.fields[index].comment = response.data.comment;
+            }).catch(error => console.log(error));
+    }
+
+
+    /**
+     * Sends request to API to save field mapping logic
      */
 
     const saveFieldMappingLogic = () => {
         setSavingFieldMappingLogic(true);
         
         // make request to API
-        FieldMappingService.editMappingLogic(selectedFieldMapping.id, selectedFieldMapping.logic).then(response => {
-            let index = fieldMappings.findIndex(x => x.id === response.data.id);
-            fieldMappings[index].logic = response.data.logic;
-            setSavingFieldMappingLogic(false);
-        }).catch(error => {
-            console.log(error);
-        });
+        FieldMappingService
+            .editMappingLogic(selectedFieldMapping.id, selectedFieldMapping.logic, etl_id)
+            .then(response => {
+                let index = fieldMappings.findIndex(x => x.id === response.data.id);
+                fieldMappings[index].logic = response.data.logic;
+                setSavingFieldMappingLogic(false);
+            }).catch(error => { console.log(error) });
     }
-
-
-    
 
     
     return(
@@ -545,6 +503,7 @@ export default function FieldMappingModal(props) {
                 <div>
                     <DialogTitle>
                         <Grid container>
+                            {/* Source table box */}
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                                 <Controls.ElementBox
                                     id={sourceTable.name + 't'}
@@ -553,6 +512,8 @@ export default function FieldMappingModal(props) {
                                     border="#000000"
                                 />
                             </Grid>
+
+                            {/* Target table box */}
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                                 <Controls.ElementBox
                                     id={targetTable.name + 't'}
@@ -570,6 +531,8 @@ export default function FieldMappingModal(props) {
                                     curveness={0.5}
                                 />
                             </Grid>
+
+                            {/* Completion switch */}
                             <Grid item xs={1} sm={1} md={1} lg={1}>
                                 <FormGroup>
                                     <FormControlLabel 
@@ -578,6 +541,8 @@ export default function FieldMappingModal(props) {
                                     />
                                 </FormGroup>
                             </Grid>
+
+                            {/* Remove table mapping */}
                             <Grid item xs={2} sm={2} md={2} lg={2}>
                                 <Controls.Button 
                                     text="Remove table mapping"
@@ -587,6 +552,8 @@ export default function FieldMappingModal(props) {
                                     onClick={removeTableMapping}
                                 />
                             </Grid>
+
+                            {/* Remove field mapping */}
                             <Grid item xs={2} sm={2} md={2} lg={2}>
                                 <Controls.Button 
                                     text="Remove field mapping"
@@ -594,9 +561,11 @@ export default function FieldMappingModal(props) {
                                     color="secondary"
                                     variant="contained"
                                     disabled={!showDeleteFieldMappingButton}
-                                    onClick={deleteFieldMapping}
+                                    onClick={removeSelectedFieldMapping}
                                 />
                             </Grid>
+
+                            {/* Close modal */}
                             <Grid item xs={1} sm={1} md={1} lg={1}>
                                 <Controls.ActionButton color="secondary" onClick={closeModal}>
                                     <CloseIcon />
@@ -628,37 +597,36 @@ export default function FieldMappingModal(props) {
                             </Grid>
 
                             <Grid item xs={3} sm={3} md={3} lg={3}>
-                            { targetTable.fields.map(item => {
+                                { targetTable.fields.map(item => {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id}
                                             id={'t_' + item.name}
                                             element={item}
-                                            handler="left" 
+                                            handler="left"
                                             clicked={selectedField.id === item.id}
-                                            help="Select first an EHR field and then an OMOP CDM field" 
+                                            help="Select first an EHR field and then an OMOP CDM field"
                                             position="right-end"
                                             color="#D5FFFF"
                                             border="#000000"
                                             handleSelection={selectTargetField}
-                                            createMapping={createFieldMapping} 
+                                            createMapping={createFieldMapping}
                                         />
-                                    )
-                                })}
+                                    )}
+                                )}
                             </Grid>
+
                             { fieldMappings.map((ar, i) => (
                                 <Xarrow
                                     key={i}
-                                    start={'s_' + ar.start}
-                                    end={'t_' + ar.end}
+                                    start={'s_' + ar.start.name}
+                                    end={'t_' + ar.end.name}
                                     startAnchor="right"
                                     endAnchor="left"
                                     color={ar.color}
                                     strokeWidth={7.5}
                                     curveness={0.5}
-                                    passProps={{
-                                        onClick: () => selectMapping(ar)
-                                    }}
+                                    passProps={{ onClick: () => selectMapping(ar) }}
                                 />
                             ))}
 
@@ -678,9 +646,9 @@ export default function FieldMappingModal(props) {
                                                 fieldInfo={fieldInfo}
                                                 setFieldInfo={setFieldInfo}
                                                 onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
-                                                saveComment={saveFieldComment}
+                                                saveComment={saveSourceFieldComment}
                                                 omopFields={targetTable.fields}
-                                                verify={connectedToTarget}
+                                                verify={connectedToTargetField}
                                                 connect={connectToTargetField}
                                             />
                                         ) : (
@@ -689,9 +657,9 @@ export default function FieldMappingModal(props) {
                                                 fieldInfo={fieldInfo}
                                                 setFieldInfo={setFieldInfo}
                                                 onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
-                                                saveComment={saveFieldComment}
+                                                saveComment={saveTargetFieldComment}
                                                 ehrFields={sourceTable.fields}
-                                                verify={connectedToSource}
+                                                verify={connectedToSourceField}
                                                 connect={connectToSourceField}
                                             />
                                         )}

@@ -52,8 +52,18 @@ public class TableMappingServiceImpl implements TableMappingService {
 
     @Override
     public TableMapping getTableMappingById(Long map_id, Long etl_id, String username) {
-        if (etlService.userHasAccessToEtl(etl_id, username))
-            return repository.findById(map_id).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", map_id.toString()));
+        if (etlService.userHasAccessToEtl(etl_id, username)) {
+            TableMapping tableMapping = repository.findById(map_id).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", map_id.toString()));
+
+            List<SourceField> sourceFields = tableMapping.getSource().getFields();
+            sourceFields.sort(Comparator.comparingLong(SourceField::getId));
+
+            // order OMOP CDM tables by id
+            List<TargetField> targetFields = tableMapping.getTarget().getFields();
+            targetFields.sort(Comparator.comparingLong(TargetField::getId));
+
+            return tableMapping;
+        }
         else
             throw new UnauthorizedAccessException(TableMapping.class, username, etl_id);
     }

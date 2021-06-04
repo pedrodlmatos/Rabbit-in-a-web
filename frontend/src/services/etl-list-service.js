@@ -25,7 +25,8 @@ class ETLService {
         try {
             return axios.post(
                 API_URL + "procedures", formData,
-                { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm, username: username } });
+                { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm, username: username } }
+            );
         } catch (e) {
             console.log(e);
         }
@@ -47,7 +48,8 @@ class ETLService {
         try {
             return axios.post(
                 API_URL + "procedures/save", formData,
-                { headers: authHeaderMultiPart(), params: { username: username} });
+                { headers: authHeaderMultiPart(), params: { username: username} }
+            );
         } catch(e) {
             console.log(e);
         }
@@ -64,7 +66,8 @@ class ETLService {
         try {
             return axios.get(
                 API_URL + 'procedures',
-                { headers: authHeader() })
+                { headers: authHeader() }
+            )
         } catch (e) {
             console.log(e);
         }
@@ -102,7 +105,7 @@ class ETLService {
         try {
             return axios.get(
                 API_URL + "procedures/" + id,
-                { headers: authHeader(), params: {username: username } }
+                { headers: authHeader(), params: { username: username } }
             );
         } catch (e) {
             console.log(e);
@@ -208,35 +211,84 @@ class ETLService {
 
 
     /**
+     * Sends a PUT request to remove stem tables from both databases, including mappings
+     *
+     * @param etl_id ETL procedure's id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    removeStemTables (etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return axios.put(
+            API_URL + "procedures/remove_stem",
+            null,
+            { headers: authHeader(), params:{ etl_id: etl_id, username: username }}
+        );
+    }
+
+
+    /**
      * Sends GET request to retrieve data from source fields summary file
      * 
-     * @param {*} etl etl's id
+     * @param etl_id ETL procedure's id
      * @returns 
      */
 
-    downloadSourceFieldsFile = async (etl) => {
-        return await axios.get(API_URL + "procedures/sourceCSV", { headers: authHeader(), params: { etl: etl }})
+    downloadSourceFieldsFile = async (etl_id) => {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return await axios.get(
+            API_URL + "procedures/sourceCSV",
+            { headers: authHeader(), params: { etl_id: etl_id, username: username }}
+        );
     }
 
 
-    downloadTargetFieldsFile = async (etl) => {
-        return await axios.get(API_URL + "procedures/targetCSV", { headers: authHeader(), params: { etl: etl }, responseType: "blob"})
+    /**
+     * Sends GET request to retrieve data from target fields summary file
+     *
+     * @param etl_id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    downloadTargetFieldsFile = async (etl_id) => {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return await axios.get(
+            API_URL + "procedures/targetCSV",
+            { headers: authHeader(), params: { etl_id: etl_id, username: username }}
+        )
     }
 
 
-    downloadSaveFile(etl) {
-        return axios.get(API_URL + "procedures/save", { headers: authHeader(), params: {etl: etl }});
+    /**
+     * Sends GET request to retrieve data from table mappings summary file
+     *
+     * @param etl_id ETL procedure's id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    downloadSummaryFile(etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return axios.get(
+            API_URL + "procedures/summary",
+            { headers: authHeader(), params: { etl_id: etl_id, username: username }, responseType: "blob"}
+        );
     }
 
-    downloadSummaryFile(etl) {
-        return axios.get(API_URL + "procedures/summary", { headers: authHeader(), params: {etl: etl }, responseType: "blob"});
+
+    /**
+     * Sends GET request to retrieve data from summary file
+     *
+     * @param etl_id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    downloadSaveFile(etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        return axios.get(
+            API_URL + "procedures/save",
+            { headers: authHeader(), params: { etl_id: etl_id, username: username }}
+        );
     }
-
-    removeStemTables (etl) {
-        return axios.put(API_URL + "procedures/remove_stem", null, { headers: authHeader(), params:{etl: etl }});
-    }
-
-
 }
 
 export default new ETLService();

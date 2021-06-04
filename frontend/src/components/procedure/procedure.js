@@ -12,7 +12,7 @@ import SourceTableDetails from './source-table-details';
 import TargetTableDetails from './target-table-details';
 import FilesMethods from './files-methods';
 import TableOperations from './table-operations';
-import MappingOperations from './mapping-operations';
+import MappingOperations from '../utilities/mapping-operations';
 import DeleteModal from '../modals/delete-modal/delete-modal';
 
 const useStyles = makeStyles(theme => ({
@@ -58,57 +58,59 @@ export default function Procedure() {
     const [loading, setLoading] = useState(true);
     const [etl, setEtl] = useState(initialETLValues);
     const [omopName, setOmopName] = useState('');
-    const [mappings, setMappings] = useState([]);
-    const [selectedMapping, setSelectedMapping] = useState({});
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [tableMappings, setTableMappings] = useState([]);
+    const [selectedTableMapping, setSelectedTableMapping] = useState({});
     
     const [selectedTable, setSelectedTable] = useState({})
     const [sourceSelected, setSourceSelected] = useState(false);
     const [showTableDetails, setShowTableDetails] = useState(false);
     const [tableDetails, setTableDetails] = useState([]);
     const [loadingSaveTableComment, setLoadingSaveTableComment] = useState(false);
-      
+
+    // show/hide modals
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
     const [loadingSaveTableMappingLogic, setLoadingSaveTableMappingLogic] = useState(false);
     
     useEffect(() => {
-        const procedure_id = window.location.pathname.toString().replace("/procedure/", "");
+        const etlProcedureId = window.location.pathname.toString().replace("/procedure/", "");
 
         // make request to API
-        ETLService.getETLById(procedure_id).then(res => {
-            setEtl({
-                id: res.data.id,
-                name: res.data.name,
-                sourceDatabase: res.data.sourceDatabase,
-                targetDatabase: res.data.targetDatabase
-            });
-            setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === res.data.targetDatabase.databaseName })[0].name);
-            // table mappings
-            let maps = [];
-            res.data.tableMappings.forEach(function(item) {
-                const arrow = {
-                    id: item.id,
-                    start:  item.source,
-                    end: item.target,
-                    complete: item.complete,
-                    logic: item.logic,
-                    color: item.complete ? "black" : "grey"
-                }
-                maps.push(arrow);
-            });
-            setMappings(maps);    
-            setLoading(false);
-        }).catch(res => {
-            console.log(res);
-        })
+        ETLService
+            .getETLById(etlProcedureId)
+            .then(res => {
+                setEtl({
+                    id: res.data.id,
+                    name: res.data.name,
+                    sourceDatabase: res.data.sourceDatabase,
+                    targetDatabase: res.data.targetDatabase
+                });
+                setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === res.data.targetDatabase.databaseName })[0].name);
+                // table mappings
+                let maps = [];
+                res.data.tableMappings.forEach(function(item) {
+                    const arrow = {
+                        id: item.id,
+                        start:  item.source,
+                        end: item.target,
+                        complete: item.complete,
+                        logic: item.logic,
+                        color: item.complete ? "black" : "grey"
+                    }
+                    maps.push(arrow);
+                });
+                setTableMappings(maps);
+                setLoading(false);
+            })
+            .catch(res => { console.log(res) })
     }, []);
 
 
     /**
      * Changes CDM database
      *
-     * @param e change OMOP CDM event
+     * @param e event with new OMOP CDM version
      */
 
     const handleCDMChange = e => {
@@ -120,17 +122,20 @@ export default function Procedure() {
             setShowTableDetails(false);
             setTableDetails([]);
         }
-        if (Object.keys(selectedMapping).length > 0) {
+        if (Object.keys(selectedTableMapping).length > 0) {
             // clean state if any table mapping is selected
-            setSelectedMapping({});
+            setSelectedTableMapping({});
         }
+
         // make API request
-        ETLService.changeTargetDatabase(etl.id, e.target.value).then(response => {
-            setEtl({...etl, targetDatabase: response.data.targetDatabase });
-            setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name);
-            setMappings([]);
-            setLoading(false);
-        });
+        ETLService
+            .changeTargetDatabase(etl.id, e.target.value)
+            .then(response => {
+                setEtl({...etl, targetDatabase: response.data.targetDatabase });
+                setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name);
+                setTableMappings([]);
+                setLoading(false);
+            }).catch(error => console.log(error));
     }
 
 
@@ -140,7 +145,7 @@ export default function Procedure() {
      */
 
     const deleteETLProcedure = () => {
-        ETLService.markETLProcedureAsDeleted(etl.id).then(window.location.href = '/procedures');
+        ETLService.markETLProcedureAsDeleted(etl.id).then(() => { window.location.href = '/procedures' });
     }
 
 
@@ -151,32 +156,32 @@ export default function Procedure() {
      *  - If there is a table selected, unselect it and then select the new table changing states
      *  - If select the table that was previous selected, unselects it
      *
-     * @param table selected source table
+     * @param sourceTable selected source table
      */
 
-    const selectSourceTable = (table) => {
+    const selectSourceTable = (sourceTable) => {
         // clean state
-        setSelectedMapping({});
+        setSelectedTableMapping({});
         if (Object.keys(selectedTable).length === 0) {
             // all tables are unselected
-            setSelectedTable(table);
+            setSelectedTable(sourceTable);
             setSourceSelected(true);
-            MappingOperations.selectArrowsFromSource(mappings, table);      // change color of mappings that comes from the selected table
-            defineData(table);                                              // define fields info
-        } else if (selectedTable === table) {
+            MappingOperations.selectMappingsFromSource(tableMappings, sourceTable);        // change color of mappings that comes from the selected table
+            defineData(sourceTable);                                                       // define fields info
+        } else if (selectedTable === sourceTable) {
             // select the same table -> unselect
-            MappingOperations.resetArrowsColor(mappings);                   // change color of arrows to grey
-            setSourceSelected(false);                                 // unselect
+            MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
+            setSourceSelected(false);                                                // unselect
             setShowTableDetails(false);
             setSelectedTable({});
             setTableDetails(null);
         } else {
             // select any other source table
-            MappingOperations.resetArrowsColor(mappings);                   // change color of arrows to grey
-            setSelectedTable(table);                                        // change select table information
+            MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
+            setSelectedTable(sourceTable);                                                 // change selected table
             setSourceSelected(true);
-            MappingOperations.selectArrowsFromSource(mappings, table);      // change color of mappings that comes from the selected table
-            defineData(table);                                              // change content of fields table
+            MappingOperations.selectMappingsFromSource(tableMappings, sourceTable);        // change color of mappings that comes from the selected table
+            defineData(sourceTable);                                                       // change content of fields table
         }
     }
 
@@ -189,41 +194,41 @@ export default function Procedure() {
      * - If select the same table, unselect
      * - Else selects a different target table
      *
-     * @param table
+     * @param targetTable selected target table
      */
 
-    const selectTargetTable = (table) => {
+    const selectTargetTable = (targetTable) => {
         // clean state
-        setSelectedMapping({});
+        setSelectedTableMapping({});
         if (Object.keys(selectedTable).length === 0) {
             // no table is selected
-            MappingOperations.selectArrowsFromTarget(mappings, table);          // change color of mappings that goes to the selected table
-            setSelectedTable(table);                                            // change select table information
+            MappingOperations.selectMappingsToTarget(tableMappings, targetTable);          // change color of mappings that goes to the selected table
+            setSelectedTable(targetTable);                                                 // change select table information
             setSourceSelected(false);
-            defineData(table);                                                  // change content of fields table
-        } else if (selectedTable === table) {
+            defineData(targetTable);                                                       // change content of fields table
+        } else if (selectedTable === targetTable) {
             // select the same table -> unselect
-            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
+            MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
             setSourceSelected(false);
             setShowTableDetails(false);
-            setSelectedTable({});                                         // unselect
+            setSelectedTable({});                                                     // unselect
             setTableDetails(null);
         } else if (sourceSelected) {
             // source table is selected -> create arrow
             const source_id = selectedTable.id;
-            //resetArrowsColor();                                               // change arrows color to grey
-            //setSelectedTable({})                                              // unselects tables
-            createTableMapping(source_id, table.id);                            // create arrow
-            //setSourceSelected(false);                                         // clean state
+            //resetArrowsColor();                                                        // change arrows color to grey
+            //setSelectedTable({})                                                       // unselects tables
+            createTableMapping(source_id, targetTable.id);                               // create arrow
+            //setSourceSelected(false);                                                  // clean state
             //setShowTableDetails(false);
             //setTableDetails(null);
         } else {
             // other target table is selected
-            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
-            setSelectedTable(table);                                            // change select table information
+            MappingOperations.resetMappingColor(tableMappings);                             // change color of arrows to grey
+            setSelectedTable(targetTable);                                                  // change select table information
             setSourceSelected(false);
-            MappingOperations.selectArrowsFromTarget(mappings, table);          // change color of mappings that comes from the selected table
-            defineData(table);                                                  // change content of fields table
+            MappingOperations.selectMappingsToTarget(tableMappings, targetTable);           // change color of mappings that comes from the selected table
+            defineData(targetTable);                                                        // change content of fields table
         }
     }
 
@@ -231,7 +236,7 @@ export default function Procedure() {
     /**
      * Creates the stem tables on both source (EHR) and target (OMOP CDM) databases
      */
-
+        // TODO: verify
     const addStemTable = () => {
         ETLService.addStemTables(etl.id).then(response => {
             setEtl({
@@ -252,16 +257,18 @@ export default function Procedure() {
                 }
                 maps.push(arrow);
             });
-            setMappings(maps);
+            setTableMappings(maps);
         })
     }
+
 
     /**
      * Removes stem table from both databases
      */
-
+    // TODO: verify
     const removeStemTable = () => {
         ETLService.removeStemTables(etl.id).then(response => {
+            console.log(response.data);
             setEtl({
                 ...etl,
                 sourceDatabase: response.data.sourceDatabase,
@@ -280,111 +287,128 @@ export default function Procedure() {
                 }
                 maps.push(arrow);
             });
-            setMappings(maps);
+            setTableMappings(maps);
         })
-    }
-
-
-    /**
-     * Selects an arrow (changes its color to red)
-     *  - If no arrow is previously selected, only selects an arrow
-     *  - If selects the arrow previously selected, unselect it
-     *  - If selects other arrow, unselects previous and selects the new one
-     * 
-     *  @param {*} arrow selected table mapping
-     */
-
-    const selectArrow = (arrow) => {
-        // change color to grey
-        MappingOperations.resetArrowsColor(mappings);
-        // clean state
-        setSelectedTable({});
-        setSourceSelected(false);
-        setShowTableDetails(false);
-        setTableDetails([]);
-        const index = mappings.indexOf(arrow);
-        if (Object.keys(selectedMapping).length === 0) {
-            // no arrow is selected
-            let arrows = mappings;
-            arrows[index].color = "red";        // change to red the selected table mapping
-            setSelectedMapping(arrow);
-            setMappings(arrows);
-        } else if(selectedMapping === arrow) {
-            // select the arrow previous selected to unselect
-            setSelectedMapping({});
-            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
-        } else {
-            // select any other unselected arrow
-            MappingOperations.resetArrowsColor(mappings);                       // change color of arrows to grey
-            let arrows = mappings;              // select a new one
-            arrows[index].color = "red";        // change to red the selected table mapping
-            setSelectedMapping(arrow);
-            setMappings(arrows);
-        }
     }
 
 
     /**
      * Creates an arrow between a source table and a target table.
      *
-     * @param sourceTable_id source table's id
-     * @param targetTable_id target table's id
+     * @param sourceTableId source table's id
+     * @param targetTableId target table's id
      */
 
-    const createTableMapping = (sourceTable_id, targetTable_id) => {
-        TableMappingService.addTableMapping(etl.id, sourceTable_id, targetTable_id).then(res => {
-            const arrow = {
-                id: res.data.id,
-                start: res.data.source,
-                end: res.data.target,
-                complete: res.data.complete,
-                logic: res.data.logic,
-                color: MappingOperations.defineArrowColor(selectedTable, res.data)
-            }
-            setMappings([arrow].concat(mappings));
-        }).catch(err => {
-            console.log(err);
+    const createTableMapping = (sourceTableId, targetTableId) => {
+        // verify if table mapping between those tables already exists
+        let exists = false;
+        tableMappings.forEach(function (item) {
+            if (item.start.id === sourceTableId && item.end.id === targetTableId) exists = true;
         })
+
+        // if doesn't exist -> create
+        if (!exists) {
+            TableMappingService
+                .addTableMapping(etl.id, sourceTableId, targetTableId)
+                .then(res => {
+                    const arrow = {
+                        id: res.data.id,
+                        start: res.data.source,
+                        end: res.data.target,
+                        complete: res.data.complete,
+                        logic: res.data.logic,
+                        color: MappingOperations.defineMappingColor(selectedTable, res.data)
+                    }
+                    setTableMappings([arrow].concat(tableMappings));
+                })
+                .catch(err => { console.log(err); })
+        }
     }
 
 
     /**
-     * Removes the selected table mapping
+     * Selects a table mapping (changing its color to red)
+     * - If no table mapping is previously selected, only selects the table mapping
+     * - If selects the table mapping previously selected, unselect it
+     * - If selects other table mapping, unselects previous and selects the new one
+     * 
+     * @param tableMapping selected table mapping
+     */
+
+    const selectTableMapping = (tableMapping) => {
+        // change color to grey
+        MappingOperations.resetMappingColor(tableMappings);
+        // clean state
+        setSelectedTable({});
+        setSourceSelected(false);
+        setShowTableDetails(false);
+        setTableDetails([]);
+        const index = tableMappings.indexOf(tableMapping);
+
+        if (Object.keys(selectedTableMapping).length === 0) {
+            // no arrow is selected
+            let mappings = tableMappings;
+            mappings[index].color = "red";                                              // change to red the selected table mapping
+            setSelectedTableMapping(tableMapping);
+            setTableMappings(mappings);
+        } else if(selectedTableMapping === tableMapping) {
+            // select the arrow previous selected to unselect
+            setSelectedTableMapping({});
+            MappingOperations.resetMappingColor(tableMappings);                         // change color of arrows to grey
+        } else {
+            // select any other unselected arrow
+            MappingOperations.resetMappingColor(tableMappings);                         // change color of arrows to grey
+            let mappings = tableMappings;                                               // select a new one
+            mappings[index].color = "red";                                              // change to red the selected table mapping
+            setSelectedTableMapping(tableMapping);
+            setTableMappings(mappings);
+        }
+    }
+
+
+    /**
+     * Closes the field mapping modal and deletes the selected table mapping
      */
 
     const removeTableMapping = () => {
         // close field mapping modal
         setShowFieldMappingModal(false);
         // make request to API
-        removeMapping(etl.id, selectedMapping.id);
-        setSelectedMapping({});
+        removeMapping(etl.id, selectedTableMapping.id);
+        setSelectedTableMapping({});
     }
 
 
     /**
-     * Makes a call to API to delete a table mapping and replace the previous with ones received
+     * Makes a call to API to delete a table mapping and removes the one deleted
      * 
-     * @param {*} etl_id ETL id
-     * @param {*} mapping_id table mapping id
+     * @param etl_id ETL procedure's
+     * @param tableMappingId table mapping id
      */
 
-    const removeMapping = (etl_id, mapping_id) => {
-        TableMappingService.removeTableMapping(etl_id, mapping_id).then(res => {
-            let maps = []
-            res.data.forEach(function(item) {
-                const arrow = {
-                    id: item.id,
-                    start: item.source,
-                    end: item.target,
-                    complete: item.complete,
-                    color: MappingOperations.defineArrowColor(selectedTable, item)
-                }
-                maps = maps.concat(arrow);
-            });
-            setMappings(maps);
-        }).catch(res => {
-            console.log(res);
-        })
+    const removeMapping = (etl_id, tableMappingId) => {
+        TableMappingService
+            .removeTableMapping(etl_id, tableMappingId)
+            .then(() => {
+                let mappings = []
+                tableMappings.forEach(function(item) {
+                    if (item.id !== tableMappingId)
+                        mappings = mappings.concat(item);
+                });
+                setTableMappings(mappings);
+            }).catch(res => { console.log(res) })
+    }
+
+
+    /**
+     * Changes state to close field mapping modal
+     *
+     * @param tableMapping selected table mapping
+     */
+
+    const openFieldMappingModal = (tableMapping) => {
+        setSelectedTableMapping(tableMapping);
+        setShowFieldMappingModal(true);
     }
 
 
@@ -394,19 +418,19 @@ export default function Procedure() {
 
     const closeFieldMappingModal = () => {
         setShowFieldMappingModal(false)
-        setSelectedMapping({});
+        setSelectedTableMapping({});
     }
 
 
     /**
-     * Changes arrow color according to table mapping completion status
+     * Changes table mapping color according to its completion status
      *
      * @param tableMappingId table mapping's id
      * @param completion table mapping completion status
      */
 
-    const getCompleteStatus = (tableMappingId, completion) => {
-        mappings.forEach(map => {
+    const changeTableMappingCompletionStatus = (tableMappingId, completion) => {
+        tableMappings.forEach(map => {
             if (map.id === tableMappingId) {
                 map.color = completion ? "black" : "grey";
                 map.complete = completion;
@@ -436,54 +460,56 @@ export default function Procedure() {
 
 
     /**
-     * Changes state to close field mapping modal
-     */
-
-    const openFieldMappingModal = (mapping) => {
-        setSelectedMapping(mapping);
-        setShowFieldMappingModal(true);
-    }
-
-
-    /**
      * Save table comment
      */
 
     const saveComment = () => {
         setLoadingSaveTableComment(true);
-        if (sourceSelected) {
-            TableService.changeSourceTableComment(selectedTable.id, selectedTable.comment, etl.id).then(response => {
+        sourceSelected ? saveCommentSourceTable() : saveCommentTargetTable();
+    }
+
+
+    /**
+     * Sends request to API to change the comment of a table from the EHR database
+     */
+
+    const saveCommentSourceTable = () => {
+        TableService
+            .changeSourceTableComment(selectedTable.id, selectedTable.comment, etl.id)
+            .then(response => {
                 const index = etl.sourceDatabase.tables.findIndex(x => x.id === response.data.id);
                 etl.sourceDatabase.tables[index].comment = response.data.comment;
                 setLoadingSaveTableComment(false);
-            }).catch(error => {
-                console.log(error);
-            });
-        } else {
-            TableService.changeTargetTableComment(selectedTable.id, selectedTable.comment, etl.id).then(response => {
+            }).catch(error => { console.log(error) });
+    }
+
+
+    /**
+     * Sends request to API to change the comment of a table from the OMOP CDM database
+     */
+
+    const saveCommentTargetTable = () => {
+        TableService
+            .changeTargetTableComment(selectedTable.id, selectedTable.comment, etl.id)
+            .then(response => {
                 const index = etl.targetDatabase.tables.findIndex(x => x.id === response.data.id);
                 etl.targetDatabase.tables[index].comment = response.data.comment;
                 setLoadingSaveTableComment(false);
-            }).catch(error => {
-                console.log(error);
-            });
-        }   
+            }).catch(error => { console.log(error) });
     }
 
 
     /**
      * Verifies if a source table is connect to a target table
      *
-     * @param {*} targetTable_id target table's id
+     * @param targetTableId target table's id
      * @returns true if are connect, false otherwise
      */
 
-    const connectedToTarget = (targetTable_id) => {
+    const connectedToTargetTable = (targetTableId) => {
         let result = false;
-        mappings.forEach(item => {
-            if (item.end.id === targetTable_id && item.start.id === selectedTable.id) {
-                result = true;
-            }
+        tableMappings.forEach(item => {
+            if (item.end.id === targetTableId && item.start.id === selectedTable.id) result = true
         })
         return result;
     }
@@ -492,37 +518,33 @@ export default function Procedure() {
     /**
      * Creates a table mapping between two tables or removes it if already exists
      * 
-     * @param {*} e check event
+     * @param e check event
      */
 
     const connectToTargetTable = e => {
-        const targetTable_id = e.target.value[0];
+        const targetTableId = e.target.value[0];
 
-        if (connectedToTarget(targetTable_id)) {
-            mappings.forEach(item => {
-                if (item.end.id === targetTable_id && item.start.id === selectedTable.id) {
+        if (connectedToTargetTable(targetTableId)) {
+            tableMappings.forEach(item => {
+                if (item.end.id === targetTableId && item.start.id === selectedTable.id)
                     removeMapping(etl.id, item.id);
-                }
             })
-        } else {
-            createTableMapping(selectedTable.id, targetTable_id);
-        }
+        } else
+            createTableMapping(selectedTable.id, targetTableId);
     }
 
 
     /**
      * Verifies if a target table is connected to a source table
      *
-     * @param {*} sourceTable_id source table id
+     * @param sourceTableId source table id
      * @returns true if they are connected, false otherwise
      */
     
-    const connectedToSource = (sourceTable_id) => {
+    const connectedToSourceTable = (sourceTableId) => {
         let result = false;
-        mappings.forEach(item => {
-            if (item.start.id === sourceTable_id && item.end.id === selectedTable.id) {
-                result = true;
-            }
+        tableMappings.forEach(item => {
+            if (item.start.id === sourceTableId && item.end.id === selectedTable.id) result = true
         })
         return result;
     }
@@ -531,21 +553,19 @@ export default function Procedure() {
     /**
      * Creates a table mapping between two tables or removes it if already exists
      * 
-     * @param {*} e check event
+     * @param e check event
      */
 
     const connectToSourceTable = e => {
-        const sourceTable_id = e.target.value[0];
+        const sourceTableId = e.target.value[0];
 
-        if (connectedToSource(sourceTable_id)) {
-            mappings.forEach(item => {
-                if (item.start.id === sourceTable_id && item.end.id === selectedTable.id) {
+        if (connectedToSourceTable(sourceTableId)) {
+            tableMappings.forEach(item => {
+                if (item.start.id === sourceTableId && item.end.id === selectedTable.id)
                     removeMapping(etl.id, item.id);
-                }
             })
-        } else {
-            createTableMapping(sourceTable_id, selectedTable.id);
-        }
+        } else
+            createTableMapping(sourceTableId, selectedTable.id);
     }
 
 
@@ -556,13 +576,26 @@ export default function Procedure() {
     const saveTableMappingLogic = () => {
         setLoadingSaveTableMappingLogic(true);
         // make request to API
-        TableMappingService.editMappingLogic(selectedMapping.id, selectedMapping.logic).then(response => {
-            let index = mappings.findIndex(x => x.id === response.data.id);
-            mappings[index].logic = response.data.logic;
-            setLoadingSaveTableMappingLogic(false);
-        }).catch(error => {
-            console.log(error);
-        });
+        TableMappingService
+            .editMappingLogic(selectedTableMapping.id, selectedTableMapping.logic, etl.id)
+            .then(response => {
+                let index = tableMappings.findIndex(x => x.id === response.data.id);
+                tableMappings[index].logic = response.data.logic;
+                setLoadingSaveTableMappingLogic(false);
+            }).catch(error => { console.log(error) });
+    }
+
+
+    /**
+     * Updates table mapping logic when field mapping modal is open
+     *
+     * @param tableMappingId table mapping id
+     * @param logic logic to update to
+     */
+
+    const updateTableMappingLogic = (tableMappingId, logic) => {
+        let index = tableMappings.findIndex(x => x.id === tableMappingId);
+        tableMappings[index].logic = logic;
     }
 
 
@@ -605,7 +638,7 @@ export default function Procedure() {
                             </Grid>
 
                             {/* If a table mapping is selected, allow to remove */}
-                            { Object.keys(selectedMapping).length !== 0 ? (
+                            { Object.keys(selectedTableMapping).length !== 0 && (
                                 <Grid item xs={2} sm={2} md={2} lg={2}>
                                     <Controls.Button
                                         color="secondary"
@@ -613,8 +646,6 @@ export default function Procedure() {
                                         onClick={removeTableMapping}
                                     />
                                 </Grid>
-                            ) : (
-                                <></>
                             )}
                         </Grid>
                             
@@ -674,7 +705,7 @@ export default function Procedure() {
                                     )
                                 })}
                             </Grid>
-                            { mappings.map((ar, i) => (
+                            { tableMappings.map((ar, i) => (
                                 <Xarrow key={i}
                                     start={'s_' + ar.start.name}
                                     end={'t_' + ar.end.name}
@@ -684,7 +715,7 @@ export default function Procedure() {
                                     strokeWidth={7.5}
                                     curveness={0.5}
                                     passProps={{
-                                        onClick: () => selectArrow(ar),
+                                        onClick: () => selectTableMapping(ar),
                                         onDoubleClick: () => openFieldMappingModal(ar)
                                     }}
                                 />
@@ -692,15 +723,17 @@ export default function Procedure() {
                             <FieldMappingModal 
                                 openModal={showFieldMappingModal}
                                 closeModal={closeFieldMappingModal}
-                                mappingId={selectedMapping.id}
+                                etl_id={etl.id}
+                                tableMappingId={selectedTableMapping.id}
                                 removeTableMapping={removeTableMapping}
-                                changeMappingCompletion={getCompleteStatus}
+                                changeMappingCompletion={changeTableMappingCompletionStatus}
+                                updateTableMappingLogic={updateTableMappingLogic}
                             />
                         </Grid>
                     </Grid>
 
                     <Grid className={classes.tableDetails} item xs={6} sm={6} md={6} lg={6}>
-                        { showTableDetails ? (
+                        { showTableDetails && (
                             <div>
                                 { sourceSelected ? (
                                     <SourceTableDetails
@@ -711,7 +744,7 @@ export default function Procedure() {
                                         disabled={loadingSaveTableComment}
                                         save={saveComment}
                                         omopTables={etl.targetDatabase.tables}
-                                        verify={connectedToTarget}
+                                        verify={connectedToTargetTable}
                                         connect={connectToTargetTable}
                                     />
                                 ) : (
@@ -723,26 +756,22 @@ export default function Procedure() {
                                         disabled={loadingSaveTableComment}
                                         save={saveComment}
                                         ehrTables={etl.sourceDatabase.tables}
-                                        verify={connectedToSource}
+                                        verify={connectedToSourceTable}
                                         connect={connectToSourceTable}
                                     />
                                     
                                 ) }
                             </div>
-                        ) : (
-                            <></>
                         )}
 
-                        { Object.keys(selectedMapping).length !== 0 ? (
+                        { Object.keys(selectedTableMapping).length !== 0 && (
                             <TableMappingLogic
-                                value={selectedMapping.logic === null ? '' : selectedMapping.logic}
+                                value={selectedTableMapping.logic === null ? '' : selectedTableMapping.logic}
                                 disabled={loadingSaveTableMappingLogic}
-                                onChange={(e) => setSelectedMapping({...selectedMapping, logic: e.target.value})}
+                                onChange={(e) => setSelectedTableMapping({...selectedTableMapping, logic: e.target.value})}
                                 save={() => saveTableMappingLogic()}
                             />
-                        ) : (
-                            <></>
-                        ) }
+                        )}
                     </Grid>
                 </Grid>
             )}
