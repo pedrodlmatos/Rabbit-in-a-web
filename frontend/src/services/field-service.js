@@ -10,18 +10,18 @@ class FieldService {
     /**
      * Sends PUT request to change comment of a source field
      *
-     * @param sourceFieldId EHR field's id
+     * @param ehrFieldId EHR field's id
      * @param comment comment to change to
      * @param etl_id ETL procedure's id
      * @returns
      */
 
-    changeSourceFieldComment(sourceFieldId, comment, etl_id) {
+    changeEHRFieldComment(ehrFieldId, comment, etl_id) {
         const username = JSON.parse(localStorage.getItem('user')).username;
         return axios.put(
             SOURCE_FIELD_URL + "comment",
             null,
-            { headers: authHeader(), params:{ fieldId: sourceFieldId, comment: comment, etl_id: etl_id, username: username }}
+            { headers: authHeader(), params:{ ehrFieldId: ehrFieldId, comment: comment, etl_id: etl_id, username: username }}
         );
     }
 
@@ -29,18 +29,26 @@ class FieldService {
     /**
      * Sends PUT request to change comment of a target field
      *
-     * @param targetFieldId OMOP CDM field id
+     * @param omopFieldId OMOP CDM field id
      * @param comment comment to change to
      * @param etl_id ETL procedure's id
      * @returns
      */
     
-    changeTargetFieldComment(targetFieldId, comment, etl_id) {
+    changeTargetFieldComment(omopFieldId, comment, etl_id) {
         const username = JSON.parse(localStorage.getItem('user')).username;
         return axios.put(
             TARGET_FIELD_URL + "comment",
             null,
-            { headers: authHeader(), params:{ fieldId: targetFieldId, comment: comment, etl_id: etl_id, username: username }}
+            {
+                headers: authHeader(),
+                params:{
+                    omopFieldId: omopFieldId,
+                    comment: comment,
+                    etl_id: etl_id,
+                    username: username
+                }
+            }
         );
     }
 }

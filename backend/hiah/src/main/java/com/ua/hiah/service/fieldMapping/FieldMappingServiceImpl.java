@@ -38,8 +38,8 @@ public class FieldMappingServiceImpl implements FieldMappingService {
     /**
      * Creates a field mapping
      *
-     * @param sourceFieldId source field's id
-     * @param targetTableId target field's id
+     * @param ehrFieldId source field's id
+     * @param omopTableId target field's id
      * @param tableMappingId table mapping's id
      * @param etl_id ETL procedure's id
      * @param username User's username
@@ -47,10 +47,10 @@ public class FieldMappingServiceImpl implements FieldMappingService {
      */
 
     @Override
-    public FieldMapping addFieldMapping(Long sourceFieldId, Long targetTableId, Long tableMappingId, Long etl_id, String username) {
+    public FieldMapping addFieldMapping(Long ehrFieldId, Long omopTableId, Long tableMappingId, Long etl_id, String username) {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
-            EHRField ehrField = ehrFieldService.getFieldById(sourceFieldId);
-            OMOPField omopField = omopFieldService.getFieldById(targetTableId);
+            EHRField ehrField = ehrFieldService.getFieldById(ehrFieldId);
+            OMOPField omopField = omopFieldService.getFieldById(omopTableId);
             TableMapping tableMapping = tableMappingService.getTableMappingById(tableMappingId);
 
             FieldMapping mapping = new FieldMapping(

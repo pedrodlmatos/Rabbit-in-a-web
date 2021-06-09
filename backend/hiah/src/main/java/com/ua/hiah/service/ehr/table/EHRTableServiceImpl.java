@@ -36,7 +36,7 @@ public class EHRTableServiceImpl implements EHRTableService {
     /**
      * Changes the comment of a table of the EHR database
      *
-     * @param table_id table's id
+     * @param ehrTableId table's id
      * @param comment comment to change to
      * @param etl_id ETL procedure's id
      * @param username User's username
@@ -44,11 +44,11 @@ public class EHRTableServiceImpl implements EHRTableService {
      */
 
     @Override
-    public EHRTable changeComment(Long table_id, String comment, Long etl_id, String username) {
+    public EHRTable changeComment(Long ehrTableId, String comment, Long etl_id, String username) {
 
         if (etlService.userHasAccessToEtl(etl_id, username)) {
             // table not found
-            EHRTable table = repository.findById(table_id).orElseThrow(() -> new EntityNotFoundException(EHRTable.class, "id", table_id.toString()));
+            EHRTable table = repository.findById(ehrTableId).orElseThrow(() -> new EntityNotFoundException(EHRTable.class, "id", ehrTableId.toString()));
 
             if (table.getComment() != null && table.getComment().equals(comment)) return table;             // old comment is equals to new
             else {                                                                                          // new comment is different
@@ -57,7 +57,7 @@ public class EHRTableServiceImpl implements EHRTableService {
                 return repository.save(table);
             }
         } else
-            throw new UnauthorizedAccessException(EHRTable.class, username, table_id);
+            throw new UnauthorizedAccessException(EHRTable.class, username, ehrTableId);
     }
 
 

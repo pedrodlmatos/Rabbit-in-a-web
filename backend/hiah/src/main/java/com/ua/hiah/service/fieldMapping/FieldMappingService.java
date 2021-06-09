@@ -9,15 +9,15 @@ public interface FieldMappingService {
     /**
      * Creates a field mapping
      *
-     * @param sourceFieldId source field's id
-     * @param targetTableId target field's id
+     * @param ehrFieldId source field's id
+     * @param omopTableId target field's id
      * @param tableMappingId table mapping's id
      * @param etl_id ETL procedure's id
      * @param username User's username
      * @return created table mapping
      */
 
-    FieldMapping addFieldMapping(Long sourceFieldId, Long targetTableId, Long tableMappingId, Long etl_id, String username);
+    FieldMapping addFieldMapping(Long ehrFieldId, Long omopTableId, Long tableMappingId, Long etl_id, String username);
 
 
     /**

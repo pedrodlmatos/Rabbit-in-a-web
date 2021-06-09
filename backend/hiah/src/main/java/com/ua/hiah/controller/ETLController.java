@@ -2,7 +2,6 @@ package com.ua.hiah.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.ETL;
-import com.ua.hiah.model.auth.User;
 import com.ua.hiah.security.services.UserDetailsServiceImpl;
 import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.views.Views;
@@ -179,14 +178,13 @@ public class ETLController {
     @JsonView(Views.CreateETLProcedure.class)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> createETLProcedure(
-            @Param(value = "name") String name,
+            @Param(value = "ehrName") String ehrName,
             @RequestParam("file") MultipartFile file,
             @Param(value = "cdm") String cdm,
             @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Creating new ETL procedure");
 
-        ETL response = etlService.createETLProcedure(name, file, cdm, username);
-        System.out.print(response);
+        ETL response = etlService.createETLProcedure(ehrName, file, cdm, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

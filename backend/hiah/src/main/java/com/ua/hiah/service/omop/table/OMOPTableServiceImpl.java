@@ -38,7 +38,7 @@ public class OMOPTableServiceImpl implements OMOPTableService {
     /**
      * Changes comment of a table from the OMOP CDM database
      *
-     * @param tableId table's id
+     * @param omopTableId table's id
      * @param comment comment to change tp
      * @param etl_id ETL procedure's id
      * @param username user's username
@@ -46,10 +46,10 @@ public class OMOPTableServiceImpl implements OMOPTableService {
      */
 
     @Override
-    public OMOPTable changeComment(Long tableId, String comment, Long etl_id, String username) {
+    public OMOPTable changeComment(Long omopTableId, String comment, Long etl_id, String username) {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
             // table not found
-            OMOPTable table = repository.findById(tableId).orElseThrow(() -> new EntityNotFoundException(OMOPTable.class, "id", tableId.toString()));
+            OMOPTable table = repository.findById(omopTableId).orElseThrow(() -> new EntityNotFoundException(OMOPTable.class, "id", omopTableId.toString()));
 
             if (table.getComment() != null && table.getComment().equals(comment)) return table;               // old comment == new comment
             else {                                                                                            // old comment != new comment
@@ -58,7 +58,7 @@ public class OMOPTableServiceImpl implements OMOPTableService {
                 return repository.save(table);
             }
         } else
-            throw new UnauthorizedAccessException(OMOPTable.class, username, tableId);
+            throw new UnauthorizedAccessException(OMOPTable.class, username, omopTableId);
     }
 
 

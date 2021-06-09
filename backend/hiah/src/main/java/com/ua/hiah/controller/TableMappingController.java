@@ -1,12 +1,8 @@
 package com.ua.hiah.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.ua.hiah.error.exceptions.UnauthorizedAccessException;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
-import com.ua.hiah.model.auth.User;
-import com.ua.hiah.security.services.UserDetailsServiceImpl;
-import com.ua.hiah.service.etl.ETLService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +26,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/v1/api/tableMap")
@@ -41,9 +35,6 @@ public class TableMappingController {
 
     @Autowired
     private TableMappingService service;
-
-    @Autowired
-    private ETLService etlService;
 
 
     @Operation(summary = "Retrieves a table mapping")
@@ -80,7 +71,10 @@ public class TableMappingController {
     @GetMapping("/map/{tableMappingId}")
     @JsonView(Views.TableMapping.class)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getTableMapping(@PathVariable Long tableMappingId, @Param(value = "etl_id") Long etl_id, @Param(value = "username") String username) {
+    public ResponseEntity<?> getTableMapping(
+            @PathVariable Long tableMappingId,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
         logger.info("TABLE MAPPING CONTROLLER - Requesting table mapping with id " + tableMappingId);
 
         TableMapping response = service.getTableMappingById(tableMappingId, etl_id, username);
@@ -123,13 +117,13 @@ public class TableMappingController {
     @PreAuthorize("hasRole('USER')")
     @JsonView(Views.CreateMapping.class)
     public ResponseEntity<?> createTableMapping(
-            @Param(value = "source_id") Long source_id,
-            @Param(value = "target_id") Long target_id,
+            @Param(value = "ehrTableId") Long ehrTableId,
+            @Param(value = "omopTableId") Long omopTableId,
             @Param(value = "username") String username,
             @Param(value = "elt_id") Long etl_id) {
-        logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", source_id, target_id, etl_id);
+        logger.info("TABLE MAPPING CONTROLLER - Add table mapping between {} and {} in session {}", ehrTableId, omopTableId, etl_id);
 
-        TableMapping response = service.addTableMapping(source_id, target_id, etl_id, username);
+        TableMapping response = service.addTableMapping(ehrTableId, omopTableId, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
@@ -170,12 +164,12 @@ public class TableMappingController {
     @DeleteMapping("/map")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> removeTableMapping(
-            @Param(value = "map_id") Long map_id,
+            @Param(value = "tableMappingId") Long tableMappingId,
             @Param(value = "etl_id") Long etl_id,
             @Param(value = "username") String username) {
-        logger.info("TABLE MAPPING CONTROLLER - Removed table mapping with id " + map_id);
+        logger.info("TABLE MAPPING CONTROLLER - Removed table mapping with id " + tableMappingId);
 
-        service.removeTableMapping(map_id, etl_id, username);
+        service.removeTableMapping(tableMappingId, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .build();
@@ -213,16 +207,16 @@ public class TableMappingController {
                     content = @Content
             )
     })
-    @PutMapping("/map/{map_id}/complete")
+    @PutMapping("/map/{tableMappingId}/complete")
     @JsonView(Views.ChangeCompletion.class)
     public ResponseEntity<?> editCompleteMapping(
-            @PathVariable Long map_id,
+            @PathVariable Long tableMappingId,
             @Param(value = "completion") boolean completion,
             @Param(value = "etl_id") Long etl_id,
             @Param(value = "username") String username) {
-        logger.info("TABLE MAPPING CONTROLLER - Change completion status of mapping " + map_id);
+        logger.info("TABLE MAPPING CONTROLLER - Change completion status of mapping " + tableMappingId);
 
-        TableMapping response = service.changeCompletionStatus(map_id, completion, etl_id, username);
+        TableMapping response = service.changeCompletionStatus(tableMappingId, completion, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
@@ -260,16 +254,16 @@ public class TableMappingController {
                     content = @Content
             )
     })
-    @PutMapping("/map/{map_id}/logic")
+    @PutMapping("/map/{tableMappingId}/logic")
     @JsonView(Views.ChangeLogic.class)
     public ResponseEntity<?> editMappingLogic(
-            @PathVariable Long map_id,
+            @PathVariable Long tableMappingId,
             @Param(value = "logic") String logic,
             @Param(value = "etl_id") Long etl_id,
             @Param(value = "username") String username) {
-        logger.info("TABLE MAPPING - Change mapping logic of mapping " + map_id);
+        logger.info("TABLE MAPPING - Change mapping logic of mapping " + tableMappingId);
 
-        TableMapping response = service.changeMappingLogic(map_id, logic, etl_id, username);
+        TableMapping response = service.changeMappingLogic(tableMappingId, logic, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

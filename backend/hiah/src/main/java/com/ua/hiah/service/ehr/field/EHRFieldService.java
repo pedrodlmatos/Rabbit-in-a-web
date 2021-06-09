@@ -18,12 +18,12 @@ public interface EHRFieldService {
     /**
      * Changes the comment a field from the EHR database
      *
-     * @param field field's id
+     * @param ehrFieldId field's id
      * @param comment comment to change to
      * @param etl_id ETL procedure's id
      * @param username User's username
      * @return changed field
      */
 
-    EHRField changeComment(Long field, String comment, Long etl_id, String username);
+    EHRField changeComment(Long ehrFieldId, String comment, Long etl_id, String username);
 }

@@ -475,7 +475,7 @@ export default function Procedure() {
 
     const saveCommentEHRTable = () => {
         TableService
-            .changeSourceTableComment(selectedTable.id, selectedTable.comment, etl.id)
+            .changeEHRTableComment(selectedTable.id, selectedTable.comment, etl.id)
             .then(response => {
                 const index = etl.ehrDatabase.tables.findIndex(x => x.id === response.data.id);
                 etl.ehrDatabase.tables[index].comment = response.data.comment;
@@ -490,7 +490,7 @@ export default function Procedure() {
 
     const saveCommentTargetTable = () => {
         TableService
-            .changeTargetTableComment(selectedTable.id, selectedTable.comment, etl.id)
+            .changeOMOPTableComment(selectedTable.id, selectedTable.comment, etl.id)
             .then(response => {
                 const index = etl.omopDatabase.tables.findIndex(x => x.id === response.data.id);
                 etl.omopDatabase.tables[index].comment = response.data.comment;

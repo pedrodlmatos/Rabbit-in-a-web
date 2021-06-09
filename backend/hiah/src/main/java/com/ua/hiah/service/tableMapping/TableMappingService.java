@@ -29,25 +29,25 @@ public interface TableMappingService {
     /**
      * Creates a table mapping between a table from the EHR database and a table from the OMOP CDM
      *
-     * @param source_id source table's id
-     * @param target_id target table's id
+     * @param ehrTableId source table's id
+     * @param omopTableId target table's id
      * @param etl_id ETL procedure's id
      * @param username User's username
      * @return created table mapping
      */
 
-    TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id, String username);
+    TableMapping addTableMapping(Long ehrTableId, Long omopTableId, Long etl_id, String username);
 
 
     /**
      * Deletes a table mapping given its id
      *
-     * @param map_id table mapping id
+     * @param tableMappingId table mapping id
      * @param etl_id ETL procedure's id
      * @param username User's username
      */
 
-    void removeTableMapping(Long map_id, Long etl_id, String username);
+    void removeTableMapping(Long tableMappingId, Long etl_id, String username);
 
 
     /**

@@ -34,7 +34,7 @@ public class EHRFieldServiceImpl implements EHRFieldService {
     /**
      * Changes the comment a field from the EHR database
      *
-     * @param sourceFieldId field's id
+     * @param ehrFieldId field's id
      * @param comment comment to change to
      * @param etl_id ETL procedure's id
      * @param username User's username
@@ -42,9 +42,9 @@ public class EHRFieldServiceImpl implements EHRFieldService {
      */
 
     @Override
-    public EHRField changeComment(Long sourceFieldId, String comment, Long etl_id, String username) {
+    public EHRField changeComment(Long ehrFieldId, String comment, Long etl_id, String username) {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
-            EHRField field = repository.findById(sourceFieldId).orElseThrow(() -> new EntityNotFoundException(EHRField.class, "id", sourceFieldId.toString()));
+            EHRField field = repository.findById(ehrFieldId).orElseThrow(() -> new EntityNotFoundException(EHRField.class, "id", ehrFieldId.toString()));
 
             if (field.getComment() != null && field.getComment().equals(comment)) return field;      // old comment is equal to new comment
             else {                                                                                   // new comment is different
@@ -54,6 +54,6 @@ public class EHRFieldServiceImpl implements EHRFieldService {
                 return repository.save(field);
             }
         } else
-            throw new UnauthorizedAccessException(EHRField.class, username, sourceFieldId);
+            throw new UnauthorizedAccessException(EHRField.class, username, ehrFieldId);
     }
 }

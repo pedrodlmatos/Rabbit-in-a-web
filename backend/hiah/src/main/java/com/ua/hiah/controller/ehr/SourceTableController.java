@@ -1,8 +1,8 @@
-package com.ua.hiah.controller.source;
+package com.ua.hiah.controller.ehr;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.ua.hiah.model.ehr.EHRField;
-import com.ua.hiah.service.ehr.field.EHRFieldService;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.service.ehr.table.EHRTableService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,23 +23,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/v1/api/sourceField")
-public class SourceFieldController {
+@RequestMapping("/v1/api/ehrTable")
+public class SourceTableController {
 
     @Autowired
-    private EHRFieldService fieldService;
+    private EHRTableService ehrTableService;
 
-    private static final Logger logger = LoggerFactory.getLogger(SourceFieldController.class);
+    private static final Logger logger = LoggerFactory.getLogger(SourceTableController.class);
 
-
-    @Operation(summary = "Change the comment of a field from the EHR database")
+    @Operation(summary = "Change comment of a table from the EHR database")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Comment changed with success",
+                    description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = EHRField.class)
+                            schema = @Schema(implementation = EHRTable.class)
                     )
             ),
             @ApiResponse(
@@ -59,7 +58,7 @@ public class SourceFieldController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Source Field not found",
+                    description = "SourceTable not found",
                     content = @Content
             ),
             @ApiResponse(
@@ -71,14 +70,14 @@ public class SourceFieldController {
     @PutMapping("/comment")
     @PreAuthorize("hasRole('USER')")
     @JsonView(Views.ChangeComment.class)
-    public ResponseEntity<?> changeFieldComment(
-            @Param(value = "fieldId") Long fieldId,
+    public ResponseEntity<?> changeTableComment(
+            @Param(value = "ehrTableId") Long ehrTableId,
             @Param(value = "comment") String comment,
-            @Param(value = "etl_id") Long etl_id,
-            @Param(value = "username") String username) {
-        logger.info("SOURCE FIELD CONTROLLER - Change field {} comment", fieldId);
+            @Param(value = "username") String username,
+            @Param(value = "etl_id") Long etl_id) {
+        logger.info("EHR TABLE CONTROLLER - Change table {} comment", ehrTableId);
 
-        EHRField response = fieldService.changeComment(fieldId, comment, etl_id, username);
+        EHRTable response = ehrTableService.changeComment(ehrTableId, comment, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

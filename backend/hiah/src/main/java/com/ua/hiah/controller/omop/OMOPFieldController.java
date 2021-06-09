@@ -1,8 +1,8 @@
-package com.ua.hiah.controller.target;
+package com.ua.hiah.controller.omop;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.ua.hiah.model.omop.OMOPTable;
-import com.ua.hiah.service.omop.table.OMOPTableService;
+import com.ua.hiah.model.omop.OMOPField;
+import com.ua.hiah.service.omop.field.OMOPFieldService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,22 +23,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/v1/api/targetTable")
-public class TargetTableController {
+@RequestMapping("/v1/api/omopField")
+public class OMOPFieldController {
 
     @Autowired
-    private OMOPTableService tableService;
+    private OMOPFieldService fieldService;
 
-    private static final Logger logger = LoggerFactory.getLogger(TargetTableController.class);
+    private static final Logger logger = LoggerFactory.getLogger(OMOPFieldController.class);
 
-    @Operation(summary = "Change comment of table from the OMOP CDM database")
+    @Operation(summary = "Change comment of field from the OMOP CDM database")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = OMOPTable.class)
+                            schema = @Schema(implementation = OMOPField.class)
                     )
             ),
             @ApiResponse(
@@ -70,14 +70,14 @@ public class TargetTableController {
     @PutMapping("/comment")
     @PreAuthorize("hasRole('USER')")
     @JsonView(Views.ChangeComment.class)
-    public ResponseEntity<?> changeTableComment(
-            @Param(value = "table_id") Long table_id,
+    public ResponseEntity<?> changeFieldComment(
+            @Param(value = "omopFieldId") Long omopFieldId,
             @Param(value = "comment") String comment,
-            @Param(value = "username") String username,
-            @Param(value = "etl_id") Long etl_id) {
-        logger.info("TARGET TABLE CONTROLLER - Change table {} comment", table_id);
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
+        logger.info("OMOP FIELD CONTROLLER - Change field {} comment", omopFieldId);
 
-        OMOPTable response = tableService.changeComment(table_id, comment, etl_id, username);
+        OMOPField response = fieldService.changeComment(omopFieldId, comment, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

@@ -10,13 +10,13 @@ class ETLService {
     /**
      * Sends POST request to API to create an ETL procedure
      *
-     * @param name EHR database name
+     * @param ehrName EHR database name
      * @param file file containing Scan Report of the EHR database
      * @param cdm OMOP CDM version
      * @returns created ETL procedure created
      */
 
-    createETL = (name, file, cdm) => {
+    createETL = (ehrName, file, cdm) => {
         const username = JSON.parse(localStorage.getItem('user')).username;
 
         let formData = new FormData();
@@ -25,7 +25,7 @@ class ETLService {
         try {
             return axios.post(
                 API_URL + "procedures", formData,
-                { headers: authHeaderMultiPart(), params: { name: name, cdm: cdm, username: username } }
+                { headers: authHeaderMultiPart(), params: { ehrName: ehrName, cdm: cdm, username: username } }
             );
         } catch (e) {
             console.log(e);

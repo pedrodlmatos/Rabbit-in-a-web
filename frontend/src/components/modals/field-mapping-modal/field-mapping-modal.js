@@ -455,7 +455,7 @@ export default function FieldMappingModal(props) {
 
     const saveEHRFieldComment = () => {
         FieldService
-            .changeSourceFieldComment(selectedField.id, selectedField.comment, etl_id)
+            .changeEHRFieldComment(selectedField.id, selectedField.comment, etl_id)
             .then(response => {
                 const index = ehrTable.fields.findIndex(x => x.id === response.data.id);
                 ehrTable.fields[index].comment = response.data.comment;

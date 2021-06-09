@@ -5,7 +5,6 @@ import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.service.fieldMapping.FieldMappingService;
 import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,8 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -74,13 +71,13 @@ public class FieldMappingController {
     @JsonView(Views.CreateMapping.class)
     public ResponseEntity<?> createFieldMapping(
             @Param(value = "tableMappingId") Long tableMappingId,
-            @Param(value = "sourceFieldId") Long sourceFieldId,
-            @Param(value = "targetFieldId") Long targetFieldId,
+            @Param(value = "ehrFieldId") Long ehrFieldId,
+            @Param(value = "omopFieldId") Long omopFieldId,
             @Param(value = "etl_id") Long etl_id,
             @Param(value = "username") String username) {
-        logger.info("FIELD MAPPING CONTROLLER - Add field mapping between {} and {} in table mapping {}", sourceFieldId, targetFieldId, tableMappingId);
+        logger.info("FIELD MAPPING CONTROLLER - Add field mapping between {} and {} in table mapping {}", ehrFieldId, omopFieldId, tableMappingId);
 
-        FieldMapping response = service.addFieldMapping(sourceFieldId, targetFieldId, tableMappingId, etl_id, username);
+        FieldMapping response = service.addFieldMapping(ehrFieldId, omopFieldId, tableMappingId, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
@@ -173,17 +170,17 @@ public class FieldMappingController {
                     content = @Content
             )
     })
-    @PutMapping("/map/{id}/logic")
+    @PutMapping("/map/{fieldMappingId}/logic")
     @PreAuthorize("hasRole('USER')")
     @JsonView(Views.ChangeLogic.class)
     public ResponseEntity<?> editMappingLogic(
-            @PathVariable Long id,
+            @PathVariable Long fieldMappingId,
             @Param(value = "logic") String logic,
             @Param(value = "etl_id") Long etl_id,
             @Param(value = "username") String username) {
-        logger.info("FIELD MAPPING - Change mapping logic of mapping " + id);
+        logger.info("FIELD MAPPING - Change mapping logic of mapping " + fieldMappingId);
 
-        FieldMapping response = service.changeMappingLogic(id, logic, etl_id, username);
+        FieldMapping response = service.changeMappingLogic(fieldMappingId, logic, etl_id, username);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

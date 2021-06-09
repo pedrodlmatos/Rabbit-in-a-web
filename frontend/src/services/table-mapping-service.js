@@ -10,15 +10,15 @@ class TableMappingService {
     /**
      * Sends a GET request to API to retrieve data from a table mapping (field of each table and field mappings)
      *
-     * @param map_id table mapping id
+     * @param tableMappingId table mapping id
      * @param etl_id ETL procedure's id
      * @returns mapping table mapping information
      */
 
-    getMapping(map_id, etl_id) {
+    getMapping(tableMappingId, etl_id) {
         const username = JSON.parse(localStorage.getItem('user')).username;
         return axios.get(
-            API_URL + "map/" + map_id,
+            API_URL + "map/" + tableMappingId,
             { headers: authHeader(), params: { etl_id: etl_id, username: username }}
         );
     }
@@ -27,18 +27,26 @@ class TableMappingService {
     /**
      * Sends a POST request to API to create a new table mapping
      * 
-     * @param {*} etl ETL procedure id
-     * @param {*} source source table id
-     * @param {*} target target table id
+     * @param {*} etl_id ETL procedure id
+     * @param {*} ehrTableId source table id
+     * @param {*} omopTableId target table id
      * @returns table mapping created
      */
 
-    addTableMapping = async (etl, source, target) => {
+    addTableMapping = async (etl_id, ehrTableId, omopTableId) => {
         const username = JSON.parse(localStorage.getItem('user')).username;
         return await axios.post(
             API_URL + "map", 
             {}, 
-            { headers: authHeader(), params: { username: username, etl_id: etl, source_id: source, target_id: target } }
+            {
+                headers: authHeader(),
+                params: {
+                    ehrTableId: ehrTableId,
+                    omopTableId: omopTableId,
+                    username: username,
+                    etl_id: etl_id
+                }
+            }
         );
     }
 
@@ -47,31 +55,32 @@ class TableMappingService {
      * Sends a DELETE request to delete table mapping
      * 
      * @param etl_id ETL procedure id
-     * @param map_id table mapping id
+     * @param tableMappingId table mapping id
      * @returns ETL procedure
      */
 
-    removeTableMapping(etl_id, map_id) {
+    removeTableMapping(etl_id, tableMappingId) {
         const username = JSON.parse(localStorage.getItem('user')).username;
         return axios.delete(
             API_URL + "map",
-            { headers: authHeader(), params: { map_id: map_id, etl_id: etl_id, username:username } }
+            { headers: authHeader(), params: { tableMappingId: tableMappingId, etl_id: etl_id, username:username } }
         )
     }
 
 
     /**
      * Sends a PUT request to change table mapping completion status
-     * 
-     * @param map_id table mapping id
+     *
+     * @param tableMapping table mapping id
      * @param complete completion status
+     * @param etl_id ETL procedure's id
      * @returns table mapping edited
      */
 
-    editCompleteMapping(map_id, complete, etl_id) {
+    editCompleteMapping(tableMapping, complete, etl_id) {
         const username = JSON.parse(localStorage.getItem('user')).username;
         return axios.put(
-            API_URL + "map/" + map_id + "/complete",
+            API_URL + "map/" + tableMapping + "/complete",
             null,
             { headers: authHeader(), params: { completion: complete, etl_id: etl_id, username: username }}
         );

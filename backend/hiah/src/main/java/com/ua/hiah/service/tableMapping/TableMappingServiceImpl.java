@@ -85,18 +85,18 @@ public class TableMappingServiceImpl implements TableMappingService {
     /**
      * Creates a table mapping between a table from the EHR database and a table from the OMOP CDM
      *
-     * @param source_id source table's id
-     * @param target_id target table's id
+     * @param ehrTableId source table's id
+     * @param omopTableId target table's id
      * @param etl_id ETL procedure's id
      * @param username User's username
      * @return created table mapping
      */
 
     @Override
-    public TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id, String username) {
+    public TableMapping addTableMapping(Long ehrTableId, Long omopTableId, Long etl_id, String username) {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
-            EHRTable ehrTable = ehrTableService.getTableById(source_id);
-            OMOPTable omopTable = omopTableService.getTableById(target_id);
+            EHRTable ehrTable = ehrTableService.getTableById(ehrTableId);
+            OMOPTable omopTable = omopTableService.getTableById(omopTableId);
             ETL etl = etlService.getETLWithId(etl_id);
 
             // validate
@@ -118,20 +118,20 @@ public class TableMappingServiceImpl implements TableMappingService {
     /**
      * Deletes a table mapping given its id
      *
-     * @param map_id table mapping id
+     * @param tableMappingId table mapping id
      * @param etl_id ETL procedure's id
      * @param username User's username
      */
 
     @Override
-    public void removeTableMapping(Long map_id, Long etl_id, String username) {
+    public void removeTableMapping(Long tableMappingId, Long etl_id, String username) {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
-            TableMapping tableMapping = repository.findById(map_id).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", map_id.toString()));
+            TableMapping tableMapping = repository.findById(tableMappingId).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", tableMappingId.toString()));
             //update modification date
             etlService.updateModificationDate(etl_id);
             repository.delete(tableMapping);
         } else
-            throw new UnauthorizedAccessException(TableMapping.class, username, map_id);
+            throw new UnauthorizedAccessException(TableMapping.class, username, tableMappingId);
     }
 
 
