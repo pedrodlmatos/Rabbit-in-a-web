@@ -21,11 +21,20 @@ public class ETL {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class, Views.CreateETLProcedure.class})
+    @JsonView({
+            Views.AdminETLProcedureList.class,
+            Views.UserETLProcedureList.class,
+            Views.CreateETLProcedure.class,
+            Views.ETLProcedure.class
+    })
     private Long id;
 
     @Column(name = "name", nullable = false)
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
+    @JsonView({
+            Views.AdminETLProcedureList.class,
+            Views.UserETLProcedureList.class,
+            Views.ETLProcedure.class
+    })
     @Expose
     private String name;
 
@@ -35,23 +44,34 @@ public class ETL {
             joinColumns = @JoinColumn(name = "etl_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    @JsonView({Views.ETLSession.class, Views.AdminETLProcedureList.class})
+    @JsonView({
+            Views.AdminETLProcedureList.class,
+            Views.ETLProcedure.class
+    })
     private List<User> users;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ehr_database_id", referencedColumnName = "id")
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
+    @JsonView({
+            Views.AdminETLProcedureList.class,
+            Views.UserETLProcedureList.class,
+            Views.ETLProcedure.class
+    })
     @Expose
     private EHRDatabase ehrDatabase;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "omop_database_id", referencedColumnName = "id")
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
+    @JsonView({
+            Views.AdminETLProcedureList.class,
+            Views.UserETLProcedureList.class,
+            Views.ETLProcedure.class
+    })
     @Expose
     private OMOPDatabase omopDatabase;
 
     @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
+    @JsonView(Views.ETLProcedure.class)
     @Expose
     private List<TableMapping> tableMappings;
 

@@ -17,11 +17,20 @@ public class OMOPTable {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.ChangeComment.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.ChangeComment.class,
+            Views.CreateMapping.class
+    })
     private Long id;
 
     @Column(name = "name")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private String name;
 
@@ -31,17 +40,26 @@ public class OMOPTable {
     private OMOPDatabase omopDatabase;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
-    @JsonView({Views.ETLSession.class, Views.ChangeComment.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.ChangeComment.class
+    })
     @Expose
     private String comment;
 
     @Column(name = "stem", nullable = false)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class
+    })
     @Expose
     private boolean stem;
 
     @OneToMany(mappedBy = "omopTable", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class
+    })
     @Expose
     private List<OMOPField> fields;
 

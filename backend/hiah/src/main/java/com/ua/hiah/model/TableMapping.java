@@ -27,18 +27,32 @@ public class TableMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class, Views.ChangeLogic.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class,
+            Views.ChangeLogic.class,
+            Views.ChangeCompletion.class
+    })
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "ehr_table_id", nullable = false)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private EHRTable ehrTable;
 
     @ManyToOne
     @JoinColumn(name = "omop_table_id", nullable = false)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private OMOPTable omopTable;
 
@@ -47,13 +61,23 @@ public class TableMapping {
     @Expose
     private List<FieldMapping> fieldMappings;
 
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class,
+            Views.ChangeCompletion.class
+    })
     @Column(name = "complete", nullable = false)
     @Expose
     private boolean complete;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class, Views.ChangeLogic.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class,
+            Views.ChangeLogic.class
+    })
     @Expose
     private String logic;
 

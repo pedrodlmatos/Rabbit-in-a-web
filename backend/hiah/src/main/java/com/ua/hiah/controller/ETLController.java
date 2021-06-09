@@ -93,7 +93,7 @@ public class ETLController {
             )
     })
     @GetMapping("/user_procedures")
-    @JsonView(Views.ETLSessionsList.class)
+    @JsonView(Views.UserETLProcedureList.class)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getUserETLs(@Param("username") String username) {
         logger.info("ETL CONTROLLER - Requesting ETL procedures of user " + username);
@@ -138,7 +138,7 @@ public class ETLController {
     })
     @GetMapping("/procedures/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     public ResponseEntity<?> getETLById(@PathVariable Long id, @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Requesting ETL procedure with id " + id);
 
@@ -246,7 +246,6 @@ public class ETLController {
             )
     })
     @DeleteMapping("/procedures")
-    @JsonView(Views.ETLSessionsList.class)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteETLProcedure(@Param("etl_id") Long etl_id) {
         logger.info("ETL CONTROLLER - Deleting ETL procedure with id " + etl_id);
@@ -360,7 +359,7 @@ public class ETLController {
             )
     })
     @PutMapping("/procedures/targetDB")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> changeTargetDatabase(
             @Param(value = "username") String username,
@@ -407,7 +406,7 @@ public class ETLController {
             )
     })
     @PutMapping("/procedures/stem")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> addStemTables(@Param(value = "etl_id") Long etl_id, @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Add stem tables on procedure {}", etl_id);
@@ -451,7 +450,7 @@ public class ETLController {
             ),
     })
     @PutMapping("/procedures/remove_stem")
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> removeStemTables(@Param(value = "etl_id") Long etl_id, @Param(value = "username") String username) {
         logger.info("ETL CONTROLLER - Remove stem tables on procedure {}", etl_id);

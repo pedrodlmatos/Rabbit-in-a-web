@@ -19,12 +19,16 @@ public class EHRDatabase {
     private Long id;
 
     @Column(name = "database_name")
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
+    @JsonView({
+            Views.AdminETLProcedureList.class,
+            Views.UserETLProcedureList.class,
+            Views.ETLProcedure.class
+    })
     @Expose
     private String databaseName;
 
     @OneToMany(mappedBy = "ehrDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     @Expose
     private List<EHRTable> tables;
 

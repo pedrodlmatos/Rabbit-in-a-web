@@ -1,13 +1,15 @@
 1 - Create an ETL procedure using EHR scan .
-2 - Create an ETL procedure using save file .
+2 - Create an ETL procedure using save file
 3 - Delete an ETL procedure (ADMIN) .
 4 - Mark an ETL procedure as deleted (ADMIN) .
 5 - Mark an ETL procedure as not deleted (ADMIN) .
+
 6 - Change EHR table comment .
 7 - Change OMOP CDM table comment .
 8 - Create mapping between tables .
 9 - Change table mapping logic .
 --> Repeat 6,7,8,9 for each way of creating table mappings .
+
 10 - Delete a table mapping .
 11 - Add stem tables
 12 - Change table mapping logic inside field mapping modal .
@@ -17,17 +19,18 @@
 16 - Create mapping between fields .
 17 - Change field mapping logic .
 --> Repeat 14,15,16,17 for each way of creating field mappings .
+
 18 - Change completion status to complete .
 19 - Change completion status to not complete .
 20 - Delete field mapping .
-21 - Change OMOP CDM version .
---> Repeat 6-20 .
+21 - Change OMOP CDM version
+--> Repeat 6-20
 22 - Remove stem tables
 23 - Download info files .
 24 - Download save file .
-25 - Create procedure using previous file .
-26 - Validate new procedure .
-27 - Mark an ETL procedure as deleted (USER) .
+25 - Create procedure using previous file
+26 - Validate new procedure
+27 - Mark an ETL procedure as deleted (USER)
 
 
 

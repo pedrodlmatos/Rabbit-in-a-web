@@ -23,23 +23,36 @@ public class FieldMapping {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView({Views.TableMapping.class, Views.CreateMapping.class, Views.ChangeLogic.class})
+    @JsonView({
+            Views.TableMapping.class,
+            Views.CreateMapping.class,
+            Views.ChangeLogic.class
+    })
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "ehr_field_id", nullable = false)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private EHRField ehrField;
 
     @ManyToOne
     @JoinColumn(name = "omop_field_id", nullable = false)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private OMOPField omopField;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView({Views.TableMapping.class, Views.ChangeLogic.class})
+    @JsonView({
+            Views.TableMapping.class,
+            Views.ChangeLogic.class
+    })
     @Expose
     private String logic;
 

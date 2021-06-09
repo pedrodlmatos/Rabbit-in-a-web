@@ -214,6 +214,7 @@ public class TableMappingController {
             )
     })
     @PutMapping("/map/{map_id}/complete")
+    @JsonView(Views.ChangeCompletion.class)
     public ResponseEntity<?> editCompleteMapping(
             @PathVariable Long map_id,
             @Param(value = "completion") boolean completion,

@@ -27,26 +27,44 @@ public class EHRField {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.ChangeComment.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.ChangeComment.class,
+            Views.CreateMapping.class
+    })
     private Long id;
 
     @Column(name = "name")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private String name;
 
 
     @Column(name = "description", columnDefinition = "TEXT")
-    @JsonView(Views.ETLSession.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class
+    })
     private String description;
 
     @Column(name = "type")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class
+    })
     @Expose
     private String type;
 
     @Column(name = "stem", nullable = false)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class
+    })
     @Expose
     private boolean stem;
 
@@ -71,7 +89,10 @@ public class EHRField {
     private double fractionUnique;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
-    @JsonView({Views.TableMapping.class, Views.ChangeComment.class})
+    @JsonView({
+            Views.TableMapping.class,
+            Views.ChangeComment.class
+    })
     @Expose
     private String comment;
 

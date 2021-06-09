@@ -26,17 +26,21 @@ public class OMOPDatabase {
     private CDMVersion version;
 
     @Column(name = "database_name", nullable = false)
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
+    @JsonView({
+            Views.AdminETLProcedureList.class,
+            Views.UserETLProcedureList.class,
+            Views.ETLProcedure.class
+    })
     @Expose
     private String databaseName;
 
     @Column(name = "vocabulary_version", nullable = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     @Expose
     private String conceptIdHintsVocabularyVersion;
 
     @OneToMany(mappedBy = "omopDatabase", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     @Expose
     private List<OMOPTable> tables;
 

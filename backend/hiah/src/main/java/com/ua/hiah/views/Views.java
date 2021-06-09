@@ -2,13 +2,32 @@ package com.ua.hiah.views;
 
 public class Views {
 
+    /**
+     * Fields necessary for ETL procedure list for ADMIN (all ETL procedures)
+     */
+
     public static class AdminETLProcedureList {}
 
-    public static class ETLSessionsList {}
+
+    /**
+     * Fields necessary for ETL procedure list for USER
+     */
+
+    public static class UserETLProcedureList {}
+
+
+    /**
+     * Fields necessary after creating an ETL procedure
+     */
 
     public static class CreateETLProcedure {}
 
-    public static class ETLSession extends ETLSessionsList {}
+
+    /**
+     * Fields necessary for ETL procedure
+     */
+
+    public static class ETLProcedure {}
 
     public static class ChangeComment {}
 
@@ -17,4 +36,6 @@ public class Views {
     public static class ChangeLogic {}
 
     public static class TableMapping {}
+
+    public static class ChangeCompletion {}
 }

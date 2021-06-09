@@ -18,7 +18,7 @@ public class EHRTable {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonView({
-            Views.ETLSession.class,
+            Views.ETLProcedure.class,
             Views.TableMapping.class,
             Views.ChangeComment.class,
             Views.CreateMapping.class
@@ -26,7 +26,11 @@ public class EHRTable {
     private Long id;
 
     @Column(name = "name")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private String name;
 
@@ -36,17 +40,23 @@ public class EHRTable {
     private EHRDatabase ehrDatabase;
 
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
-    @JsonView({Views.ETLSession.class, Views.ChangeComment.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.ChangeComment.class
+    })
     @Expose
     private String comment;
 
     @Column(name = "stem", nullable = false)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class
+    })
     @Expose
     private boolean stem;
 
     @Column(name = "row_count", nullable = true)
-    @JsonView(Views.ETLSession.class)
+    @JsonView(Views.ETLProcedure.class)
     @Expose
     private int rowCount;
 
@@ -55,7 +65,10 @@ public class EHRTable {
     private int rowsCheckedCount;
 
     @OneToMany(mappedBy = "ehrTable", cascade = CascadeType.ALL)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class
+    })
     @Expose
     private List<EHRField> fields;
 
