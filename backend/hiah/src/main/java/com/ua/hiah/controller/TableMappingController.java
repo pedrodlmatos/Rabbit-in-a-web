@@ -121,6 +121,7 @@ public class TableMappingController {
     })
     @PostMapping("/map")
     @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.CreateMapping.class)
     public ResponseEntity<?> createTableMapping(
             @Param(value = "source_id") Long source_id,
             @Param(value = "target_id") Long target_id,
@@ -259,6 +260,7 @@ public class TableMappingController {
             )
     })
     @PutMapping("/map/{map_id}/logic")
+    @JsonView(Views.ChangeLogic.class)
     public ResponseEntity<?> editMappingLogic(
             @PathVariable Long map_id,
             @Param(value = "logic") String logic,

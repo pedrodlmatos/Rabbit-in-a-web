@@ -3,16 +3,16 @@ package com.ua.hiah.service.tableMapping;
 import com.ua.hiah.error.exceptions.EntityNotFoundException;
 import com.ua.hiah.error.exceptions.UnauthorizedAccessException;
 import com.ua.hiah.model.*;
-import com.ua.hiah.model.source.SourceDatabase;
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.target.TargetDatabase;
-import com.ua.hiah.model.target.TargetField;
-import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.model.ehr.EHRDatabase;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.model.omop.OMOPDatabase;
+import com.ua.hiah.model.omop.OMOPField;
+import com.ua.hiah.model.omop.OMOPTable;
 import com.ua.hiah.repository.TableMappingRepository;
 import com.ua.hiah.service.etl.ETLService;
-import com.ua.hiah.service.source.table.SourceTableService;
-import com.ua.hiah.service.target.table.TargetTableService;
+import com.ua.hiah.service.ehr.table.EHRTableService;
+import com.ua.hiah.service.omop.table.OMOPTableService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +35,10 @@ public class TableMappingServiceImpl implements TableMappingService {
     private ETLService etlService;
 
     @Autowired
-    private SourceTableService sourceTableService;
+    private EHRTableService ehrTableService;
 
     @Autowired
-    private TargetTableService targetTableService;
+    private OMOPTableService omopTableService;
 
 
     /**
@@ -55,12 +55,12 @@ public class TableMappingServiceImpl implements TableMappingService {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
             TableMapping tableMapping = repository.findById(map_id).orElseThrow(() -> new EntityNotFoundException(TableMapping.class, "id", map_id.toString()));
 
-            List<SourceField> sourceFields = tableMapping.getSource().getFields();
-            sourceFields.sort(Comparator.comparingLong(SourceField::getId));
+            List<EHRField> ehrField = tableMapping.getEhrTable().getFields();
+            ehrField.sort(Comparator.comparingLong(EHRField::getId));
 
             // order OMOP CDM tables by id
-            List<TargetField> targetFields = tableMapping.getTarget().getFields();
-            targetFields.sort(Comparator.comparingLong(TargetField::getId));
+            List<OMOPField> omopFields = tableMapping.getOmopTable().getFields();
+            omopFields.sort(Comparator.comparingLong(OMOPField::getId));
 
             return tableMapping;
         }
@@ -95,14 +95,14 @@ public class TableMappingServiceImpl implements TableMappingService {
     @Override
     public TableMapping addTableMapping(Long source_id, Long target_id, Long etl_id, String username) {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
-            SourceTable sourceTable = sourceTableService.getTableById(source_id);
-            TargetTable targetTable = targetTableService.getTableById(target_id);
+            EHRTable ehrTable = ehrTableService.getTableById(source_id);
+            OMOPTable omopTable = omopTableService.getTableById(target_id);
             ETL etl = etlService.getETLWithId(etl_id);
 
             // validate
             TableMapping mapping = new TableMapping(
-                    sourceTable,
-                    targetTable,
+                    ehrTable,
+                    omopTable,
                     false,
                     etl
             );
@@ -195,29 +195,29 @@ public class TableMappingServiceImpl implements TableMappingService {
      *
      * @param etl ETL procedure object
      * @param tableMappings table mapping in JSON
-     * @param sourceDatabase source database
-     * @param targetDatabase target database
+     * @param ehrDatabase source database
+     * @param omopDatabase target database
      * @return table mappings created
      */
 
     @Override
-    public List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase sourceDatabase, TargetDatabase targetDatabase) {
+    public List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, EHRDatabase ehrDatabase, OMOPDatabase omopDatabase) {
         List<TableMapping> responseMappings = new ArrayList<>();
         for (TableMapping mapping : tableMappings) {
-            SourceTable sourceTable = sourceDatabase.getTables().stream().filter(src -> src.getName().equals(mapping.getSource().getName())).findFirst().orElse(null);
-            TargetTable targetTable = targetDatabase.getTables().stream().filter(trg -> trg.getName().equals(mapping.getTarget().getName())).findFirst().orElse(null);
+            EHRTable ehrTable = ehrDatabase.getTables().stream().filter(src -> src.getName().equals(mapping.getEhrTable().getName())).findFirst().orElse(null);
+            OMOPTable omopTable = omopDatabase.getTables().stream().filter(trg -> trg.getName().equals(mapping.getOmopTable().getName())).findFirst().orElse(null);
 
-            if (sourceTable != null && targetTable != null) {
-                TableMapping responseMapping = new TableMapping(etl, sourceTable, targetTable, mapping.getLogic());
+            if (ehrTable != null && omopTable != null) {
+                TableMapping responseMapping = new TableMapping(etl, ehrTable, omopTable, mapping.getLogic());
 
                 for (FieldMapping fieldMapping : mapping.getFieldMappings()) {
-                    SourceField sourceField = sourceTable.getFields().stream().filter(srcField -> srcField.getName().equals(fieldMapping.getSource().getName())).findFirst().orElse(null);
-                    TargetField targetField = targetTable.getFields().stream().filter(trgField -> trgField.getName().equals(fieldMapping.getTarget().getName())).findFirst().orElse(null);
+                    EHRField ehrField = ehrTable.getFields().stream().filter(srcField -> srcField.getName().equals(fieldMapping.getEhrField().getName())).findFirst().orElse(null);
+                    OMOPField omopField = omopTable.getFields().stream().filter(trgField -> trgField.getName().equals(fieldMapping.getOmopField().getName())).findFirst().orElse(null);
 
-                    if (sourceField != null && targetField != null) {
+                    if (ehrField != null && omopField != null) {
                         FieldMapping responseFieldMapping = new FieldMapping(
-                                sourceField,
-                                targetField,
+                                ehrField,
+                                omopField,
                                 fieldMapping.getLogic(),
                                 responseMapping
                         );
@@ -247,14 +247,14 @@ public class TableMappingServiceImpl implements TableMappingService {
      * Creates mapping to or from a stem table (stored in file)
      *
      * @param version OMOP CDM version
-     * @param targetDatabase target database
+     * @param omopDatabase target database
      * @param sourceStemTable stem table on EHR database
      * @param etl ETL procedure object
      * @return list of created table mappings
      */
 
     @Override
-    public List<TableMapping> createMappingsWithStemTable(CDMVersion version, TargetDatabase targetDatabase, SourceTable sourceStemTable, ETL etl) {
+    public List<TableMapping> createMappingsWithStemTable(CDMVersion version, OMOPDatabase omopDatabase, EHRTable sourceStemTable, ETL etl) {
         try {
             StemTableFile stemTableFile = StemTableFile.valueOf(version.name());
             FileInputStream fileInputStream = new FileInputStream(stemTableFile.defaultMappings);
@@ -263,20 +263,20 @@ public class TableMappingServiceImpl implements TableMappingService {
 
             for (CSVRecord row : CSVFormat.RFC4180.withHeader().parse(new InputStreamReader(fileInputStream))) {
                 String targetTableName = row.get("TARGET_TABLE").toLowerCase();
-                TargetTable targetTable = targetDatabase.getTables().stream().filter(target -> target.getName().equals(targetTableName)).findFirst().orElse(null);
-                if (targetTable != null) {
+                OMOPTable omopTable = omopDatabase.getTables().stream().filter(target -> target.getName().equals(targetTableName)).findFirst().orElse(null);
+                if (omopTable != null) {
                     if (mappingMap.get(targetTableName) == null) {
-                        TableMapping tableMapping = new TableMapping(etl, sourceStemTable, targetTable);
+                        TableMapping tableMapping = new TableMapping(etl, sourceStemTable, omopTable);
                         mappingMap.put(targetTableName, tableMapping);
                         mappings.add(tableMapping);
                     }
-                    SourceField sourceField = sourceStemTable.getFields().stream().filter(field -> field.getName().equals(row.get("SOURCE_FIELD").toLowerCase())).findFirst().orElse(null);
-                    TargetField targetField = targetTable.getFields().stream().filter(field -> field.getName().equals(row.get("TARGET_FIELD").toLowerCase())).findFirst().orElse(null);
+                    EHRField ehrField = sourceStemTable.getFields().stream().filter(field -> field.getName().equals(row.get("SOURCE_FIELD").toLowerCase())).findFirst().orElse(null);
+                    OMOPField omopField = omopTable.getFields().stream().filter(field -> field.getName().equals(row.get("TARGET_FIELD").toLowerCase())).findFirst().orElse(null);
 
-                    if (sourceField != null && targetField != null) {
+                    if (ehrField != null && omopField != null) {
                         FieldMapping fieldMapping = new FieldMapping(
-                                sourceField,
-                                targetField,
+                                ehrField,
+                                omopField,
                                 mappingMap.get(targetTableName)
                         );
                         mappingMap.get(targetTableName).getFieldMappings().add(fieldMapping);
@@ -358,17 +358,17 @@ public class TableMappingServiceImpl implements TableMappingService {
 
 
     @Override
-    public void removeTableMappingsFromTable(Long etl_id, SourceTable table) {
+    public void removeTableMappingsFromTable(Long etl_id, EHRTable table) {
         for (TableMapping tableMapping : repository.findAllByEtl_Id(etl_id)) {
-            if (tableMapping.getSource() == table)
+            if (tableMapping.getEhrTable() == table)
                 repository.delete(tableMapping);
         }
     }
 
     @Override
-    public void removeTableMappingsToTable(Long etl_id, TargetTable table) {
+    public void removeTableMappingsToTable(Long etl_id, OMOPTable table) {
         for (TableMapping tableMapping : repository.findAllByEtl_Id(etl_id)) {
-            if (tableMapping.getTarget() == table)
+            if (tableMapping.getOmopTable() == table)
                 repository.delete(tableMapping);
         }
     }

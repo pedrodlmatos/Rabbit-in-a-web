@@ -175,7 +175,8 @@ public class ETLController {
                     content = @Content
             )
     })
-    @PostMapping(value = "/procedures", consumes = "multipart/form-data")
+    @PostMapping(value = "/procedures", consumes = "multipart/form-data", produces = "application/json")
+    @JsonView(Views.CreateETLProcedure.class)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> createETLProcedure(
             @Param(value = "name") String name,
@@ -185,6 +186,7 @@ public class ETLController {
         logger.info("ETL CONTROLLER - Creating new ETL procedure");
 
         ETL response = etlService.createETLProcedure(name, file, cdm, username);
+        System.out.print(response);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
@@ -213,6 +215,7 @@ public class ETLController {
             )
     })
     @PostMapping(value = "/procedures/save", consumes = "multipart/form-data")
+    @JsonView(Views.CreateETLProcedure.class)
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> createETLSessionFromFile(@RequestParam("file") MultipartFile file, @Param("username") String username) {
         logger.info("ETL CONTROLLER - Creating ETL session from file");

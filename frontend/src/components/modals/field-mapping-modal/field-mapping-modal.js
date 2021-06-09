@@ -40,8 +40,8 @@ export default function FieldMappingModal(props) {
     
     const [loading, setLoading] = useState(true);
 
-    const [sourceTable, setSourceTable] = useState({});
-    const [targetTable, setTargetTable] = useState({});
+    const [ehrTable, setEHRTable] = useState({});
+    const [omopTable, setOMOPTable] = useState({});
     const [complete, setComplete] = useState(false);
     const [fieldMappings, setFieldMappings] = useState([]);
 
@@ -75,8 +75,8 @@ export default function FieldMappingModal(props) {
                 res.data.fieldMappings.forEach(item => {
                     const arrow = {
                         id: item.id,
-                        start: item.source,
-                        end: item.target,
+                        start: item.ehrField,
+                        end: item.omopField,
                         logic: item.logic,
                         color: 'grey'
                     }
@@ -84,8 +84,8 @@ export default function FieldMappingModal(props) {
                 })
 
                 setFieldMappings(maps);
-                setSourceTable(res.data.source);
-                setTargetTable(res.data.target);
+                setEHRTable(res.data.ehrTable);
+                setOMOPTable(res.data.omopTable);
                 setComplete(res.data.complete);
                 setTableMappingLogic(res.data.logic);
                 setLoading(false);
@@ -131,22 +131,22 @@ export default function FieldMappingModal(props) {
      *  - If there is a field selected, unselect it and then select the new field changing states
      *  - If select the field that was previous selected, unselects it
      *
-     * @param field selected source field
+     * @param ehrField selected source field
      */
 
-    const selectSourceField = (field) => {
+    const selectEHRField = (ehrField) => {
         // clean state
         setSelectedFieldMapping({});
         setShowFieldMappingLogic(false);
         setShowDeleteFieldMappingButton(false);
         if (Object.keys(selectedField).length === 0) {
             // no field is selected
-            setSelectedField(field);
+            setSelectedField(ehrField);
             setSourceSelected(true);                                               // change color of mappings that comes from the selected field
-            MappingOperations.selectMappingsFromSource(fieldMappings, field);
-            defineSourceFieldData(field);                                                // define fields info
+            MappingOperations.selectMappingsFromSource(fieldMappings, ehrField);
+            defineEHRFieldData(ehrField);                                                // define fields info
             setShowFieldInfo(true);
-        } else if (selectedField === field) {
+        } else if (selectedField === ehrField) {
             // select the same table
             MappingOperations.resetMappingColor(fieldMappings);                           // change color of mappings to grey
             setSelectedField({});                                                   // unselect
@@ -156,10 +156,10 @@ export default function FieldMappingModal(props) {
         } else {
             // select any other source table
             MappingOperations.resetMappingColor(fieldMappings);                           // change color of arrows to grey
-            setSelectedField(field);                                                      // change selected field information
+            setSelectedField(ehrField);                                                      // change selected field information
             setSourceSelected(true);
-            MappingOperations.selectMappingsFromSource(fieldMappings, field);             // change color of mappings that comes from the selected field
-            defineSourceFieldData(field);
+            MappingOperations.selectMappingsFromSource(fieldMappings, ehrField);             // change color of mappings that comes from the selected field
+            defineEHRFieldData(ehrField);
             setShowFieldInfo(true);                                                 // change content of fields table
         }
     }
@@ -173,10 +173,10 @@ export default function FieldMappingModal(props) {
      * - If select the same field, unselect
      * - Else selects a different target field
      *
-     * @param field target field
+     * @param omopField target field
      */
 
-    const selectTargetField = (field) => {
+    const selectOMOPField = (omopField) => {
         // clean state
         setSelectedFieldMapping({});
         setShowFieldMappingLogic(false);
@@ -184,12 +184,12 @@ export default function FieldMappingModal(props) {
 
         if (Object.keys(selectedField).length === 0) {
             // no field is selected
-            MappingOperations.selectMappingsToTarget(fieldMappings, field)          // change color of mappings that goes to the selected field
-            setSelectedField(field);                                                // change select field information
+            MappingOperations.selectMappingsToTarget(fieldMappings, omopField)          // change color of mappings that goes to the selected field
+            setSelectedField(omopField);                                                // change select field information
             setSourceSelected(false);
-            defineTargetFieldData(field);
+            defineOMOPFieldData(omopField);
             setShowFieldInfo(true);                                           // change content of fields table
-        } else if (selectedField === field) {
+        } else if (selectedField === omopField) {
             // select the same field -> unselect
             MappingOperations.resetMappingColor(fieldMappings);                     // change color of mappings to grey
             setSelectedField({});                                             // unselect
@@ -199,7 +199,7 @@ export default function FieldMappingModal(props) {
         } else if (sourceSelected) {
             // source field is selected -> create field mapping
             //resetArrowsColor();                                                     // change arrows color to grey
-            createFieldMapping(selectedField.id, field.id);                           // create arrow
+            createFieldMapping(selectedField.id, omopField.id);                           // create arrow
             //setSelectedField({});                                                   // unselects fields
             //setSourceSelected(false);                                               // clean state
             //setShowFieldInfo(false);
@@ -207,10 +207,10 @@ export default function FieldMappingModal(props) {
         } else {
             // other target field is selected
             MappingOperations.resetMappingColor(fieldMappings);                     // change color of mappings to grey
-            setSelectedField(field);                                                // change select table information
+            setSelectedField(omopField);                                                // change select table information
             setSourceSelected(false);
-            MappingOperations.selectMappingsToTarget(fieldMappings, field)          // change color of mappings that goes to the selected field
-            defineTargetFieldData(field);
+            MappingOperations.selectMappingsToTarget(fieldMappings, omopField)          // change color of mappings that goes to the selected field
+            defineOMOPFieldData(omopField);
             setShowFieldInfo(true);                                           // change content of fields table
         }
     }
@@ -219,16 +219,16 @@ export default function FieldMappingModal(props) {
     /**
      * Defines the content of fields table (field name, type, description and value counts)
      *
-     * @param field selected field
+     * @param ehrField selected field
      */
 
-    const defineSourceFieldData = (field) => {
+    const defineEHRFieldData = (ehrField) => {
         let data = [];
         setFieldInfo(data);
 
-        if (field.valueCounts.length === 0) setShowTable(false);
+        if (ehrField.valueCounts.length === 0) setShowTable(false);
         else {
-            field.valueCounts.forEach(element => {
+            ehrField.valueCounts.forEach(element => {
                 data.push({
                     value: element.value,
                     frequency: element.frequency,
@@ -244,14 +244,14 @@ export default function FieldMappingModal(props) {
     /**
      * Defines the content of fields table (field name, type, description and list os concepts)
      *
-     * @param field selected field
+     * @param omopField selected field
      */
 
-    const defineTargetFieldData = (field) => {
+    const defineOMOPFieldData = (omopField) => {
         let data = [];
-        if (field.concepts.length === 0) setShowTable(false);
+        if (omopField.concepts.length === 0) setShowTable(false);
         else {
-            field.concepts.forEach(element => {
+            omopField.concepts.forEach(element => {
                 data.push({
                     conceptId: element.conceptId,
                     conceptName: element.conceptName,
@@ -268,28 +268,28 @@ export default function FieldMappingModal(props) {
     /**
      * Sends request to API to create a mapping between two fields
      *
-     * @param sourceFieldId source field id
-     * @param targetFieldId target field id
+     * @param ehrFieldId source field id
+     * @param omopFieldId target field id
      */
 
-    const createFieldMapping = (sourceFieldId, targetFieldId) => {
+    const createFieldMapping = (ehrFieldId, omopFieldId) => {
         // verify if table mapping between those tables already exists
         let exists = false;
         fieldMappings.forEach(function (item) {
-            if (item.start.id === sourceFieldId && item.end.id === targetFieldId) exists = true;
+            if (item.start.id === ehrFieldId && item.end.id === omopFieldId) exists = true;
         })
 
         // if doesn't exist -> create
         if (!exists) {
             FieldMappingService
-                .addFieldMapping(tableMappingId, sourceFieldId, targetFieldId, etl_id)
+                .addFieldMapping(tableMappingId, ehrFieldId, omopFieldId, etl_id)
                 .then(res => {
                     const arrow = {
                         id: res.data.id,
-                        start: res.data.source,
-                        end: res.data.target,
+                        start: res.data.ehrField,
+                        end: res.data.omopField,
                         logic: res.data.logic,
-                        color: MappingOperations.defineMappingColor(selectedField, res.data),
+                        color: MappingOperations.defineMappingColor(selectedField, false, res.data.ehrField.id, res.data.omopField.id),
                     }
                     setFieldMappings(fieldMappings.concat(arrow));
                 }).catch(res => { console.log(res) });
@@ -383,14 +383,14 @@ export default function FieldMappingModal(props) {
     /**
      * Verifies if a source field is connected to a target field
      *
-     * @param targetFieldId target table's id
+     * @param omopFieldId target table's id
      * @returns true if are connected, false otherwise
      */
 
-    const connectedToTargetField = (targetFieldId) => {
+    const connectedToOMOPField = (omopFieldId) => {
         let result = false;
         fieldMappings.forEach(item => {
-            if (item.end.id === targetFieldId && item.start.id === selectedField.id) result = true;
+            if (item.end.id === omopFieldId && item.start.id === selectedField.id) result = true;
         })
         return result;
     }
@@ -402,15 +402,15 @@ export default function FieldMappingModal(props) {
      * @param e check event with selected target field
      */
 
-    const connectToTargetField = e => {
-        const targetFieldId = e.target.value[0];
+    const connectToOMOPField = e => {
+        const omopFieldId = e.target.value[0];
 
-        if (connectedToTargetField(targetFieldId)) {
+        if (connectedToOMOPField(omopFieldId)) {
             fieldMappings.forEach(item => {
-                if (item.end.id === targetFieldId && item.start.id === selectedField.id) removeMapping(item.id);
+                if (item.end.id === omopFieldId && item.start.id === selectedField.id) removeMapping(item.id);
             })
         } else {
-            createFieldMapping(selectedField.id, targetFieldId);
+            createFieldMapping(selectedField.id, omopFieldId);
         }
     }
 
@@ -418,14 +418,14 @@ export default function FieldMappingModal(props) {
     /**
      * Verifies if a target field is connected to a source field
      *
-     * @param sourceFieldId source table id
+     * @param ehrFieldId source table id
      * @returns true if they are connected, false otherwise
      */
 
-    const connectedToSourceField = (sourceFieldId) => {
+    const connectedToEHRField = (ehrFieldId) => {
         let result = false;
         fieldMappings.forEach(item => {
-            if (item.start.id === sourceFieldId && item.end.id === selectedField.id) result = true;
+            if (item.start.id === ehrFieldId && item.end.id === selectedField.id) result = true;
         })
         return result;
     }
@@ -437,15 +437,15 @@ export default function FieldMappingModal(props) {
      * @param {*} e check event with checked source field
      */
 
-    const connectToSourceField = e => {
-        const sourceFieldId = e.target.value[0];
+    const connectToEHRField = e => {
+        const ehrFieldId = e.target.value[0];
 
-        if (connectedToSourceField(sourceFieldId)) {
+        if (connectedToEHRField(ehrFieldId)) {
             fieldMappings.forEach(item => {
-                if (item.start.id === sourceFieldId && item.end.id === selectedField.id) removeMapping(item.id);
+                if (item.start.id === ehrFieldId && item.end.id === selectedField.id) removeMapping(item.id);
             })
         } else
-            createFieldMapping(sourceFieldId, selectedField.id);
+            createFieldMapping(ehrFieldId, selectedField.id);
     }
 
 
@@ -453,12 +453,12 @@ export default function FieldMappingModal(props) {
      * Sends request to save comment of field from EHR database
      */
 
-    const saveSourceFieldComment = () => {
+    const saveEHRFieldComment = () => {
         FieldService
             .changeSourceFieldComment(selectedField.id, selectedField.comment, etl_id)
             .then(response => {
-                const index = sourceTable.fields.findIndex(x => x.id === response.data.id);
-                sourceTable.fields[index].comment = response.data.comment;
+                const index = ehrTable.fields.findIndex(x => x.id === response.data.id);
+                ehrTable.fields[index].comment = response.data.comment;
             }).catch(error => { console.log(error) });
     }
 
@@ -467,12 +467,12 @@ export default function FieldMappingModal(props) {
      * Sends request to save comment of field from OMOP CDM database
      */
 
-    const saveTargetFieldComment = () => {
+    const saveOMOPFieldComment = () => {
         FieldService
             .changeTargetFieldComment(selectedField.id, selectedField.comment, etl_id)
             .then(response => {
-                const index = targetTable.fields.findIndex(x => x.id === response.data.id);
-                targetTable.fields[index].comment = response.data.comment;
+                const index = omopTable.fields.findIndex(x => x.id === response.data.id);
+                omopTable.fields[index].comment = response.data.comment;
             }).catch(error => console.log(error));
     }
 
@@ -506,9 +506,9 @@ export default function FieldMappingModal(props) {
                             {/* Source table box */}
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                                 <Controls.ElementBox
-                                    id={sourceTable.name + 't'}
-                                    element={sourceTable}
-                                    color={sourceTable.stem ? "#A000A0" : "#FF9224"}
+                                    id={ehrTable.name + 't'}
+                                    element={ehrTable}
+                                    color={ehrTable.stem ? "#A000A0" : "#FF9224"}
                                     border="#000000"
                                 />
                             </Grid>
@@ -516,14 +516,14 @@ export default function FieldMappingModal(props) {
                             {/* Target table box */}
                             <Grid item xs={3} sm={3} md={3} lg={3}>
                                 <Controls.ElementBox
-                                    id={targetTable.name + 't'}
-                                    element={targetTable}
+                                    id={omopTable.name + 't'}
+                                    element={omopTable}
                                     color="#53ECEC"
                                     border="#000000"
                                 />
                                 <Xarrow
-                                    start={sourceTable.name + 't'}
-                                    end={targetTable.name + 't'}
+                                    start={ehrTable.name + 't'}
+                                    end={omopTable.name + 't'}
                                     startAnchor="right"
                                     endAnchor="left"
                                     color={complete ? 'black' : 'grey'}
@@ -577,7 +577,7 @@ export default function FieldMappingModal(props) {
                     <DialogContent>
                         <Grid container>
                             <Grid item xs={3} sm={3} md={3} lg={3}>
-                                { sourceTable.fields.map(item => {
+                                { ehrTable.fields.map(item => {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id}
@@ -589,7 +589,7 @@ export default function FieldMappingModal(props) {
                                             position="right-end"
                                             color='#FFE3C6'
                                             border="#000000"
-                                            handleSelection={selectSourceField}
+                                            handleSelection={selectEHRField}
                                             createMapping={createFieldMapping} 
                                         />
                                     )
@@ -597,7 +597,7 @@ export default function FieldMappingModal(props) {
                             </Grid>
 
                             <Grid item xs={3} sm={3} md={3} lg={3}>
-                                { targetTable.fields.map(item => {
+                                { omopTable.fields.map(item => {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id}
@@ -609,7 +609,7 @@ export default function FieldMappingModal(props) {
                                             position="right-end"
                                             color="#D5FFFF"
                                             border="#000000"
-                                            handleSelection={selectTargetField}
+                                            handleSelection={selectOMOPField}
                                             createMapping={createFieldMapping}
                                         />
                                     )}
@@ -646,10 +646,10 @@ export default function FieldMappingModal(props) {
                                                 fieldInfo={fieldInfo}
                                                 setFieldInfo={setFieldInfo}
                                                 onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
-                                                saveComment={saveSourceFieldComment}
-                                                omopFields={targetTable.fields}
-                                                verify={connectedToTargetField}
-                                                connect={connectToTargetField}
+                                                saveComment={saveEHRFieldComment}
+                                                omopFields={omopTable.fields}
+                                                verify={connectedToOMOPField}
+                                                connect={connectToOMOPField}
                                             />
                                         ) : (
                                             <TargetFieldDetails
@@ -657,10 +657,10 @@ export default function FieldMappingModal(props) {
                                                 fieldInfo={fieldInfo}
                                                 setFieldInfo={setFieldInfo}
                                                 onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
-                                                saveComment={saveTargetFieldComment}
-                                                ehrFields={sourceTable.fields}
-                                                verify={connectedToSourceField}
-                                                connect={connectToSourceField}
+                                                saveComment={saveOMOPFieldComment}
+                                                ehrFields={ehrTable.fields}
+                                                verify={connectedToEHRField}
+                                                connect={connectToEHRField}
                                             />
                                         )}
                                     </div>
@@ -672,7 +672,7 @@ export default function FieldMappingModal(props) {
                                         disabled={savingFieldMappingLogic}
                                         onChange={(e) => setSelectedFieldMapping({...selectedFieldMapping, logic: e.target.value})}
                                         save={saveFieldMappingLogic}
-                                        omopFields={targetTable.fields}
+                                        omopFields={omopTable.fields}
                                     />
                                 )}
                             </Grid>

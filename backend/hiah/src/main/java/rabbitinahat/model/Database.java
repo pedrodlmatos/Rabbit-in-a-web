@@ -1,10 +1,10 @@
 /* Adapted from Database (rabbit-core) */
 package rabbitinahat.model;
 
-import com.ua.hiah.model.source.SourceDatabase;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.target.TargetDatabase;
-import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.model.ehr.EHRDatabase;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.model.omop.OMOPDatabase;
+import com.ua.hiah.model.omop.OMOPTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,31 +15,31 @@ public class Database {
     private String name;
     public String conceptIdHintsVocabularyVersion;
 
-    public Database(SourceDatabase sourceDatabase) {
-        this.name = sourceDatabase.getDatabaseName();
-        this.tables = getTablesFromDatabase(sourceDatabase.getTables());
+    public Database(EHRDatabase ehrDatabase) {
+        this.name = ehrDatabase.getDatabaseName();
+        this.tables = getTablesFromDatabase(ehrDatabase.getTables());
     }
 
-    public Database(TargetDatabase targetDatabase) {
-        this.name = targetDatabase.getDatabaseName();
-        this.conceptIdHintsVocabularyVersion = targetDatabase.getConceptIdHintsVocabularyVersion();
-        this.tables = getTablesFromTargetDatabase(targetDatabase);
+    public Database(OMOPDatabase omopDatabase) {
+        this.name = omopDatabase.getDatabaseName();
+        this.conceptIdHintsVocabularyVersion = omopDatabase.getConceptIdHintsVocabularyVersion();
+        this.tables = getTablesFromTargetDatabase(omopDatabase);
     }
 
-    private List<Table> getTablesFromDatabase(List<SourceTable> tables) {
+    private List<Table> getTablesFromDatabase(List<EHRTable> tables) {
         List<Table> tempTables = new ArrayList<>();
-        for (SourceTable sourceTable : tables) {
-            Table table = new Table(sourceTable, this);
+        for (EHRTable ehrTable : tables) {
+            Table table = new Table(ehrTable, this);
             tempTables.add(table);
         }
 
         return tempTables;
     }
 
-    private List<Table> getTablesFromTargetDatabase(TargetDatabase targetDatabase) {
+    private List<Table> getTablesFromTargetDatabase(OMOPDatabase omopDatabase) {
         List<Table> tables = new ArrayList<>();
-        for (TargetTable targetTable : targetDatabase.getTables()) {
-            Table table = new Table(targetTable, this);
+        for (OMOPTable omopTable : omopDatabase.getTables()) {
+            Table table = new Table(omopTable, this);
             tables.add(table);
         }
         return tables;

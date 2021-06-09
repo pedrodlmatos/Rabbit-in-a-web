@@ -146,7 +146,7 @@ public class ConceptsMap {
         private String vocabularyId;
         private String conceptClassId;
 
-        public Concept(com.ua.hiah.model.target.Concept concept, Field field) {
+        public Concept(com.ua.hiah.model.omop.Concept concept, Field field) {
             this.field = field;
             this.conceptId = concept.getConceptId();
             this.conceptName = concept.getConceptName();

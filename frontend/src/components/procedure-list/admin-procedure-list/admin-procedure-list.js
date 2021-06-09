@@ -197,8 +197,8 @@ export default function AdminProcedureList() {
         switch (paramSort) {
             case "omop":
                 compareFn = (i, j) => {
-                    let cdmIndexI = CDMVersions.findIndex(function(item) { return item.id === i.targetDatabase.databaseName});
-                    let cdmIndexJ = CDMVersions.findIndex(function(item) { return item.id === j.targetDatabase.databaseName});
+                    let cdmIndexI = CDMVersions.findIndex(function(item) { return item.id === i.omopDatabase.databaseName});
+                    let cdmIndexJ = CDMVersions.findIndex(function(item) { return item.id === j.omopDatabase.databaseName});
                     if (cdmIndexI < cdmIndexJ)
                         return sortOrder === "desc" ? -1 : 1;
                     else if (cdmIndexI > cdmIndexJ)
@@ -340,11 +340,11 @@ export default function AdminProcedureList() {
                                             </StyledTableCell>
 
                                             <StyledTableCell component="th" scope="row" align="left">
-                                                {procedure.sourceDatabase.databaseName}
+                                                {procedure.ehrDatabase.databaseName}
                                             </StyledTableCell>
 
                                             <StyledTableCell component="th" scope="row" align="left">
-                                                {CDMVersions.filter(function(cdm) { return cdm.id === procedure.targetDatabase.databaseName })[0].name}
+                                                {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
                                             </StyledTableCell>
 
                                             <StyledTableCell component="th" scope="row" align="left">
@@ -382,7 +382,6 @@ export default function AdminProcedureList() {
                                         </StyledTableRow>
                                     )
                                 })}
-
                             </TableBody>
                         </Table>
                     </TableContainer>

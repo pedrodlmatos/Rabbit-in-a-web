@@ -3,10 +3,10 @@ package rabbitcore.utilities;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.TableMapping;
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.target.TargetField;
-import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.model.omop.OMOPField;
+import com.ua.hiah.model.omop.OMOPTable;
 import rabbitcore.utilities.files.Row;
 import rabbitcore.utilities.files.WriteCSVFileWithHeader;
 import org.apache.commons.csv.CSVFormat;
@@ -48,15 +48,15 @@ public class ETLSummaryGenerator {
     public static List<Row> createSourceFieldList(ETL etl) {
         List<Row> rows = new ArrayList<>();
 
-        for (SourceTable sourceTable : etl.getSourceDatabase().getTables()) {
-            for (SourceField sourceField : sourceTable.getFields()) {
-                List<String> mappings = sourceField.getMappingsFromSourceField();
+        for (EHRTable ehrTable : etl.getSourceDatabase().getTables()) {
+            for (EHRField ehrField : ehrTable.getFields()) {
+                List<String> mappings = ehrField.getMappingsFromEHRField();
                 // create Row object
                 Row row = new Row();
-                row.add("Source Table", sourceTable.getName());
-                row.add("Source Field", sourceField.getName());
-                row.add("Type", sourceField.getType());
-                row.add("Comment", sourceField.getComment());
+                row.add("Source Table", ehrTable.getName());
+                row.add("Source Field", ehrField.getName());
+                row.add("Type", ehrField.getType());
+                row.add("Comment", ehrField.getComment());
                 row.add("Mapped?", mappings.size() > 0 ? "X" : "");
                 row.add("Number of mappings", mappings.size() > 0 ? String.valueOf(mappings.size()) : "");
                 row.add("Mappings", String.join(",", mappings));
@@ -78,15 +78,15 @@ public class ETLSummaryGenerator {
     public static List<Row> createTargetFieldList(ETL etl) {
         List<Row> rows = new ArrayList<>();
 
-        for (TargetTable targetTable : etl.getTargetDatabase().getTables()) {
-            for (TargetField targetField : targetTable.getFields()) {
-                List<String> mappings = targetField.getMappingsToTargetField();
+        for (OMOPTable omopTable : etl.getTargetDatabase().getTables()) {
+            for (OMOPField omopField : omopTable.getFields()) {
+                List<String> mappings = omopField.getMappingsToTargetField();
                 // create row object
                 Row row = new Row();
-                row.add("Target Table", targetTable.getName());
-                row.add("Target Field", targetField.getName());
-                row.add("Required?", targetField.isNullable() ? "" : "*");
-                row.add("Comment", targetField.getComment());
+                row.add("Target Table", omopTable.getName());
+                row.add("Target Field", omopField.getName());
+                row.add("Required?", omopField.isNullable() ? "" : "*");
+                row.add("Comment", omopField.getComment());
                 row.add("Mapped?", mappings.size() > 0 ? "X" : "");
                 row.add("Number of mappings", mappings.size() > 0 ? String.valueOf(mappings.size()) : "");
                 row.add("Mappings", String.join(",", mappings));
@@ -104,8 +104,8 @@ public class ETLSummaryGenerator {
 
         for (TableMapping mapping : mappings) {
             Row row = new Row();
-            row.add("Source Table", mapping.getSource().getName());
-            row.add("Target Table", mapping.getTarget().getName());
+            row.add("Source Table", mapping.getEhrTable().getName());
+            row.add("Target Table", mapping.getOmopTable().getName());
             //row.add("Comment", mapping.comment()); TODO
             //row.add("Logic", mapping.getLogic()); TODO
 

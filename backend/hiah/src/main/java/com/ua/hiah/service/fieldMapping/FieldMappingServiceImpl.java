@@ -4,13 +4,13 @@ import com.ua.hiah.error.exceptions.EntityNotFoundException;
 import com.ua.hiah.error.exceptions.UnauthorizedAccessException;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.TableMapping;
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.target.TargetField;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.model.omop.OMOPField;
 import com.ua.hiah.repository.FieldMappingRepository;
 import com.ua.hiah.service.etl.ETLService;
-import com.ua.hiah.service.source.field.SourceFieldService;
+import com.ua.hiah.service.ehr.field.EHRFieldService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
-import com.ua.hiah.service.target.field.TargetFieldService;
+import com.ua.hiah.service.omop.field.OMOPFieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +23,10 @@ public class FieldMappingServiceImpl implements FieldMappingService {
     private FieldMappingRepository repository;
 
     @Autowired
-    private SourceFieldService sourceFieldService;
+    private EHRFieldService ehrFieldService;
 
     @Autowired
-    private TargetFieldService targetFieldService;
+    private OMOPFieldService omopFieldService;
 
     @Autowired
     private TableMappingService tableMappingService;
@@ -49,13 +49,13 @@ public class FieldMappingServiceImpl implements FieldMappingService {
     @Override
     public FieldMapping addFieldMapping(Long sourceFieldId, Long targetTableId, Long tableMappingId, Long etl_id, String username) {
         if (etlService.userHasAccessToEtl(etl_id, username)) {
-            SourceField sourceField = sourceFieldService.getFieldById(sourceFieldId);
-            TargetField targetField = targetFieldService.getFieldById(targetTableId);
+            EHRField ehrField = ehrFieldService.getFieldById(sourceFieldId);
+            OMOPField omopField = omopFieldService.getFieldById(targetTableId);
             TableMapping tableMapping = tableMappingService.getTableMappingById(tableMappingId);
 
             FieldMapping mapping = new FieldMapping(
-                    sourceField,
-                    targetField,
+                    ehrField,
+                    omopField,
                     tableMapping
             );
 

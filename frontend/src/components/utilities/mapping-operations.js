@@ -8,14 +8,16 @@ class MappingOperations {
      * Defines the color of a table mapping
      *
      * @param selectedBox selected table/field
-     * @param mapping table mapping
+     * @param complete
+     * @param sourceId
+     * @param targetId
      * @returns string color in arrow
      */
 
-    defineMappingColor = (selectedBox, mapping) => {
-        if (Object.keys(selectedBox).length === 0) return mapping.complete ? 'black' : 'grey'           // if table mapping is complete, color is black, grey otherwise
-        else if (selectedBox.id === mapping.source.id) return 'orange';                                 // orange if mapping starts in selected table
-        else if (selectedBox.id === mapping.target.id) return 'blue';                                   // blue if mapping ends in selected table
+    defineMappingColor = (selectedBox, complete, sourceId, targetId) => {
+        if (Object.keys(selectedBox).length === 0) return complete ? 'black' : 'grey'           // if table mapping is complete, color is black, grey otherwise
+        else if (selectedBox.id === sourceId) return 'orange';                                          // orange if mapping starts in selected table
+        else if (selectedBox.id === targetId) return 'blue';                                            // blue if mapping ends in selected table
         else return 'grey';                                                                             // grey otherwise
     }
 

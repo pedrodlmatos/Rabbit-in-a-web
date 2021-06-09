@@ -1,10 +1,10 @@
 /* Adapted from Table (rabbit-core) */
 package rabbitinahat.model;
 
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.target.TargetField;
-import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.model.omop.OMOPField;
+import com.ua.hiah.model.omop.OMOPTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,41 +26,41 @@ public class Table implements MappableItem {
         super();
     }
 
-    public Table(SourceTable sourceTable, Database database) {
+    public Table(EHRTable ehrTable, Database database) {
         super();
         this.database = database;
-        this.name = sourceTable.getName();
-        this.stem = sourceTable.isStem();
-        this.rowCount = sourceTable.getRowCount();
-        this.rowsCheckedCount = sourceTable.getRowsCheckedCount();
-        this.comment = sourceTable.getComment();
-        this.fields = getFieldsFromSourceTable(sourceTable);
+        this.name = ehrTable.getName();
+        this.stem = ehrTable.isStem();
+        this.rowCount = ehrTable.getRowCount();
+        this.rowsCheckedCount = ehrTable.getRowsCheckedCount();
+        this.comment = ehrTable.getComment();
+        this.fields = getFieldsFromSourceTable(ehrTable);
     }
 
-    public Table(TargetTable targetTable, Database database) {
+    public Table(OMOPTable omopTable, Database database) {
         this.database = database;
-        this.name = targetTable.getName();
-        this.stem = targetTable.isStem();
-        this.comment = targetTable.getComment();
-        this.fields = getFieldsFromTargetTable(targetTable);
+        this.name = omopTable.getName();
+        this.stem = omopTable.isStem();
+        this.comment = omopTable.getComment();
+        this.fields = getFieldsFromTargetTable(omopTable);
     }
 
 
 
 
-    private List<Field> getFieldsFromSourceTable(SourceTable sourceTable) {
+    private List<Field> getFieldsFromSourceTable(EHRTable ehrTable) {
         List<Field> fields = new ArrayList<>();
-        for (SourceField sourceField : sourceTable.getFields()) {
-            Field field = new Field(sourceField, this);
+        for (EHRField ehrField : ehrTable.getFields()) {
+            Field field = new Field(ehrField, this);
             fields.add(field);
         }
         return fields;
     }
 
-    private List<Field> getFieldsFromTargetTable(TargetTable targetTable) {
+    private List<Field> getFieldsFromTargetTable(OMOPTable omopTable) {
         List<Field> fields = new ArrayList<>();
-        for (TargetField targetField : targetTable.getFields()) {
-            Field field = new Field(targetField, this);
+        for (OMOPField omopField : omopTable.getFields()) {
+            Field field = new Field(omopField, this);
             fields.add(field);
         }
         return fields;

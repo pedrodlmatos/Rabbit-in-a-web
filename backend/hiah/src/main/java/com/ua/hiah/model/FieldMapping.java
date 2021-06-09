@@ -3,8 +3,8 @@ package com.ua.hiah.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.gson.annotations.Expose;
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.target.TargetField;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.model.omop.OMOPField;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.Column;
@@ -23,23 +23,23 @@ public class FieldMapping {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.TableMapping.class, Views.CreateMapping.class, Views.ChangeLogic.class})
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "source_id", nullable = false)
+    @JoinColumn(name = "ehr_field_id", nullable = false)
     @JsonView(Views.TableMapping.class)
     @Expose
-    private SourceField source;
+    private EHRField ehrField;
 
     @ManyToOne
-    @JoinColumn(name = "target_id", nullable = false)
+    @JoinColumn(name = "omop_field_id", nullable = false)
     @JsonView(Views.TableMapping.class)
     @Expose
-    private TargetField target;
+    private OMOPField omopField;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.TableMapping.class, Views.ChangeLogic.class})
     @Expose
     private String logic;
 
@@ -52,15 +52,15 @@ public class FieldMapping {
     public FieldMapping() {
     }
 
-    public FieldMapping(SourceField sourceField, TargetField targetField, TableMapping tableMapping) {
-        this.source = sourceField;
-        this.target = targetField;
+    public FieldMapping(EHRField ehrField, OMOPField omopField, TableMapping tableMapping) {
+        this.ehrField = ehrField;
+        this.omopField = omopField;
         this.tableMapping = tableMapping;
     }
 
-    public FieldMapping(SourceField source, TargetField target, String logic, TableMapping tableMapping) {
-        this.source = source;
-        this.target = target;
+    public FieldMapping(EHRField ehrField, OMOPField omopField, String logic, TableMapping tableMapping) {
+        this.ehrField = ehrField;
+        this.omopField = omopField;
         this.logic = logic;
         this.tableMapping = tableMapping;
     }
@@ -74,20 +74,20 @@ public class FieldMapping {
         this.id = id;
     }
 
-    public SourceField getSource() {
-        return source;
+    public EHRField getEhrField() {
+        return ehrField;
     }
 
-    public void setSource(SourceField source) {
-        this.source = source;
+    public void setEhrField(EHRField source) {
+        this.ehrField = source;
     }
 
-    public TargetField getTarget() {
-        return target;
+    public OMOPField getOmopField() {
+        return omopField;
     }
 
-    public void setTarget(TargetField target) {
-        this.target = target;
+    public void setOmopField(OMOPField target) {
+        this.omopField = target;
     }
 
     public TableMapping getTableMapping() {

@@ -9,10 +9,4 @@ export default function authHeaderMultiPart() {
         }
     } else
         return {}
-
-    /*
-    return {
-        'Access-Control-Allow-Origin': true
-    }
-    */
 }

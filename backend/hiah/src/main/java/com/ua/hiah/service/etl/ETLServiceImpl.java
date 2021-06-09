@@ -9,20 +9,20 @@ import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
 import com.ua.hiah.model.auth.User;
-import com.ua.hiah.model.source.SourceDatabase;
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.target.TargetDatabase;
-import com.ua.hiah.model.target.TargetField;
-import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.model.ehr.EHRDatabase;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.model.omop.OMOPDatabase;
+import com.ua.hiah.model.omop.OMOPField;
+import com.ua.hiah.model.omop.OMOPTable;
 import com.ua.hiah.security.services.UserDetailsServiceImpl;
 import org.springframework.transaction.annotation.Transactional;
 import rabbitcore.utilities.ETLSummaryGenerator;
 import rabbitcore.utilities.files.Row;
 import com.ua.hiah.repository.ETLRepository;
-import com.ua.hiah.service.source.database.SourceDatabaseService;
+import com.ua.hiah.service.ehr.database.EHRDatabaseService;
 import com.ua.hiah.service.tableMapping.TableMappingService;
-import com.ua.hiah.service.target.database.TargetDatabaseService;
+import com.ua.hiah.service.omop.database.OMOPDatabaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +32,6 @@ import rabbitinahat.model.ETL_RIAH;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -49,10 +48,10 @@ public class ETLServiceImpl implements ETLService {
     UserDetailsServiceImpl userService;
 
     @Autowired
-    TargetDatabaseService targetDatabaseService;
+    OMOPDatabaseService omopDatabaseService;
 
     @Autowired
-    SourceDatabaseService sourceDatabaseService;
+    EHRDatabaseService ehrDatabaseService;
 
     @Autowired
     TableMappingService mappingService;
@@ -106,16 +105,16 @@ public class ETLServiceImpl implements ETLService {
         // user has access to ETL or is admin
         if (userHasAccessToEtl(etl, user) || userService.userIsAdmin(user)) {
             // sort field from the EHR database by id
-            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
-                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            for (EHRTable ehrTable : etl.getSourceDatabase().getTables())
+                ehrTable.getFields().sort(Comparator.comparingLong(EHRField::getId));
             // sort tables from the EHR database by id
-            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(EHRTable::getId));
 
             // sort fields from the OMOP CDM database by id
-            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
-                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            for (OMOPTable omopTable : etl.getTargetDatabase().getTables())
+                omopTable.getFields().sort(Comparator.comparingLong(OMOPField::getId));
             // sort tables from the OMOP CDM database by id
-            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(OMOPTable::getId));
 
             return etl;
         } else {
@@ -136,16 +135,16 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", id.toString()));
 
         // sort field from the EHR database by id
-        for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
-            sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+        for (EHRTable ehrTable : etl.getSourceDatabase().getTables())
+            ehrTable.getFields().sort(Comparator.comparingLong(EHRField::getId));
         // sort tables from the EHR database by id
-        etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+        etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(EHRTable::getId));
 
         // sort fields from the OMOP CDM database by id
-        for (TargetTable targetTable : etl.getTargetDatabase().getTables())
-            targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+        for (OMOPTable omopTable : etl.getTargetDatabase().getTables())
+            omopTable.getFields().sort(Comparator.comparingLong(OMOPField::getId));
         // sort tables from the OMOP CDM database by id
-        etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+        etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(OMOPTable::getId));
 
         return etl;
     }
@@ -167,11 +166,11 @@ public class ETLServiceImpl implements ETLService {
         // user not found
         if (user == null) throw new EntityNotFoundException(User.class, "username", username);
 
-        if (targetDatabaseService.CDMExists(cdm)) {
+        if (omopDatabaseService.CDMExists(cdm)) {
             ETL etl = new ETL();
             etl.setName("ETL procedure " + etlRepository.count());
-            etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
-            etl.setSourceDatabase(sourceDatabaseService.createDatabaseFromScanReport(ehrName, ehrScan));
+            etl.setTargetDatabase(omopDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
+            etl.setSourceDatabase(ehrDatabaseService.createDatabaseFromScanReport(ehrName, ehrScan));
             etl.getUsers().add(user);
 
             // define dates
@@ -218,11 +217,11 @@ public class ETLServiceImpl implements ETLService {
             response.setName("ETL procedure " + etlRepository.count());
 
             // create source database from json
-            SourceDatabase source = sourceDatabaseService.createDatabaseFromJSON(request.getSourceDatabase());
+            EHRDatabase source = ehrDatabaseService.createDatabaseFromJSON(request.getSourceDatabase());
             response.setSourceDatabase(source);
 
             // create target database from json
-            TargetDatabase target = targetDatabaseService.createDatabaseFromJSON(request.getTargetDatabase());
+            OMOPDatabase target = omopDatabaseService.createDatabaseFromJSON(request.getTargetDatabase());
             response.setTargetDatabase(target);
 
             // create mappings from json
@@ -353,7 +352,7 @@ public class ETLServiceImpl implements ETLService {
 
         if (userHasAccessToEtl(etl, user)) {
             // create an OMOP CDM from a different version
-            etl.setTargetDatabase(targetDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
+            etl.setTargetDatabase(omopDatabaseService.generateModelFromCSV(CDMVersion.valueOf(cdm)));
             // remove previous cdm and mappings
             mappingService.removeTableMappingsFromETL(etl.getId());
             //targetDatabaseService.removeDatabase(previous.getId());
@@ -394,20 +393,20 @@ public class ETLServiceImpl implements ETLService {
             if (!containsStemTable(etl)) {
                 CDMVersion version = etl.getTargetDatabase().getVersion();
                 // add stem table on EHR database
-                SourceDatabase sourceDatabase = etl.getSourceDatabase();
-                SourceTable sourceStemTable = sourceDatabaseService.createSourceStemTable(version, sourceDatabase);
-                sourceDatabase.getTables().add(sourceStemTable);
-                etl.setSourceDatabase(sourceDatabase);
+                EHRDatabase ehrDatabase = etl.getSourceDatabase();
+                EHRTable sourceStemTable = ehrDatabaseService.createEHRStemTable(version, ehrDatabase);
+                ehrDatabase.getTables().add(sourceStemTable);
+                etl.setSourceDatabase(ehrDatabase);
 
                 // add stem table on OMOP CDM database
-                TargetDatabase targetDatabase = etl.getTargetDatabase();
-                TargetTable targetStemTable = targetDatabaseService.createTargetStemTable(version, targetDatabase);
-                targetDatabase.getTables().add(targetStemTable);
-                etl.setTargetDatabase(targetDatabase);
+                OMOPDatabase omopDatabase = etl.getTargetDatabase();
+                OMOPTable targetStemTable = omopDatabaseService.createTargetStemTable(version, omopDatabase);
+                omopDatabase.getTables().add(targetStemTable);
+                etl.setTargetDatabase(omopDatabase);
 
                 // add mappings from and to stem table
                 List<TableMapping> prevTableMappings = etl.getTableMappings();
-                List<TableMapping> tableMappings = mappingService.createMappingsWithStemTable(version, targetDatabase, sourceStemTable, etl);
+                List<TableMapping> tableMappings = mappingService.createMappingsWithStemTable(version, omopDatabase, sourceStemTable, etl);
                 prevTableMappings.addAll(tableMappings);
                 etl.setTableMappings(prevTableMappings);
 
@@ -429,7 +428,7 @@ public class ETLServiceImpl implements ETLService {
      */
 
     private boolean containsStemTable(ETL etl) {
-        for (SourceTable table : etl.getSourceDatabase().getTables()) {
+        for (EHRTable table : etl.getSourceDatabase().getTables()) {
             if (table.isStem())
                 return true;
         }
@@ -453,17 +452,17 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
         if (userHasAccessToEtl(etl, user)) {
-            for (SourceTable table : etl.getSourceDatabase().getTables()) {
+            for (EHRTable table : etl.getSourceDatabase().getTables()) {
                 if (table.isStem()) {
                     //mappingService.removeTableMappingsFromTable(etl_id, table);
-                    sourceDatabaseService.removeTable(table);
+                    ehrDatabaseService.removeTable(table);
                 }
             }
 
-            for (TargetTable table : etl.getTargetDatabase().getTables())
+            for (OMOPTable table : etl.getTargetDatabase().getTables())
                 if (table.isStem()) {
                     //mappingService.removeTableMappingsToTable(etl_id, table);
-                    targetDatabaseService.removeTable(table);
+                    omopDatabaseService.removeTable(table);
                 }
 
             // define dates
@@ -496,16 +495,16 @@ public class ETLServiceImpl implements ETLService {
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
                 // sort field from the EHR database by id
-                for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
-                    sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+                for (EHRTable ehrTable : etl.getSourceDatabase().getTables())
+                    ehrTable.getFields().sort(Comparator.comparingLong(EHRField::getId));
                 // sort tables from the EHR database by id
-                etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+                etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(EHRTable::getId));
 
                 // sort fields from the OMOP CDM database by id
-                for (TargetTable targetTable : etl.getTargetDatabase().getTables())
-                    targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+                for (OMOPTable omopTable : etl.getTargetDatabase().getTables())
+                    omopTable.getFields().sort(Comparator.comparingLong(OMOPField::getId));
                 // sort tables from the OMOP CDM database by id
-                etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+                etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(OMOPTable::getId));
 
                 // transform ETL object to json object (keeping only needed attributes)
                 String etlJsonStr = gson.toJson(etl);
@@ -543,16 +542,16 @@ public class ETLServiceImpl implements ETLService {
 
         if (userHasAccessToEtl(etl, user)) {
             // sort field from the EHR database by id
-            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
-                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            for (EHRTable ehrTable : etl.getSourceDatabase().getTables())
+                ehrTable.getFields().sort(Comparator.comparingLong(EHRField::getId));
             // sort tables from the EHR database by id
-            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(EHRTable::getId));
 
             // sort fields from the OMOP CDM database by id
-            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
-                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            for (OMOPTable omopTable : etl.getTargetDatabase().getTables())
+                omopTable.getFields().sort(Comparator.comparingLong(OMOPField::getId));
             // sort tables from the OMOP CDM database by id
-            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(OMOPTable::getId));
 
             List<Row> rows = ETLSummaryGenerator.createSourceFieldList(etl);
             return ETLSummaryGenerator.writeCSV("sourceList.csv", rows);
@@ -578,16 +577,16 @@ public class ETLServiceImpl implements ETLService {
 
         if (userHasAccessToEtl(etl, user)) {
             // sort field from the EHR database by id
-            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
-                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            for (EHRTable ehrTable : etl.getSourceDatabase().getTables())
+                ehrTable.getFields().sort(Comparator.comparingLong(EHRField::getId));
             // sort tables from the EHR database by id
-            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(EHRTable::getId));
 
             // sort fields from the OMOP CDM database by id
-            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
-                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            for (OMOPTable omopTable : etl.getTargetDatabase().getTables())
+                omopTable.getFields().sort(Comparator.comparingLong(OMOPField::getId));
             // sort tables from the OMOP CDM database by id
-            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(OMOPTable::getId));
 
             List<Row> rows = ETLSummaryGenerator.createTargetFieldList(etl);
             return ETLSummaryGenerator.writeCSV("targetList.csv", rows);
@@ -613,16 +612,16 @@ public class ETLServiceImpl implements ETLService {
 
         if (userHasAccessToEtl(etl, user)) {
             // sort field from the EHR database by id
-            for (SourceTable sourceTable : etl.getSourceDatabase().getTables())
-                sourceTable.getFields().sort(Comparator.comparingLong(SourceField::getId));
+            for (EHRTable ehrTable : etl.getSourceDatabase().getTables())
+                ehrTable.getFields().sort(Comparator.comparingLong(EHRField::getId));
             // sort tables from the EHR database by id
-            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(SourceTable::getId));
+            etl.getSourceDatabase().getTables().sort(Comparator.comparingLong(EHRTable::getId));
 
             // sort fields from the OMOP CDM database by id
-            for (TargetTable targetTable : etl.getTargetDatabase().getTables())
-                targetTable.getFields().sort(Comparator.comparingLong(TargetField::getId));
+            for (OMOPTable omopTable : etl.getTargetDatabase().getTables())
+                omopTable.getFields().sort(Comparator.comparingLong(OMOPField::getId));
             // sort tables from the OMOP CDM database by id
-            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(TargetTable::getId));
+            etl.getTargetDatabase().getTables().sort(Comparator.comparingLong(OMOPTable::getId));
 
             ETL_RIAH etlRiah = new ETL_RIAH(etl);
 

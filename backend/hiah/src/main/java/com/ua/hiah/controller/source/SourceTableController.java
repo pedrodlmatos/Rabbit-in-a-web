@@ -1,11 +1,9 @@
 package com.ua.hiah.controller.source;
 
-import com.ua.hiah.model.ETL;
-import com.ua.hiah.model.auth.User;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.security.services.UserDetailsServiceImpl;
-import com.ua.hiah.service.etl.ETLService;
-import com.ua.hiah.service.source.table.SourceTableService;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.service.ehr.table.EHRTableService;
+import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SourceTableController {
 
     @Autowired
-    private SourceTableService tableService;
+    private EHRTableService tableService;
 
     private static final Logger logger = LoggerFactory.getLogger(SourceTableController.class);
 
@@ -40,7 +38,7 @@ public class SourceTableController {
                     description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = SourceTable.class)
+                            schema = @Schema(implementation = EHRTable.class)
                     )
             ),
             @ApiResponse(
@@ -71,6 +69,7 @@ public class SourceTableController {
     })
     @PutMapping("/comment")
     @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.ChangeComment.class)
     public ResponseEntity<?> changeTableComment(
             @Param(value = "table_id") Long table_id,
             @Param(value = "comment") String comment,
@@ -78,7 +77,7 @@ public class SourceTableController {
             @Param(value = "etl_id") Long etl_id) {
         logger.info("SOURCE TABLE CONTROLLER - Change table {} comment", table_id);
 
-        SourceTable response = tableService.changeComment(table_id, comment, etl_id, username);
+        EHRTable response = tableService.changeComment(table_id, comment, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

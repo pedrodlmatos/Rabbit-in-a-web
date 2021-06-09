@@ -164,8 +164,8 @@ export default function UserProcedureList() {
                                 <ProcedureCard
                                     id={session.id}
                                     name={session.name}
-                                    ehr={session.sourceDatabase.databaseName}
-                                    omop={session.targetDatabase.databaseName}
+                                    ehr={session.ehrDatabase.databaseName}
+                                    omop={session.omopDatabase.databaseName}
                                 />
                             </Grid>
                         )}

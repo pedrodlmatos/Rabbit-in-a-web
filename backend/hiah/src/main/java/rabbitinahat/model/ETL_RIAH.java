@@ -4,8 +4,6 @@ package rabbitinahat.model;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.model.TableMapping;
-import com.ua.hiah.model.source.SourceDatabase;
-import com.ua.hiah.model.target.TargetDatabase;
 
 import java.util.*;
 
@@ -22,16 +20,16 @@ public class ETL_RIAH {
         this.targetDB = new Database(etl.getTargetDatabase());
 
         for (TableMapping tableMapping : etl.getTableMappings()) {
-            Table sourceTable = this.sourceDB.getTables().stream().filter(table -> table.getName().equals(tableMapping.getSource().getName())).findFirst().orElse(null);
-            Table targetTable = this.targetDB.getTables().stream().filter(trgTable -> trgTable.getName().equals(tableMapping.getTarget().getName())).findFirst().orElse(null);
+            Table sourceTable = this.sourceDB.getTables().stream().filter(table -> table.getName().equals(tableMapping.getEhrTable().getName())).findFirst().orElse(null);
+            Table targetTable = this.targetDB.getTables().stream().filter(trgTable -> trgTable.getName().equals(tableMapping.getOmopTable().getName())).findFirst().orElse(null);
             if (sourceTable != null && targetTable != null) {
                 // create table mapping
                 ItemToItemMap itemToItemMap = new ItemToItemMap(sourceTable, targetTable, tableMapping.getLogic(), tableMapping.isComplete());
                 this.tableToTableMaps.add(itemToItemMap);
                 List<ItemToItemMap> fieldMaps = new ArrayList<>();
                 for (FieldMapping fieldMapping : tableMapping.getFieldMappings()) {
-                    Field sourceField = sourceTable.getFields().stream().filter(field -> field.getName().equals(fieldMapping.getSource().getName())).findFirst().orElse(null);
-                    Field targetField = targetTable.getFields().stream().filter(field -> field.getName().equals(fieldMapping.getTarget().getName())).findFirst().orElse(null);
+                    Field sourceField = sourceTable.getFields().stream().filter(field -> field.getName().equals(fieldMapping.getEhrField().getName())).findFirst().orElse(null);
+                    Field targetField = targetTable.getFields().stream().filter(field -> field.getName().equals(fieldMapping.getOmopField().getName())).findFirst().orElse(null);
                     if (sourceField != null && targetField != null) {
                         ItemToItemMap fieldMap = new ItemToItemMap(sourceField, targetField, fieldMapping.getLogic());
                         fieldMaps.add(fieldMap);

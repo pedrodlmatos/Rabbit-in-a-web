@@ -1,6 +1,6 @@
 package com.ua.hiah.repository.target;
 
-import com.ua.hiah.model.target.Concept;
+import com.ua.hiah.model.omop.Concept;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,10 +1,10 @@
 /* Adapted from Field (rabbit-core) */
 package rabbitinahat.model;
 
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.model.source.ValueCount;
-import com.ua.hiah.model.target.Concept;
-import com.ua.hiah.model.target.TargetField;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.model.ehr.ValueCount;
+import com.ua.hiah.model.omop.Concept;
+import com.ua.hiah.model.omop.OMOPField;
 import rabbitcore.riah_datamodel.ConceptsMap;
 
 import java.util.ArrayList;
@@ -31,38 +31,38 @@ public class Field implements MappableItem {
 
     public Field() {}
 
-    public Field(SourceField sourceField, Table table) {
+    public Field(EHRField ehrField, Table table) {
         this.table = table;
-        this.name = sourceField.getName();
-        this.comment = sourceField.getComment();
-        this.isNullable = sourceField.isNullable();
-        this.type = sourceField.getType();
-        this.maxLength = sourceField.getMaxLength();
-        this.fractionEmpty = sourceField.getFractionEmpty();
-        this.uniqueCount = sourceField.getUniqueCount();
-        this.fractionUnique = sourceField.getFractionUnique();
-        getValueCountsFromField(sourceField);
+        this.name = ehrField.getName();
+        this.comment = ehrField.getComment();
+        this.isNullable = ehrField.isNullable();
+        this.type = ehrField.getType();
+        this.maxLength = ehrField.getMaxLength();
+        this.fractionEmpty = ehrField.getFractionEmpty();
+        this.uniqueCount = ehrField.getUniqueCount();
+        this.fractionUnique = ehrField.getFractionUnique();
+        getValueCountsFromField(ehrField);
     }
 
-    public Field(TargetField targetField, Table table) {
+    public Field(OMOPField omopField, Table table) {
         this.table = table;
-        this.name = targetField.getName();
-        this.comment = targetField.getComment();
-        this.type = targetField.getType();
-        this.isNullable = targetField.isNullable();
-        this.concepts = getConceptsFromTargetField(targetField);
+        this.name = omopField.getName();
+        this.comment = omopField.getComment();
+        this.type = omopField.getType();
+        this.isNullable = omopField.isNullable();
+        this.concepts = getConceptsFromTargetField(omopField);
     }
 
 
-    private void getValueCountsFromField(SourceField sourceField) {
-        for (ValueCount valueCount : sourceField.getValueCounts()) {
+    private void getValueCountsFromField(EHRField ehrField) {
+        for (ValueCount valueCount : ehrField.getValueCounts()) {
             valueCounts.add(valueCount.getValue(), valueCount.getFrequency());
         }
     }
 
-    private List<ConceptsMap.Concept> getConceptsFromTargetField(TargetField targetField) {
+    private List<ConceptsMap.Concept> getConceptsFromTargetField(OMOPField omopField) {
         List<ConceptsMap.Concept> concepts = new ArrayList<>();
-        for (Concept concept : targetField.getConcepts()) {
+        for (Concept concept : omopField.getConcepts()) {
             ConceptsMap.Concept concept_riah = new ConceptsMap.Concept(concept, this);
             concepts.add(concept_riah);
         }

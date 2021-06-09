@@ -45,8 +45,8 @@ export default function Procedure() {
 
     const initialETLValues = {
         id: null, name: null,
-        targetDatabase: { id: null, tables: [], databaseName: '' },
-        sourceDatabase: { id: null, tables: [], databaseName: null }
+        ehrDatabase: { id: null, tables: [], databaseName: null },
+        omopDatabase: { id: null, tables: [], databaseName: '' }
     }
 
     const columns = React.useMemo(() => [
@@ -83,17 +83,17 @@ export default function Procedure() {
                 setEtl({
                     id: res.data.id,
                     name: res.data.name,
-                    sourceDatabase: res.data.sourceDatabase,
-                    targetDatabase: res.data.targetDatabase
+                    ehrDatabase: res.data.ehrDatabase,
+                    omopDatabase: res.data.omopDatabase
                 });
-                setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === res.data.targetDatabase.databaseName })[0].name);
+                setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === res.data.omopDatabase.databaseName })[0].name);
                 // table mappings
                 let maps = [];
                 res.data.tableMappings.forEach(function(item) {
                     const arrow = {
                         id: item.id,
-                        start:  item.source,
-                        end: item.target,
+                        start:  item.ehrTable,
+                        end: item.omopTable,
                         complete: item.complete,
                         logic: item.logic,
                         color: item.complete ? "black" : "grey"
@@ -131,8 +131,8 @@ export default function Procedure() {
         ETLService
             .changeTargetDatabase(etl.id, e.target.value)
             .then(response => {
-                setEtl({...etl, targetDatabase: response.data.targetDatabase });
-                setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.targetDatabase.databaseName })[0].name);
+                setEtl({...etl, omopDatabase: response.data.omopDatabase });
+                setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.omopDatabase.databaseName })[0].name);
                 setTableMappings([]);
                 setLoading(false);
             }).catch(error => console.log(error));
@@ -156,19 +156,19 @@ export default function Procedure() {
      *  - If there is a table selected, unselect it and then select the new table changing states
      *  - If select the table that was previous selected, unselects it
      *
-     * @param sourceTable selected source table
+     * @param ehrTable selected source table
      */
 
-    const selectSourceTable = (sourceTable) => {
+    const selectEHRTable = (ehrTable) => {
         // clean state
         setSelectedTableMapping({});
         if (Object.keys(selectedTable).length === 0) {
             // all tables are unselected
-            setSelectedTable(sourceTable);
+            setSelectedTable(ehrTable);
             setSourceSelected(true);
-            MappingOperations.selectMappingsFromSource(tableMappings, sourceTable);        // change color of mappings that comes from the selected table
-            defineData(sourceTable);                                                       // define fields info
-        } else if (selectedTable === sourceTable) {
+            MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);        // change color of mappings that comes from the selected table
+            defineData(ehrTable);                                                       // define fields info
+        } else if (selectedTable === ehrTable) {
             // select the same table -> unselect
             MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
             setSourceSelected(false);                                                // unselect
@@ -178,10 +178,10 @@ export default function Procedure() {
         } else {
             // select any other source table
             MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
-            setSelectedTable(sourceTable);                                                 // change selected table
+            setSelectedTable(ehrTable);                                                 // change selected table
             setSourceSelected(true);
-            MappingOperations.selectMappingsFromSource(tableMappings, sourceTable);        // change color of mappings that comes from the selected table
-            defineData(sourceTable);                                                       // change content of fields table
+            MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);        // change color of mappings that comes from the selected table
+            defineData(ehrTable);                                                       // change content of fields table
         }
     }
 
@@ -194,19 +194,19 @@ export default function Procedure() {
      * - If select the same table, unselect
      * - Else selects a different target table
      *
-     * @param targetTable selected target table
+     * @param omopTable selected target table
      */
 
-    const selectTargetTable = (targetTable) => {
+    const selectOMOPTable = (omopTable) => {
         // clean state
         setSelectedTableMapping({});
         if (Object.keys(selectedTable).length === 0) {
             // no table is selected
-            MappingOperations.selectMappingsToTarget(tableMappings, targetTable);          // change color of mappings that goes to the selected table
-            setSelectedTable(targetTable);                                                 // change select table information
+            MappingOperations.selectMappingsToTarget(tableMappings, omopTable);          // change color of mappings that goes to the selected table
+            setSelectedTable(omopTable);                                                 // change select table information
             setSourceSelected(false);
-            defineData(targetTable);                                                       // change content of fields table
-        } else if (selectedTable === targetTable) {
+            defineData(omopTable);                                                       // change content of fields table
+        } else if (selectedTable === omopTable) {
             // select the same table -> unselect
             MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
             setSourceSelected(false);
@@ -218,17 +218,17 @@ export default function Procedure() {
             const source_id = selectedTable.id;
             //resetArrowsColor();                                                        // change arrows color to grey
             //setSelectedTable({})                                                       // unselects tables
-            createTableMapping(source_id, targetTable.id);                               // create arrow
+            createTableMapping(source_id, omopTable.id);                                 // create arrow
             //setSourceSelected(false);                                                  // clean state
             //setShowTableDetails(false);
             //setTableDetails(null);
         } else {
             // other target table is selected
             MappingOperations.resetMappingColor(tableMappings);                             // change color of arrows to grey
-            setSelectedTable(targetTable);                                                  // change select table information
+            setSelectedTable(omopTable);                                                  // change select table information
             setSourceSelected(false);
-            MappingOperations.selectMappingsToTarget(tableMappings, targetTable);           // change color of mappings that comes from the selected table
-            defineData(targetTable);                                                        // change content of fields table
+            MappingOperations.selectMappingsToTarget(tableMappings, omopTable);           // change color of mappings that comes from the selected table
+            defineData(omopTable);                                                        // change content of fields table
         }
     }
 
@@ -279,8 +279,8 @@ export default function Procedure() {
             response.data.tableMappings.forEach(function(item) {
                 const arrow = {
                     id: item.id,
-                    start:  item.source,
-                    end: item.target,
+                    start:  item.ehrTable,
+                    end: item.omopTable,
                     complete: item.complete,
                     logic: item.logic,
                     color: item.complete ? "black" : "grey"
@@ -295,29 +295,29 @@ export default function Procedure() {
     /**
      * Creates an arrow between a source table and a target table.
      *
-     * @param sourceTableId source table's id
-     * @param targetTableId target table's id
+     * @param ehrTableId source table's id
+     * @param omopTableId target table's id
      */
 
-    const createTableMapping = (sourceTableId, targetTableId) => {
+    const createTableMapping = (ehrTableId, omopTableId) => {
         // verify if table mapping between those tables already exists
         let exists = false;
         tableMappings.forEach(function (item) {
-            if (item.start.id === sourceTableId && item.end.id === targetTableId) exists = true;
+            if (item.start.id === ehrTableId && item.end.id === omopTableId) exists = true;
         })
 
         // if doesn't exist -> create
         if (!exists) {
             TableMappingService
-                .addTableMapping(etl.id, sourceTableId, targetTableId)
+                .addTableMapping(etl.id, ehrTableId, omopTableId)
                 .then(res => {
                     const arrow = {
                         id: res.data.id,
-                        start: res.data.source,
-                        end: res.data.target,
+                        start: res.data.ehrTable,
+                        end: res.data.omopTable,
                         complete: res.data.complete,
                         logic: res.data.logic,
-                        color: MappingOperations.defineMappingColor(selectedTable, res.data)
+                        color: MappingOperations.defineMappingColor(selectedTable, res.data.complete, res.data.ehrTable.id, res.data.omopTable.id)
                     }
                     setTableMappings([arrow].concat(tableMappings));
                 })
@@ -465,7 +465,7 @@ export default function Procedure() {
 
     const saveComment = () => {
         setLoadingSaveTableComment(true);
-        sourceSelected ? saveCommentSourceTable() : saveCommentTargetTable();
+        sourceSelected ? saveCommentEHRTable() : saveCommentTargetTable();
     }
 
 
@@ -473,12 +473,12 @@ export default function Procedure() {
      * Sends request to API to change the comment of a table from the EHR database
      */
 
-    const saveCommentSourceTable = () => {
+    const saveCommentEHRTable = () => {
         TableService
             .changeSourceTableComment(selectedTable.id, selectedTable.comment, etl.id)
             .then(response => {
-                const index = etl.sourceDatabase.tables.findIndex(x => x.id === response.data.id);
-                etl.sourceDatabase.tables[index].comment = response.data.comment;
+                const index = etl.ehrDatabase.tables.findIndex(x => x.id === response.data.id);
+                etl.ehrDatabase.tables[index].comment = response.data.comment;
                 setLoadingSaveTableComment(false);
             }).catch(error => { console.log(error) });
     }
@@ -492,8 +492,8 @@ export default function Procedure() {
         TableService
             .changeTargetTableComment(selectedTable.id, selectedTable.comment, etl.id)
             .then(response => {
-                const index = etl.targetDatabase.tables.findIndex(x => x.id === response.data.id);
-                etl.targetDatabase.tables[index].comment = response.data.comment;
+                const index = etl.omopDatabase.tables.findIndex(x => x.id === response.data.id);
+                etl.omopDatabase.tables[index].comment = response.data.comment;
                 setLoadingSaveTableComment(false);
             }).catch(error => { console.log(error) });
     }
@@ -620,8 +620,8 @@ export default function Procedure() {
                                         Stem tables
                                         <Checkbox
                                             edge="end"
-                                            checked={TableOperations.hasStemTable(etl.sourceDatabase.tables)}
-                                            onChange={TableOperations.hasStemTable(etl.sourceDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
+                                            checked={TableOperations.hasStemTable(etl.ehrDatabase.tables)}
+                                            onChange={TableOperations.hasStemTable(etl.ehrDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
                                         />
                                     </MenuItem>
                                     <Divider />
@@ -651,14 +651,14 @@ export default function Procedure() {
                             
                         <Grid className={classes.databaseNames} container>
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <h4>{ etl.sourceDatabase.databaseName }</h4>
+                                <h4>{ etl.ehrDatabase.databaseName }</h4>
                             </Grid>
                             
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <Controls.Select 
                                     name={omopName} 
                                     label="OMOP CDM" 
-                                    value={etl.targetDatabase.databaseName}
+                                    value={etl.omopDatabase.databaseName}
                                     onChange={handleCDMChange}
                                     options={CDMVersions} 
                                 />
@@ -667,7 +667,7 @@ export default function Procedure() {
 
                         <Grid container>
                             <Grid item xs={6} sm={6} md={6} lg={6}>                                
-                                { etl.sourceDatabase.tables.map(item => {
+                                { etl.ehrDatabase.tables.map(item => {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id}
@@ -679,7 +679,7 @@ export default function Procedure() {
                                             position="right-end"
                                             color={TableOperations.defineSourceTableColor(sourceSelected, selectedTable, item)}
                                             border="#000000"
-                                            handleSelection={selectSourceTable}
+                                            handleSelection={selectEHRTable}
                                             createMapping={createTableMapping}
                                         />
                                     )
@@ -687,7 +687,7 @@ export default function Procedure() {
                             </Grid>
                             
                             <Grid item xs={6} sm={6} md={6} lg={6}>                               
-                                { etl.targetDatabase.tables.map(item => {
+                                { etl.omopDatabase.tables.map(item => {
                                     return(
                                         <Controls.TooltipBox
                                             key={item.id}
@@ -699,7 +699,7 @@ export default function Procedure() {
                                             position="right-end"
                                             color={item.stem ? "#A000A0" : "#53ECEC"}
                                             border="#000000"
-                                            handleSelection={selectTargetTable}
+                                            handleSelection={selectOMOPTable}
                                             createMapping={createTableMapping}
                                         />
                                     )
@@ -743,7 +743,7 @@ export default function Procedure() {
                                         onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
                                         disabled={loadingSaveTableComment}
                                         save={saveComment}
-                                        omopTables={etl.targetDatabase.tables}
+                                        omopTables={etl.omopDatabase.tables}
                                         verify={connectedToTargetTable}
                                         connect={connectToTargetTable}
                                     />
@@ -755,7 +755,7 @@ export default function Procedure() {
                                         onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
                                         disabled={loadingSaveTableComment}
                                         save={saveComment}
-                                        ehrTables={etl.sourceDatabase.tables}
+                                        ehrTables={etl.ehrDatabase.tables}
                                         verify={connectedToSourceTable}
                                         connect={connectToSourceTable}
                                     />

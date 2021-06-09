@@ -1,11 +1,9 @@
 package com.ua.hiah.controller.target;
 
-import com.ua.hiah.model.ETL;
-import com.ua.hiah.model.auth.User;
-import com.ua.hiah.model.target.TargetTable;
-import com.ua.hiah.security.services.UserDetailsServiceImpl;
-import com.ua.hiah.service.etl.ETLService;
-import com.ua.hiah.service.target.table.TargetTableService;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.ua.hiah.model.omop.OMOPTable;
+import com.ua.hiah.service.omop.table.OMOPTableService;
+import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TargetTableController {
 
     @Autowired
-    private TargetTableService tableService;
+    private OMOPTableService tableService;
 
     private static final Logger logger = LoggerFactory.getLogger(TargetTableController.class);
 
@@ -40,7 +38,7 @@ public class TargetTableController {
                     description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = TargetTable.class)
+                            schema = @Schema(implementation = OMOPTable.class)
                     )
             ),
             @ApiResponse(
@@ -71,6 +69,7 @@ public class TargetTableController {
     })
     @PutMapping("/comment")
     @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.ChangeComment.class)
     public ResponseEntity<?> changeTableComment(
             @Param(value = "table_id") Long table_id,
             @Param(value = "comment") String comment,
@@ -78,7 +77,7 @@ public class TargetTableController {
             @Param(value = "etl_id") Long etl_id) {
         logger.info("TARGET TABLE CONTROLLER - Change table {} comment", table_id);
 
-        TargetTable response = tableService.changeComment(table_id, comment, etl_id, username);
+        OMOPTable response = tableService.changeComment(table_id, comment, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

@@ -3,10 +3,10 @@ package com.ua.hiah.service.tableMapping;
 import com.ua.hiah.model.CDMVersion;
 import com.ua.hiah.model.ETL;
 import com.ua.hiah.model.TableMapping;
-import com.ua.hiah.model.source.SourceDatabase;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.target.TargetDatabase;
-import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.model.ehr.EHRDatabase;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.model.omop.OMOPDatabase;
+import com.ua.hiah.model.omop.OMOPTable;
 
 import java.util.List;
 
@@ -81,12 +81,12 @@ public interface TableMappingService {
      *
      * @param etl ETL procedure object
      * @param tableMappings table mapping in JSON
-     * @param sourceDatabase source database
-     * @param targetDatabase target database
+     * @param ehrDatabase source database
+     * @param omopDatabase target database
      * @return table mappings created
      */
 
-    List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, SourceDatabase sourceDatabase, TargetDatabase targetDatabase);
+    List<TableMapping> getTableMappingsFromJSON(ETL etl, List<TableMapping> tableMappings, EHRDatabase ehrDatabase, OMOPDatabase omopDatabase);
 
 
     /**
@@ -102,13 +102,13 @@ public interface TableMappingService {
      * Creates mapping to or from a stem table (stored in file)
      *
      * @param version OMOP CDM version
-     * @param targetDatabase target database
+     * @param omopDatabase target database
      * @param sourceStemTable stem table on EHR database
      * @param etl ETL procedure object
      * @return list of created table mappings
      */
 
-    List<TableMapping> createMappingsWithStemTable(CDMVersion version, TargetDatabase targetDatabase, SourceTable sourceStemTable, ETL etl);
+    List<TableMapping> createMappingsWithStemTable(CDMVersion version, OMOPDatabase omopDatabase, EHRTable sourceStemTable, ETL etl);
 
 
 
@@ -147,7 +147,7 @@ public interface TableMappingService {
     List<TableMapping> getTableMappingFromETL(Long etl_id);
 
 
-    void removeTableMappingsFromTable(Long etl_id, SourceTable table);
+    void removeTableMappingsFromTable(Long etl_id, EHRTable table);
 
-    void removeTableMappingsToTable(Long etl_id, TargetTable table);
+    void removeTableMappingsToTable(Long etl_id, OMOPTable table);
 }

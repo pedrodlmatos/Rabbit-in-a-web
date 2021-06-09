@@ -1,7 +1,9 @@
 package com.ua.hiah.controller.target;
 
-import com.ua.hiah.model.target.TargetField;
-import com.ua.hiah.service.target.field.TargetFieldService;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.ua.hiah.model.omop.OMOPField;
+import com.ua.hiah.service.omop.field.OMOPFieldService;
+import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TargetFieldController {
 
     @Autowired
-    private TargetFieldService fieldService;
+    private OMOPFieldService fieldService;
 
     private static final Logger logger = LoggerFactory.getLogger(TargetFieldController.class);
 
@@ -36,7 +38,7 @@ public class TargetFieldController {
                     description = "Changed comment with success",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = TargetField.class)
+                            schema = @Schema(implementation = OMOPField.class)
                     )
             ),
             @ApiResponse(
@@ -67,6 +69,7 @@ public class TargetFieldController {
     })
     @PutMapping("/comment")
     @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.ChangeComment.class)
     public ResponseEntity<?> changeFieldComment(
             @Param(value = "fieldId") Long fieldId,
             @Param(value = "comment") String comment,
@@ -74,7 +77,7 @@ public class TargetFieldController {
             @Param(value = "username") String username) {
         logger.info("TARGET FIELD CONTROLLER - Change field {} comment", fieldId);
 
-        TargetField response = fieldService.changeComment(fieldId, comment, etl_id, username);
+        OMOPField response = fieldService.changeComment(fieldId, comment, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

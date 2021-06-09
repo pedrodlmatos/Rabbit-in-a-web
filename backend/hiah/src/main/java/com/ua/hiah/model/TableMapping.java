@@ -3,8 +3,8 @@ package com.ua.hiah.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.gson.annotations.Expose;
-import com.ua.hiah.model.source.SourceTable;
-import com.ua.hiah.model.target.TargetTable;
+import com.ua.hiah.model.ehr.EHRTable;
+import com.ua.hiah.model.omop.OMOPTable;
 import com.ua.hiah.views.Views;
 
 import javax.persistence.CascadeType;
@@ -27,33 +27,33 @@ public class TableMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class, Views.ChangeLogic.class})
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "source_table_id", nullable = false)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JoinColumn(name = "ehr_table_id", nullable = false)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
     @Expose
-    private SourceTable source;
+    private EHRTable ehrTable;
 
     @ManyToOne
-    @JoinColumn(name = "target_table_id", nullable = false)
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JoinColumn(name = "omop_table_id", nullable = false)
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
     @Expose
-    private TargetTable target;
+    private OMOPTable omopTable;
 
     @OneToMany(mappedBy = "tableMapping", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.TableMapping.class)
     @Expose
     private List<FieldMapping> fieldMappings;
 
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class})
     @Column(name = "complete", nullable = false)
     @Expose
     private boolean complete;
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
-    @JsonView({Views.ETLSession.class, Views.TableMapping.class})
+    @JsonView({Views.ETLSession.class, Views.TableMapping.class, Views.CreateMapping.class, Views.ChangeLogic.class})
     @Expose
     private String logic;
 
@@ -66,25 +66,25 @@ public class TableMapping {
     public TableMapping() {
     }
 
-    public TableMapping(ETL etl, SourceTable sourceTable, TargetTable targetTable) {
+    public TableMapping(ETL etl, EHRTable ehrTable, OMOPTable omopTable) {
         this.etl = etl;
-        this.source = sourceTable;
-        this.target = targetTable;
+        this.ehrTable = ehrTable;
+        this.omopTable = omopTable;
         this.fieldMappings = new ArrayList<>();
     }
 
-    public TableMapping(ETL etl, SourceTable sourceTable, TargetTable targetTable, String logic) {
+    public TableMapping(ETL etl, EHRTable ehrTable, OMOPTable omopTable, String logic) {
         this.etl = etl;
-        this.source = sourceTable;
-        this.target = targetTable;
+        this.ehrTable = ehrTable;
+        this.omopTable = omopTable;
         this.logic = logic;
         this.fieldMappings = new ArrayList<>();
     }
 
-    public TableMapping(SourceTable sourceTable, TargetTable targetTable, boolean complete, ETL etl) {
+    public TableMapping(EHRTable ehrTable, OMOPTable omopTable, boolean complete, ETL etl) {
         this.etl = etl;
-        this.source = sourceTable;
-        this.target = targetTable;
+        this.ehrTable = ehrTable;
+        this.omopTable = omopTable;
         this.complete = complete;
         this.fieldMappings = new ArrayList<>();
     }
@@ -98,20 +98,20 @@ public class TableMapping {
         this.id = id;
     }
 
-    public SourceTable getSource() {
-        return source;
+    public EHRTable getEhrTable() {
+        return ehrTable;
     }
 
-    public void setSource(SourceTable source) {
-        this.source = source;
+    public void setEhrTable(EHRTable source) {
+        this.ehrTable = source;
     }
 
-    public TargetTable getTarget() {
-        return target;
+    public OMOPTable getOmopTable() {
+        return omopTable;
     }
 
-    public void setTarget(TargetTable target) {
-        this.target = target;
+    public void setOmopTable(OMOPTable target) {
+        this.omopTable = target;
     }
 
     public ETL getEtl() {
@@ -152,8 +152,11 @@ public class TableMapping {
     public String toString() {
         return "TableMapping{" +
                 "id=" + id +
-                ", source=" + source +
-                ", target=" + target +
+                ", ehrTable=" + ehrTable +
+                ", omopTable=" + omopTable +
+                ", fieldMappings=" + fieldMappings +
+                ", complete=" + complete +
+                ", logic='" + logic + '\'' +
                 '}';
     }
 }

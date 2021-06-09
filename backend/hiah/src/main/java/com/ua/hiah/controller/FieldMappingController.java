@@ -1,7 +1,9 @@
 package com.ua.hiah.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.ua.hiah.model.FieldMapping;
 import com.ua.hiah.service.fieldMapping.FieldMappingService;
+import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -69,6 +71,7 @@ public class FieldMappingController {
     })
     @PostMapping("/create")
     @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.CreateMapping.class)
     public ResponseEntity<?> createFieldMapping(
             @Param(value = "tableMappingId") Long tableMappingId,
             @Param(value = "sourceFieldId") Long sourceFieldId,
@@ -172,6 +175,7 @@ public class FieldMappingController {
     })
     @PutMapping("/map/{id}/logic")
     @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.ChangeLogic.class)
     public ResponseEntity<?> editMappingLogic(
             @PathVariable Long id,
             @Param(value = "logic") String logic,

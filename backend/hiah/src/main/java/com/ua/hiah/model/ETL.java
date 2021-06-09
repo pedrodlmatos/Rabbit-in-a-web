@@ -4,15 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.gson.annotations.Expose;
 import com.ua.hiah.model.auth.User;
-import com.ua.hiah.model.source.SourceDatabase;
-import com.ua.hiah.model.target.TargetDatabase;
+import com.ua.hiah.model.ehr.EHRDatabase;
+import com.ua.hiah.model.omop.OMOPDatabase;
 import com.ua.hiah.views.Views;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,7 +21,7 @@ public class ETL {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
+    @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class, Views.CreateETLProcedure.class})
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -43,16 +39,16 @@ public class ETL {
     private List<User> users;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "source_database_id", referencedColumnName = "id")
+    @JoinColumn(name = "ehr_database_id", referencedColumnName = "id")
     @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
-    private SourceDatabase sourceDatabase;
+    private EHRDatabase ehrDatabase;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "target_database_id", referencedColumnName = "id")
+    @JoinColumn(name = "omop_database_id", referencedColumnName = "id")
     @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
     @Expose
-    private TargetDatabase targetDatabase;
+    private OMOPDatabase omopDatabase;
 
     @OneToMany(mappedBy = "etl", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({Views.ETLSessionsList.class, Views.AdminETLProcedureList.class})
@@ -102,20 +98,20 @@ public class ETL {
         this.name = name;
     }
 
-    public SourceDatabase getSourceDatabase() {
-        return sourceDatabase;
+    public EHRDatabase getSourceDatabase() {
+        return ehrDatabase;
     }
 
-    public void setSourceDatabase(SourceDatabase sourceDatabase) {
-        this.sourceDatabase = sourceDatabase;
+    public void setSourceDatabase(EHRDatabase ehrDatabase) {
+        this.ehrDatabase = ehrDatabase;
     }
 
-    public TargetDatabase getTargetDatabase() {
-        return targetDatabase;
+    public OMOPDatabase getTargetDatabase() {
+        return omopDatabase;
     }
 
-    public void setTargetDatabase(TargetDatabase targetDatabase) {
-        this.targetDatabase = targetDatabase;
+    public void setTargetDatabase(OMOPDatabase omopDatabase) {
+        this.omopDatabase = omopDatabase;
     }
 
     public List<TableMapping> getTableMappings() {
@@ -160,12 +156,16 @@ public class ETL {
 
     @Override
     public String toString() {
-        return String.format("ETL{" +
-                "\tid=%s,\n" +
-                "\tname=%s,\n" +
-                "\tsourceDatabase=%s,\n" +
-                "\ttargetDatabase=%s,\n" +
-                "\ttableMappings=%s\n" +
-                "}", id, name, sourceDatabase, targetDatabase, tableMappings);
+        return "ETL{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", users=" + users +
+                ", ehrDatabase=" + ehrDatabase +
+                ", omopDatabase=" + omopDatabase +
+                ", tableMappings=" + tableMappings +
+                ", deleted=" + deleted +
+                ", creationDate=" + creationDate +
+                ", modificationDate=" + modificationDate +
+                '}';
     }
 }

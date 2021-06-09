@@ -1,7 +1,9 @@
 package com.ua.hiah.controller.source;
 
-import com.ua.hiah.model.source.SourceField;
-import com.ua.hiah.service.source.field.SourceFieldService;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.ua.hiah.model.ehr.EHRField;
+import com.ua.hiah.service.ehr.field.EHRFieldService;
+import com.ua.hiah.views.Views;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SourceFieldController {
 
     @Autowired
-    private SourceFieldService fieldService;
+    private EHRFieldService fieldService;
 
     private static final Logger logger = LoggerFactory.getLogger(SourceFieldController.class);
 
@@ -37,7 +39,7 @@ public class SourceFieldController {
                     description = "Comment changed with success",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = SourceField.class)
+                            schema = @Schema(implementation = EHRField.class)
                     )
             ),
             @ApiResponse(
@@ -68,6 +70,7 @@ public class SourceFieldController {
     })
     @PutMapping("/comment")
     @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.ChangeComment.class)
     public ResponseEntity<?> changeFieldComment(
             @Param(value = "fieldId") Long fieldId,
             @Param(value = "comment") String comment,
@@ -75,7 +78,7 @@ public class SourceFieldController {
             @Param(value = "username") String username) {
         logger.info("SOURCE FIELD CONTROLLER - Change field {} comment", fieldId);
 
-        SourceField response = fieldService.changeComment(fieldId, comment, etl_id, username);
+        EHRField response = fieldService.changeComment(fieldId, comment, etl_id, username);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);
