@@ -261,6 +261,53 @@ public class ETLServiceImpl implements ETLService {
 
 
     /**
+     * Changes the name of an ETL procedure
+     *
+     * @param etl_id ETL procedure's id
+     * @param username user's username
+     * @param name name to change to
+     */
+
+    @Override
+    public void changeETLProcedureName(Long etl_id, String username, String name) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        if (userHasAccessToEtl(etl, user)) {
+            etl.setName(name);
+            etl.setModificationDate(Date.from(Instant.now()));
+            etlRepository.save(etl);
+        } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+    /**
+     * Changes the name of the EHR database
+     *
+     * @param sourceDatabaseId source database's id
+     * @param name name to change to
+     * @param etl_id ETL procedure's id
+     * @param username user's username
+     */
+
+    @Override
+    public void changeEHRDatabaseName(Long sourceDatabaseId, String name, Long etl_id, String username) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        if (userHasAccessToEtl(etl, user)) {
+            etl.getSourceDatabase().setDatabaseName(name);
+            etl.setModificationDate(Date.from(Instant.now()));
+            etlRepository.save(etl);
+        } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+    /**
      * Marks an ETL procedure as deleted but doesn't remove it from database
      *
      * @param etl_id ETL procedure's id

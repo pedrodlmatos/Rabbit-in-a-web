@@ -57,6 +57,8 @@ export default function Procedure() {
 
     const [loading, setLoading] = useState(true);
     const [etl, setEtl] = useState(initialETLValues);
+    const [disableETLProcedureName, setDisableETLProcedureName] = useState(true);
+    const [disableEHRDatabaseName, setDisableEHRDatabaseName] = useState(true);
     const [omopName, setOmopName] = useState('');
     const [tableMappings, setTableMappings] = useState([]);
     const [selectedTableMapping, setSelectedTableMapping] = useState({});
@@ -105,6 +107,47 @@ export default function Procedure() {
             })
             .catch(res => { console.log(res) })
     }, []);
+
+
+    /**
+     * Sends request to API to change ETL procedure name and after receiving response,
+     * disables input to change
+     */
+
+    const saveETLProcedureName = () => {
+        ETLService
+            .changeETLProcedureName(etl.id, etl.name)
+            .then(() => {
+                setDisableETLProcedureName(true);
+            })
+            .catch(e => console.log(e));
+    }
+
+
+    /**
+     * Changes the name of the EHR database
+     *
+     * @param e change event
+     */
+
+    const changeEHRDatabaseName = e => {
+        let newSourceDatabase = {...etl.ehrDatabase, databaseName: e.target.value}
+        setEtl({...etl, ehrDatabase: newSourceDatabase});
+    }
+
+    /**
+     * Sends request to API to change EHR database name and after receiving response,
+     * disables input to change
+     */
+
+    const saveEHRDatabaseName = () => {
+        ETLService
+            .changeEHRDatabaseName(etl.ehrDatabase.id, etl.id, etl.ehrDatabase.databaseName)
+            .then(() => {
+                setDisableEHRDatabaseName(true);
+            })
+            .catch(e => console.log(e));
+    }
 
 
     /**
@@ -608,7 +651,19 @@ export default function Procedure() {
                     <Grid item xs={6} sm={6} md={6} lg={6}>
                         <Grid container>
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <h1>{ etl.name }</h1>
+                                <Controls.Input
+                                    label="ETL procedure name"
+                                    placeholder="ETL procedure name"
+                                    value={etl.name}
+                                    size="small"
+                                    disabled={disableETLProcedureName}
+                                    onChange={e => setEtl({...etl, name: e.target.value})}
+                                />
+                                <Controls.Button
+                                    text={disableETLProcedureName ? "Edit" : "Save"}
+                                    size="small"
+                                    onClick={disableETLProcedureName ? () => setDisableETLProcedureName(false) : () => saveETLProcedureName()}
+                                />
                             </Grid>
 
                             {/* Menu (with files, add/remove stem tables) */}
@@ -651,7 +706,19 @@ export default function Procedure() {
                             
                         <Grid className={classes.databaseNames} container>
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <h4>{ etl.ehrDatabase.databaseName }</h4>
+                                <Controls.Input
+                                    label="EHR database name"
+                                    placeholder="EHR database name"
+                                    value={etl.ehrDatabase.databaseName}
+                                    size="small"
+                                    disabled={disableEHRDatabaseName}
+                                    onChange={e => changeEHRDatabaseName(e)}
+                                />
+                                <Controls.Button
+                                    text={disableEHRDatabaseName ? "Edit" : "Save"}
+                                    size="small"
+                                    onClick={disableEHRDatabaseName ? () => setDisableEHRDatabaseName(false) : () => saveEHRDatabaseName()}
+                                />
                             </Grid>
                             
                             <Grid item xs={6} sm={6} md={6} lg={6}>

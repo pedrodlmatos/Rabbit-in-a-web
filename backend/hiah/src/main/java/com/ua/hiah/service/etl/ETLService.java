@@ -63,6 +63,17 @@ public interface ETLService {
 
 
     /**
+     * Changes the name of an ETL procedure
+     *
+     * @param etl_id ETL procedure's id
+     * @param username user's username
+     * @param name name to change to
+     */
+
+    void changeETLProcedureName(Long etl_id, String username, String name);
+
+
+    /**
      * Deletes ETL procedure given its id (operation by ADMIN)
      *
      * @param etl_id ETL procedure's id
@@ -70,6 +81,8 @@ public interface ETLService {
 
     void deleteETLProcedure(Long etl_id);
 
+
+    void changeEHRDatabaseName(Long sourceDatabaseId, String name, Long etl_id, String username);
 
     /**
      * Marks an ETL procedure as deleted but doesn't remove it from database

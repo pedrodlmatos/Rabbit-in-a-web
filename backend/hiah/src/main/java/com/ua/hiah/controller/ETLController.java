@@ -254,6 +254,93 @@ public class ETLController {
     }
 
 
+    @Operation(summary = "Changes the name of an ETL procedure")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL procedure altered with success",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
+            )
+    })
+    @PutMapping("/procedures/name")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeETLProcedureName(
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "name") String name,
+            @Param(value = "username") String username) {
+
+        logger.info("ETL CONTROLLER - Changing name of ETL procedure {}", etl_id);
+        etlService.changeETLProcedureName(etl_id, username, name);
+
+        return ResponseEntity
+                .status(HttpStatus.OK).build();
+    }
+
+
+    @Operation(summary = "Changes the name of an EHR database")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "EHR database altered with success",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
+            )
+    })
+    @PutMapping("/ehrDatabase/name")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeEHRDatabaseName(
+            @Param(value = "sourceDatabaseId") Long sourceDatabaseId,
+            @Param(value = "name") String name,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
+
+        logger.info("ETL CONTROLLER - Changing name of EHR database of ETL procedure {}", sourceDatabaseId);
+        etlService.changeEHRDatabaseName(sourceDatabaseId, name, etl_id, username);
+
+        return ResponseEntity
+                .status(HttpStatus.OK).build();
+    }
+
+
     @Operation(summary = "Marks an ETL procedure as deleted (made by USER)")
     @ApiResponses(value = {
             @ApiResponse(

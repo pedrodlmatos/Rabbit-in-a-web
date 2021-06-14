@@ -110,7 +110,55 @@ class ETLService {
         } catch (e) {
             console.log(e);
         }
+    }
 
+
+    /**
+     * Sends a PUT request to API to change the ETL procedure name
+     *
+     * @param etl_id ETL procedure's id
+     * @param name name to change to
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    changeETLProcedureName(etl_id, name) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        try {
+            return axios.put(
+                API_URL + "procedures/name",
+                null,
+                { headers: authHeader(), params: {etl_id: etl_id, name: name, username: username}}
+            );
+        } catch (e) { console.log(e) }
+    }
+
+
+    /**
+     * Sends a PUT request to API to change the EHR database name
+     *
+     * @param sourceDatabaseId source database's id
+     * @param etl_id ETL procedure's id
+     * @param name name to change to
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    changeEHRDatabaseName(sourceDatabaseId, etl_id, name) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        try {
+            return axios.put(
+                API_URL + "ehrDatabase/name",
+                null,
+                {
+                    headers: authHeader(),
+                    params: {
+                        sourceDatabaseId: sourceDatabaseId,
+                        name: name,
+                        etl_id: etl_id,
+                        username: username
+                    }
+                }
+            );
+        } catch (e) { console.log(e) }
     }
 
 
