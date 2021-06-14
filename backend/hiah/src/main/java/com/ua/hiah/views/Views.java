@@ -3,6 +3,20 @@ package com.ua.hiah.views;
 public class Views {
 
     /**
+     * Field necessary to retrieve list of users
+     */
+
+    public static class UserList {}
+
+
+    /**
+     *
+     */
+
+    public static class ETLUsers {};
+
+
+    /**
      * Fields necessary for ETL procedure list for ADMIN (all ETL procedures)
      */
 

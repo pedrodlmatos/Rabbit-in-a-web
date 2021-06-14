@@ -46,7 +46,8 @@ public class ETL {
     )
     @JsonView({
             Views.AdminETLProcedureList.class,
-            Views.ETLProcedure.class
+            Views.ETLProcedure.class,
+            Views.ETLUsers.class
     })
     private List<User> users;
 

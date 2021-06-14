@@ -306,6 +306,25 @@ public class ETLServiceImpl implements ETLService {
         } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);
     }
 
+    @Override
+    public ETL addETLCollaborator(String[] usersToInvite, Long etl_id, String username) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        if (userHasAccessToEtl(etl, user)) {
+            for (String usernameToInvite : usersToInvite) {
+                User invited = userService.getUserByUsername(usernameToInvite);
+                if (usernameToInvite == null) throw new EntityNotFoundException(User.class, "username", username);
+
+                etl.getUsers().add(invited);
+            }
+            etl.setModificationDate(Date.from(Instant.now()));
+            return etlRepository.save(etl);
+        } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
 
     /**
      * Marks an ETL procedure as deleted but doesn't remove it from database

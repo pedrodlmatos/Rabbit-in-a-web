@@ -341,6 +341,20 @@ public class ETLController {
     }
 
 
+    @PutMapping("/invite")
+    @JsonView(Views.ETLUsers.class)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> addCollaborator(
+            @Param(value = "userToInvite") String[] usersToInvite,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
+
+        logger.info("ETL CONTROLLER - Invite collaborator {} to ETL procedure {}", usersToInvite, etl_id);
+        ETL response = etlService.addETLCollaborator(usersToInvite, etl_id, username);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
     @Operation(summary = "Marks an ETL procedure as deleted (made by USER)")
     @ApiResponses(value = {
             @ApiResponse(

@@ -82,7 +82,25 @@ public interface ETLService {
     void deleteETLProcedure(Long etl_id);
 
 
+    /**
+     * Changes the name of the EHR database
+     *
+     * @param sourceDatabaseId source database's id
+     * @param name name to change to
+     * @param etl_id ETL procedure's id
+     * @param username user's username
+     */
+
     void changeEHRDatabaseName(Long sourceDatabaseId, String name, Long etl_id, String username);
+
+
+    /**
+     * @param userToInvite
+     * @param etl_id
+     * @param username
+     * @return
+     */
+    ETL addETLCollaborator(String[] userToInvite, Long etl_id, String username);
 
     /**
      * Marks an ETL procedure as deleted but doesn't remove it from database

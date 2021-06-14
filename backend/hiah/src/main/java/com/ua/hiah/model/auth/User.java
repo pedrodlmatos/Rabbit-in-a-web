@@ -26,8 +26,8 @@ public class User {
     @NotBlank
     @Size(max = 20)
     @JsonView({
-            Views.AdminETLProcedureList.class,
-            Views.ETLProcedure.class
+            Views.AdminETLProcedureList.class, Views.ETLProcedure.class,
+            Views.UserList.class, Views.ETLUsers.class
     })
     private String username;
 

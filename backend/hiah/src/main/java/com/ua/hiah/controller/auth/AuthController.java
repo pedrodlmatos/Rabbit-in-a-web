@@ -1,5 +1,7 @@
 package com.ua.hiah.controller.auth;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.ua.hiah.error.exceptions.EntityNotFoundException;
 import com.ua.hiah.model.auth.Role;
 import com.ua.hiah.model.auth.RoleEnum;
 import com.ua.hiah.model.auth.User;
@@ -11,15 +13,23 @@ import com.ua.hiah.repository.auth.RoleRepository;
 import com.ua.hiah.repository.auth.UserRepository;
 import com.ua.hiah.security.jwt.JwtUtils;
 import com.ua.hiah.security.services.UserDetailsImpl;
+import com.ua.hiah.views.Views;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -121,6 +131,23 @@ public class AuthController {
         return new ResponseEntity<>(
                 new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles),
                 HttpStatus.OK);
+    }
+
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.UserList.class)
+    public ResponseEntity<?> getAllUsers(@Param(value = "username") String username) {
+        // get list of users
+        List<User> users = userRepository.findAll();
+
+        // remove user who made request
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(User.class, "username", username));
+        users.remove(user);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(users);
     }
 
 }

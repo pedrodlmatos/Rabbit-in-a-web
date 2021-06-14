@@ -2,6 +2,7 @@ import axios from 'axios';
 import authHeader from './auth-header';
 import authHeaderMultiPart from "./auth-header-multi-part";
 import {environment} from "./environment";
+import qs from 'qs'
 
 const API_URL = environment.ETL_URL;
 
@@ -114,6 +115,25 @@ class ETLService {
 
 
     /**
+     * Sends a DELETE request to delete an ETL procedure (including databases, tables, fields and mappings)
+     *
+     * @param etl_id ETL procedure's id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    deleteETLProcedure(etl_id) {
+        try {
+            return axios.delete(
+                API_URL + "procedures",
+                { headers: authHeader(), params: { etl_id: etl_id } }
+            );
+        } catch(e) {
+            console.log(e);
+        }
+    }
+
+
+    /**
      * Sends a PUT request to API to change the ETL procedure name
      *
      * @param etl_id ETL procedure's id
@@ -162,22 +182,22 @@ class ETLService {
     }
 
 
-    /**
-     * Sends a DELETE request to delete an ETL procedure (including databases, tables, fields and mappings)
-     *
-     * @param etl_id ETL procedure's id
-     * @returns {Promise<AxiosResponse<any>>}
-     */
-
-    deleteETLProcedure(etl_id) {
+    inviteCollaboratorsToETL(usersToInvite, etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
         try {
-            return axios.delete(
-                API_URL + "procedures",
-                { headers: authHeader(), params: { etl_id: etl_id } }
+            return axios.put(
+                API_URL + "invite",
+                null,
+                {
+                    headers: authHeader(),
+                    params: {
+                        usersToInvite: usersToInvite,
+                        etl_id: etl_id,
+                        username: username
+                    }
+                }
             );
-        } catch(e) {
-            console.log(e);
-        }
+        } catch (e) { console.log(e) }
     }
 
 

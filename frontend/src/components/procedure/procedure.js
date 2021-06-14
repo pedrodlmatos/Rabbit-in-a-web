@@ -2,6 +2,7 @@ import { Grid, CircularProgress, makeStyles, Menu, MenuItem, Checkbox, Divider }
 import React, { useState, useEffect } from 'react'
 import Xarrow from 'react-xarrows/lib';
 import ETLService from '../../services/etl-list-service';
+import AuthService from '../../services/auth-service';
 import TableService from '../../services/table-service';
 import TableMappingService from '../../services/table-mapping-service';
 import Controls from '../controls/controls';
@@ -14,6 +15,7 @@ import FilesMethods from './files-methods';
 import TableOperations from './table-operations';
 import MappingOperations from '../utilities/mapping-operations';
 import DeleteModal from '../modals/delete-modal/delete-modal';
+import InviteCollaboratorModal from '../modals/invite-collaborator'
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -57,6 +59,7 @@ export default function Procedure() {
 
     const [loading, setLoading] = useState(true);
     const [etl, setEtl] = useState(initialETLValues);
+    const [ETLUsers, setETLUsers] = useState([]);
     const [disableETLProcedureName, setDisableETLProcedureName] = useState(true);
     const [disableEHRDatabaseName, setDisableEHRDatabaseName] = useState(true);
     const [omopName, setOmopName] = useState('');
@@ -72,6 +75,7 @@ export default function Procedure() {
     // show/hide modals
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showInviteCollaboratorModal, setShowInviteCollaboratorModal] = useState(false);
     const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
     const [loadingSaveTableMappingLogic, setLoadingSaveTableMappingLogic] = useState(false);
     
@@ -86,9 +90,10 @@ export default function Procedure() {
                     id: res.data.id,
                     name: res.data.name,
                     ehrDatabase: res.data.ehrDatabase,
-                    omopDatabase: res.data.omopDatabase
+                    omopDatabase: res.data.omopDatabase,
                 });
                 setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === res.data.omopDatabase.databaseName })[0].name);
+                setETLUsers(res.data.users);
                 // table mappings
                 let maps = [];
                 res.data.tableMappings.forEach(function(item) {
@@ -179,6 +184,23 @@ export default function Procedure() {
                 setTableMappings([]);
                 setLoading(false);
             }).catch(error => console.log(error));
+    }
+
+    /**
+     *
+     * @param usersList
+     */
+
+    const inviteCollaborators = (usersList) => {
+        let usernames = []
+        usersList.forEach(user => usernames.push(user.username));
+
+        ETLService
+            .inviteCollaboratorsToETL(usernames.toString(), etl.id)
+            .then(response => {
+                console.log(response.data);
+                setETLUsers(response.data)
+            })
     }
 
 
@@ -687,6 +709,13 @@ export default function Procedure() {
                                     <Divider />
                                     <MenuItem onClick={() => FilesMethods.fetchSaveFile(etl.id)}>Save session to file</MenuItem>
                                     <Divider />
+                                    <MenuItem onClick={() => setShowInviteCollaboratorModal(true)}>Invite collaborator</MenuItem>
+                                    <InviteCollaboratorModal
+                                        show={showInviteCollaboratorModal}
+                                        setShow={setShowInviteCollaboratorModal}
+                                        invite={inviteCollaborators}
+                                    />
+
                                     <MenuItem style={{color: 'red'}} onClick={() => setShowDeleteModal(true)}>Delete procedure</MenuItem>
                                     <DeleteModal show={showDeleteModal} setShow={setShowDeleteModal} deleteProcedure={() => deleteETLProcedure()}/>
                                 </Menu>
