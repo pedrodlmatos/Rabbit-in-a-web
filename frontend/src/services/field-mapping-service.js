@@ -15,7 +15,7 @@ class FieldMappingService {
      * @returns {Promise<AxiosResponse<any>>}
      */
 
-    addFieldMapping(tableMappingId, sourceFieldId, targetFieldId, etl_id) {
+    addFieldMapping(tableMappingId, ehrFieldId, omopFieldId, etl_id) {
         const username = JSON.parse(localStorage.getItem('user')).username;
         return axios.post(
             API_URL + "create",
@@ -24,8 +24,8 @@ class FieldMappingService {
                 headers: authHeader(),
                 params: {
                     tableMappingId: tableMappingId,
-                    sourceFieldId: sourceFieldId,
-                    targetFieldId: targetFieldId,
+                    ehrFieldId: ehrFieldId,
+                    omopFieldId: omopFieldId,
                     etl_id: etl_id,
                     username: username
                 }
