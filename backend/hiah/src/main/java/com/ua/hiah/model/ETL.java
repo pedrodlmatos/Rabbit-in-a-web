@@ -10,9 +10,7 @@ import com.ua.hiah.views.Views;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "ETL")
@@ -49,7 +47,7 @@ public class ETL {
             Views.ETLProcedure.class,
             Views.ETLUsers.class
     })
-    private List<User> users;
+    private Set<User> users;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ehr_database_id", referencedColumnName = "id")
@@ -95,7 +93,7 @@ public class ETL {
 
     // CONSTRUCTORS
     public ETL() {
-        this.users = new ArrayList<>();
+        this.users = new HashSet<>();
         this.tableMappings = new ArrayList<>();
         this.deleted = false;
         this.creationDate = Date.from(Instant.now());
@@ -143,11 +141,11 @@ public class ETL {
         this.tableMappings = tableMappings;
     }
 
-    public List<User> getUsers() {
+    public Set<User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public void setUsers(Set<User> users) {
         this.users = users;
     }
 

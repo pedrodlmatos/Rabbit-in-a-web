@@ -182,6 +182,14 @@ class ETLService {
     }
 
 
+    /**
+     * Sends a PUT request to API to add users to list of collaborators
+     *
+     * @param usersToInvite list of users to invite
+     * @param etl_id ETL procedure's id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
     inviteCollaboratorsToETL(usersToInvite, etl_id) {
         const username = JSON.parse(localStorage.getItem('user')).username;
         try {
@@ -192,6 +200,33 @@ class ETLService {
                     headers: authHeader(),
                     params: {
                         usersToInvite: usersToInvite,
+                        etl_id: etl_id,
+                        username: username
+                    }
+                }
+            );
+        } catch (e) { console.log(e) }
+    }
+
+
+    /**
+     * Sends a PUT request to API to remove a user from list of users
+     *
+     * @param userToRemove user's to remove username
+     * @param etl_id ETL procedure's id
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
+    removeUserFromCollaborators(userToRemove, etl_id) {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+        try {
+            return axios.put(
+                API_URL + "removeUser",
+                null,
+                {
+                    headers: authHeader(),
+                    params: {
+                        userToRemove: userToRemove,
                         etl_id: etl_id,
                         username: username
                     }

@@ -306,6 +306,16 @@ public class ETLServiceImpl implements ETLService {
         } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);
     }
 
+
+    /**
+     * Adds a list of users to the list of collaborators of an ETL procedure
+     *
+     * @param usersToInvite users to add usernames
+     * @param etl_id ETL procedure's id
+     * @param username User's who made request username
+     * @return ETL procedure with new list of collaborators
+     */
+
     @Override
     public ETL addETLCollaborator(String[] usersToInvite, Long etl_id, String username) {
         ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
@@ -320,6 +330,35 @@ public class ETLServiceImpl implements ETLService {
 
                 etl.getUsers().add(invited);
             }
+            etl.setModificationDate(Date.from(Instant.now()));
+            return etlRepository.save(etl);
+        } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+    /**
+     * Removes a user from the list of collaborators of an ETL procedure
+     *
+     * @param userToRemove user's to remove username
+     * @param etl_id ETL procedure's id
+     * @param username User's who made request username
+     * @return ETL procedure with new list of collaborators
+     */
+
+    @Override
+    public ETL removeETLCollaborator(String userToRemove, Long etl_id, String username) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+
+        User user = userService.getUserByUsername(username);
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        if (userHasAccessToEtl(etl, user)) {
+            // get user to remove
+            User removeUser = userService.getUserByUsername(userToRemove);
+            if (removeUser == null) throw new EntityNotFoundException(User.class, "username", username);
+            // remove user
+            etl.getUsers().remove(removeUser);
+            // update dates
             etl.setModificationDate(Date.from(Instant.now()));
             return etlRepository.save(etl);
         } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);

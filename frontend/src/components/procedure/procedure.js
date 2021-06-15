@@ -15,7 +15,9 @@ import FilesMethods from './files-methods';
 import TableOperations from './table-operations';
 import MappingOperations from '../utilities/mapping-operations';
 import DeleteModal from '../modals/delete-modal/delete-modal';
-import InviteCollaboratorModal from '../modals/invite-collaborator'
+import InviteCollaboratorModal from '../modals/collaborators/manage-collaborator'
+import axios from 'axios'
+import authHeader from '../../services/auth-header'
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -93,7 +95,15 @@ export default function Procedure() {
                     omopDatabase: res.data.omopDatabase,
                 });
                 setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === res.data.omopDatabase.databaseName })[0].name);
-                setETLUsers(res.data.users);
+
+                // get users with access to ETL procedure (excluding the user in session)
+                const username = JSON.parse(localStorage.getItem('user')).username;
+                let users = [];
+                res.data.users.forEach(user => {
+                    if (user.username !== username) users.push(user);
+                })
+                setETLUsers(users);
+
                 // table mappings
                 let maps = [];
                 res.data.tableMappings.forEach(function(item) {
@@ -186,6 +196,7 @@ export default function Procedure() {
             }).catch(error => console.log(error));
     }
 
+
     /**
      *
      * @param usersList
@@ -198,8 +209,34 @@ export default function Procedure() {
         ETLService
             .inviteCollaboratorsToETL(usernames.toString(), etl.id)
             .then(response => {
-                console.log(response.data);
-                setETLUsers(response.data)
+                // get users with access to ETL procedure (excluding the user in session)
+                const username = JSON.parse(localStorage.getItem('user')).username;
+                let users = [];
+                response.data.users.forEach(user => {
+                    if (user.username !== username) users.push(user);
+                })
+                setETLUsers(users);
+            })
+    }
+
+
+    /**
+     *
+     * @param userToRemove
+     */
+
+    const removeCollaborator = (userToRemove) => {
+        ETLService
+            .removeUserFromCollaborators(userToRemove.username, etl.id)
+            .then(response => {
+                console.log(response.data)
+                // get users with access to ETL procedure (excluding the user in session)
+                const username = JSON.parse(localStorage.getItem('user')).username;
+                let users = [];
+                response.data.users.forEach(user => {
+                    if (user.username !== username) users.push(user);
+                })
+                setETLUsers(users);
             })
     }
 
@@ -713,7 +750,9 @@ export default function Procedure() {
                                     <InviteCollaboratorModal
                                         show={showInviteCollaboratorModal}
                                         setShow={setShowInviteCollaboratorModal}
+                                        etlUsers={ETLUsers}
                                         invite={inviteCollaborators}
+                                        remove={removeCollaborator}
                                     />
 
                                     <MenuItem style={{color: 'red'}} onClick={() => setShowDeleteModal(true)}>Delete procedure</MenuItem>

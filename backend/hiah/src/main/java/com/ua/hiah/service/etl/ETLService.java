@@ -95,12 +95,28 @@ public interface ETLService {
 
 
     /**
-     * @param userToInvite
-     * @param etl_id
-     * @param username
-     * @return
+     * Adds a list of users to the list of collaborators of an ETL procedure
+     *
+     * @param usersToInvite users to add usernames
+     * @param etl_id ETL procedure's id
+     * @param username User's who made request username
+     * @return ETL procedure with new list of collaborators
      */
-    ETL addETLCollaborator(String[] userToInvite, Long etl_id, String username);
+
+    ETL addETLCollaborator(String[] usersToInvite, Long etl_id, String username);
+
+
+    /**
+     * Removes a user from the list of collaborators of an ETL procedure
+     *
+     * @param userToRemove user's to remove username
+     * @param etl_id ETL procedure's id
+     * @param username User's who made request username
+     * @return ETL procedure with new list of collaborators
+     */
+
+    ETL removeETLCollaborator(String userToRemove, Long etl_id, String username);
+
 
     /**
      * Marks an ETL procedure as deleted but doesn't remove it from database

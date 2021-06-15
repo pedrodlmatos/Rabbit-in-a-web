@@ -341,6 +341,34 @@ public class ETLController {
     }
 
 
+    @Operation(summary = "Adds collaborators to the ETL procedure")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL users altered with success",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
+            )
+    })
     @PutMapping("/invite")
     @JsonView(Views.ETLUsers.class)
     @PreAuthorize("hasRole('USER')")
@@ -351,6 +379,48 @@ public class ETLController {
 
         logger.info("ETL CONTROLLER - Invite collaborator {} to ETL procedure {}", usersToInvite, etl_id);
         ETL response = etlService.addETLCollaborator(usersToInvite, etl_id, username);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
+    @Operation(summary = "Removes a collaborator from the ETL procedure")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ETL users altered with success",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "User doesn't have access to ETL procedure",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "ETL procedure not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal error",
+                    content = @Content
+            )
+    })
+    @PutMapping("/removeUser")
+    @JsonView(Views.ETLUsers.class)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> removeCollaborator(
+            @Param(value = "userToRemove") String userToRemove,
+            @Param(value = "etl_id") Long etl_id,
+            @Param(value = "username") String username) {
+
+        logger.info("ETL CONTROLLER - Removing collaborator {} from ETL procedure {}", userToRemove, etl_id);
+        ETL response = etlService.removeETLCollaborator(userToRemove, etl_id, username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
