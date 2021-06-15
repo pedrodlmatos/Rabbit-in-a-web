@@ -730,7 +730,7 @@ export default function Procedure() {
                                 <Controls.Button text="Menu" aria-controls="simple-menu" aria-haspopup={true} onClick={(event) => setAnchorEl(event.currentTarget)} />
                                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={(event) => setAnchorEl(null)}>
                                     {/* Stem Tables (add/remove) */}
-                                    <MenuItem>
+                                    <MenuItem disabled={true}>
                                         Stem tables
                                         <Checkbox
                                             edge="end"
