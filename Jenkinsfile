@@ -78,8 +78,8 @@ pipeline {
                 stage('Backend project') {
                     steps {
                         sh '''
-                            docker tag hiah-backend 35.205.223.175:5000/v2/hiah-backend:runtime
-                            docker push 35.205.223.175:5000/v2/hiah-backend:runtime
+                            docker tag hiah-backend http://35.205.223.175:5000/v2/hiah-backend:runtime
+                            docker push http://35.205.223.175:5000/v2/hiah-backend:runtime
                         '''
                     }
                 }
@@ -87,8 +87,8 @@ pipeline {
                 stage('Frontend project') {
                     steps {
                         sh '''
-                            docker tag hiah-frontend 35.205.223.175:5000/v2/hiah-frontend:runtime
-                            docker push 35.205.223.175:5000/v2/hiah-frontend:runtime
+                            docker tag hiah-frontend http://35.205.223.175:5000/v2/hiah-frontend:runtime
+                            docker push http://35.205.223.175:5000/v2/hiah-frontend:runtime
                         '''
                     }
                 }
