@@ -17,12 +17,12 @@
 	<distributionManagement>
 		<snapshotRepository>
 			<id>nexusdeploymentrepo</id>
-			<url>http://35.205.94.208:8081/nexus/content/repositories/snapshots/</url>
+			<url>http://35.205.223.175:8081/nexus/content/repositories/snapshots/</url>
 		</snapshotRepository>
 
 		<repository>
 			<id>nexusdeploymentrepo</id>
-			<url>http://35.205.94.208:8081/nexus/content/repositories/releases/</url>
+			<url>http://35.205.223.175:8081/nexus/content/repositories/releases/</url>
 		</repository>
 	</distributionManagement>
 
@@ -187,7 +187,7 @@
 
 				<configuration>
 					<serverId>nexusdeploymentrepo</serverId>
-					<nexusUrl>http://35.205.94.208:8081/nexus/</nexusUrl>
+					<nexusUrl>http://35.205.223.175:8081/nexus/</nexusUrl>
 					<skipStaging>true</skipStaging>
 				</configuration>
 			</plugin>

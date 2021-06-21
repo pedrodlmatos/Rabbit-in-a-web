@@ -1,8 +1,9 @@
-import { Grid, CircularProgress, makeStyles, Menu, MenuItem, Checkbox, Divider } from '@material-ui/core'
 import React, { useState, useEffect } from 'react'
+import { Grid, CircularProgress, makeStyles, Menu, MenuItem, Checkbox, Divider } from '@material-ui/core'
+import EditIcon from '@material-ui/icons/Edit';
+import SaveIcon from '@material-ui/icons/Save';
 import Xarrow from 'react-xarrows/lib';
 import ETLService from '../../services/etl-list-service';
-import AuthService from '../../services/auth-service';
 import TableService from '../../services/table-service';
 import TableMappingService from '../../services/table-mapping-service';
 import Controls from '../controls/controls';
@@ -16,8 +17,6 @@ import TableOperations from './table-operations';
 import MappingOperations from '../utilities/mapping-operations';
 import DeleteModal from '../modals/delete-modal/delete-modal';
 import InviteCollaboratorModal from '../modals/collaborators/manage-collaborator'
-import axios from 'axios'
-import authHeader from '../../services/auth-header'
 
 const useStyles = makeStyles(theme => ({
     tablesArea: {
@@ -40,6 +39,15 @@ const useStyles = makeStyles(theme => ({
     showButton: {
         marginTop: theme.spacing(1),
         visibility: 'false'
+    },
+    iconButton: {
+        border: "solid 0px #ffffff",
+        color: "#000000",
+        backgroundColor: "#ffffff",
+        '&:hover': {
+            color: "#000000",
+            backgroundColor: "#ffffff",
+        }
     }
 }))
 
@@ -718,11 +726,15 @@ export default function Procedure() {
                                     disabled={disableETLProcedureName}
                                     onChange={e => setEtl({...etl, name: e.target.value})}
                                 />
-                                <Controls.Button
-                                    text={disableETLProcedureName ? "Edit" : "Save"}
-                                    size="small"
-                                    onClick={disableETLProcedureName ? () => setDisableETLProcedureName(false) : () => saveETLProcedureName()}
-                                />
+                                {disableETLProcedureName ? (
+                                    <Controls.Button className={classes.iconButton} variant="outlined" color="inherit">
+                                        <EditIcon onClick={() => setDisableETLProcedureName(false)} />
+                                    </Controls.Button>
+                                ) : (
+                                    <Controls.Button className={classes.iconButton} variant="outlined" color="inherit">
+                                        <SaveIcon onClick={() => saveETLProcedureName()} />
+                                    </Controls.Button>
+                                )}
                             </Grid>
 
                             {/* Menu (with files, add/remove stem tables) */}
@@ -782,11 +794,15 @@ export default function Procedure() {
                                     disabled={disableEHRDatabaseName}
                                     onChange={e => changeEHRDatabaseName(e)}
                                 />
-                                <Controls.Button
-                                    text={disableEHRDatabaseName ? "Edit" : "Save"}
-                                    size="small"
-                                    onClick={disableEHRDatabaseName ? () => setDisableEHRDatabaseName(false) : () => saveEHRDatabaseName()}
-                                />
+                                {disableEHRDatabaseName ? (
+                                    <Controls.Button className={classes.iconButton} variant="outlined" color="inherit">
+                                        <EditIcon onClick={() => setDisableEHRDatabaseName(false)} />
+                                    </Controls.Button>
+                                ) : (
+                                    <Controls.Button className={classes.iconButton} variant="outlined" color="inherit">
+                                        <SaveIcon onClick={() => saveEHRDatabaseName()} />
+                                    </Controls.Button>
+                                )}
                             </Grid>
                             
                             <Grid item xs={6} sm={6} md={6} lg={6}>

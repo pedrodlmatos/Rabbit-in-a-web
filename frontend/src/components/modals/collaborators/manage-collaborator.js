@@ -189,8 +189,8 @@ export default function InviteCollaboratorModal(props) {
     const ref = useRef(true);
 
     let {
-        getRootProps, getInputLabelProps, getInputProps, getTagProps, getListboxProps,
-        getOptionProps, groupedOptions, value, focused, setAnchorEl,
+        getRootProps, getInputProps, getTagProps, getListboxProps,
+        getOptionProps, groupedOptions, value, setAnchorEl,
     } = useAutocomplete({
         id: 'customized-hook-demo',
         defaultValue: [],

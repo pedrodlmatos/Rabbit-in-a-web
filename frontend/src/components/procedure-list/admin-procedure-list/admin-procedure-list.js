@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-    makeStyles,
-    CircularProgress,
-    Paper,
-    Table,
-    TableHead,
-    TableRow,
-    TableBody,
-    Checkbox,
+    makeStyles, CircularProgress, Paper, Table, TableHead, TableRow, TableBody, Checkbox,
     TableContainer, withStyles, TableCell, createStyles, TableSortLabel
 } from '@material-ui/core'
 import ETLService from "../../../services/etl-list-service";
 import { CDMVersions } from '../../../services/CDMVersions';
-import moment from 'moment';
 import Controls from '../../controls/controls'
+import moment from 'moment'
 
 
 const useStyles = makeStyles(theme => ({
@@ -282,13 +275,24 @@ export default function AdminProcedureList() {
 
                     <TableContainer className={classes.table} component={Paper}>
                         <Table stickyHeader aria-label="customized table">
+                            <colgroup>
+                                <col style={{ width: "15%"}} />{/* ETL procedure name */}
+                                <col style={{ width: "15%"}} />{/* EHR database name */}
+                                <col style={{ width: "15%"}} />{/* OMOP CDM version */}
+                                <col style={{ width: "8%"}} />{/* Deleted */}
+                                <col style={{ width: "13%"}} />{/* Creation date */}
+                                <col style={{ width: "13%"}} />{/* Modification date */}
+                                <col style={{ width: "7%"}} />{/* Users */}
+                                <col style={{ width: "7%"}} />{/* Access button */}
+                                <col style={{ width: "7%"}} />{/* Delete button */}
+                            </colgroup>
                             <TableHead>
                                 <TableRow>
-                                    <StyledTableCell>Name</StyledTableCell>
+                                    <StyledTableCell align="left">Name</StyledTableCell>
 
-                                    <StyledTableCell>EHR Database</StyledTableCell>
+                                    <StyledTableCell align="left">EHR Database</StyledTableCell>
 
-                                    <StyledTableCell>
+                                    <StyledTableCell align="left">
                                         <StyledTableSortLabel
                                             active={sortBy === "omop"}
                                             direction={sortOrder}
@@ -297,7 +301,7 @@ export default function AdminProcedureList() {
                                         OMOP CDM
                                     </StyledTableCell>
 
-                                    <StyledTableCell>
+                                    <StyledTableCell align="center">
                                         <StyledTableSortLabel
                                             active={sortBy === "deleted"}
                                             direction={sortOrder}
@@ -306,7 +310,7 @@ export default function AdminProcedureList() {
                                         Deleted
                                     </StyledTableCell>
 
-                                    <StyledTableCell>
+                                    <StyledTableCell align="center">
                                         <StyledTableSortLabel
                                             active={sortBy === "creationDate"}
                                             direction={sortOrder}
@@ -315,7 +319,7 @@ export default function AdminProcedureList() {
                                         Creation Date
                                     </StyledTableCell>
 
-                                    <StyledTableCell>
+                                    <StyledTableCell align="center">
                                         <StyledTableSortLabel
                                             active={sortBy === "modificationDate"}
                                             direction={sortOrder}
@@ -324,7 +328,7 @@ export default function AdminProcedureList() {
                                         Modification Date
                                     </StyledTableCell>
 
-                                    <StyledTableCell>Users</StyledTableCell>
+                                    <StyledTableCell align="center">Users</StyledTableCell>
 
                                     <StyledTableCell />
                                     <StyledTableCell />
@@ -335,7 +339,7 @@ export default function AdminProcedureList() {
                                 {procedures.map((procedure, i) => {
                                     return(
                                         <StyledTableRow key={i}>
-                                            <StyledTableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row">
                                                 {procedure.name}
                                             </StyledTableCell>
 
@@ -347,30 +351,32 @@ export default function AdminProcedureList() {
                                                 {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
                                             </StyledTableCell>
 
-                                            <StyledTableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="center">
                                                 <Checkbox checked={getDeletionStatus(procedure.id)} onClick={() => handleETLProcedureDeletion(procedure)} />
                                             </StyledTableCell>
 
-                                            <StyledTableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="center">
                                                 {procedure.creationDate}
                                             </StyledTableCell>
 
-                                            <StyledTableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="center">
                                                 {procedure.modificationDate}
                                             </StyledTableCell>
 
-                                            <StyledTableCell component="th" scope="row" align="left">
-                                                {procedure.users.map((user, i) => { return(<div key={i}>{user.username}</div>)})}
+                                            <StyledTableCell component="th" scope="row" align="center">
+                                                {procedure.users.map((user, i) => {
+                                                    return(<div key={i}>{user.username}</div>)
+                                                })}
                                             </StyledTableCell>
 
-                                            <StyledTableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="center">
                                                 <Controls.Button
                                                     text="Access"
                                                     onClick={() => accessETLProcedure(procedure.id)}
                                                 />
                                             </StyledTableCell>
 
-                                            <StyledTableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="center">
                                                 <Controls.Button
                                                     id="del"
                                                     text="Delete"

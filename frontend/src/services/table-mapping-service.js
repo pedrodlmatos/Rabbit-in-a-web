@@ -1,7 +1,6 @@
 import axios from 'axios';
 import authHeader from './auth-header';
 import {environment} from "./environment";
-import { unstable_batchedUpdates } from 'react-dom'
 
 const API_URL = environment.TABLE_MAP_URL;
 

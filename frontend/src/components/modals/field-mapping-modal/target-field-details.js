@@ -1,5 +1,4 @@
 import React from 'react'
-import SourceFieldTable from './source-field-table'
 import Controls from '../../controls/controls'
 import { makeStyles } from '@material-ui/core'
 import TargetFieldTable from './target-field-table'

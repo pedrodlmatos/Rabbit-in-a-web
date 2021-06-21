@@ -2,7 +2,6 @@ import axios from 'axios';
 import authHeader from './auth-header';
 import authHeaderMultiPart from "./auth-header-multi-part";
 import {environment} from "./environment";
-import qs from 'qs'
 
 const API_URL = environment.ETL_URL;
 
