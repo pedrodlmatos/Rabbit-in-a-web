@@ -1,6 +1,6 @@
 FROM adoptopenjdk/openjdk8-openj9:alpine-slim
 WORKDIR /app
-COPY target/riah-0.0.1-SNAPSHOT.jar riaw.jar
+COPY target/riaw-0.0.1-SNAPSHOT.jar riaw.jar
 COPY run.sh /app
 COPY src/main/resources /app
 RUN ls /app
