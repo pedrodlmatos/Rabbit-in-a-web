@@ -12,7 +12,7 @@ pipeline {
                     steps {
                         withMaven(maven: 'maven', mavenSettingsConfig: '7bb4ab77-7de9-46b4-8b70-ff9f823c4c9e') {
                             sh '''
-                                cd backend/hiah
+                                cd backend/riaw
                                 mvn clean package -DskipTest
                             '''
                         }
@@ -32,7 +32,7 @@ pipeline {
                     steps {
                         withMaven(maven: 'maven', mavenSettingsConfig: '7bb4ab77-7de9-46b4-8b70-ff9f823c4c9e') {
                             sh '''
-                                cd backend/hiah
+                                cd backend/riaw
                                 mvn deploy -DskipTest
                             '''
                         }
@@ -51,8 +51,8 @@ pipeline {
                 stage('Backend project') {
                     steps {
                         sh '''
-                            cd backend/hiah
-                            docker build -t hiah-backend .
+                            cd backend/riaw
+                            docker build -t riaw-backend .
                         '''
                     }
                 }
@@ -61,7 +61,7 @@ pipeline {
                     steps {
                         sh '''
                             cd frontend
-                            docker build -t hiah-frontend .
+                            docker build -t riaw-frontend .
                         '''
                     }
                 }
@@ -78,8 +78,8 @@ pipeline {
                 stage('Backend project') {
                     steps {
                         sh '''
-                            docker tag hiah-backend 35.205.223.175:5000/v2/hiah-backend:runtime
-                            docker push 35.205.223.175:5000/v2/hiah-backend:runtime
+                            docker tag riaw-backend 35.205.223.175:5000/v2/riaw-backend:runtime
+                            docker push 35.205.223.175:5000/v2/riaw-backend:runtime
                         '''
                     }
                 }
@@ -87,8 +87,8 @@ pipeline {
                 stage('Frontend project') {
                     steps {
                         sh '''
-                            docker tag hiah-frontend 35.205.223.175:5000/v2/hiah-frontend:runtime
-                            docker push 35.205.223.175:5000/v2/hiah-frontend:runtime
+                            docker tag riaw-frontend 35.205.223.175:5000/v2/riaw-frontend:runtime
+                            docker push 35.205.223.175:5000/v2/riaw-frontend:runtime
                         '''
                     }
                 }

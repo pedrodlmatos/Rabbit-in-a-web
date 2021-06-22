@@ -1,4 +1,4 @@
-# Hare in a Hat - Web App
+# Rabbit-in-a-web
 
 Rabbit in a Hat desenvolvida num ambiente _web_ com UI desenvolvida em ReactJS e uma camada de serviços desenvolvida em SpringBoot.
 
