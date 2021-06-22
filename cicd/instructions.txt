@@ -36,7 +36,7 @@ docker-compose up -d --build
 
 --- 4 - Configure Jenkins ---
 
-35.205.94.208:8080
+35.205.223.175:8080
 Create pipeline job
 
 # Build Triggers
