@@ -38,7 +38,8 @@ public class OMOPField {
     @Column(name = "description", columnDefinition = "TEXT")
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.CreateMapping.class
     })
     @Expose
     private String description;
@@ -46,7 +47,8 @@ public class OMOPField {
     @Column(name = "type")
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.CreateMapping.class
     })
     @Expose
     private String type;
@@ -54,7 +56,8 @@ public class OMOPField {
     @Column(name = "stem", nullable = false)
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.CreateMapping.class
     })
     @Expose
     private boolean stem;
@@ -66,7 +69,9 @@ public class OMOPField {
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView({
             Views.TableMapping.class,
-            Views.ChangeComment.class
+            Views.ChangeComment.class,
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class
     })
     @Expose
     private String comment;
@@ -81,7 +86,11 @@ public class OMOPField {
     private List<FieldMapping> mappings;
 
     @OneToMany(mappedBy = "omopField", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.TableMapping.class,
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private List<Concept> concepts;
 

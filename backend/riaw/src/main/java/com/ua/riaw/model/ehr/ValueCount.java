@@ -14,21 +14,21 @@ public class ValueCount {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.ETLProcedure.class, Views.CreateMapping.class, Views.TableMapping.class})
     private Long id;
 
     @Column(name = "value")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.ETLProcedure.class, Views.CreateMapping.class, Views.TableMapping.class})
     @Expose
     private String value;
 
     @Column(name = "frequency")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.ETLProcedure.class, Views.CreateMapping.class, Views.TableMapping.class})
     @Expose
     private int frequency;
 
     @Column(name = "percentage")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.ETLProcedure.class, Views.CreateMapping.class, Views.TableMapping.class})
     @Expose
     private double percentage;
 

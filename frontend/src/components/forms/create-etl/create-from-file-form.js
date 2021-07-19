@@ -96,6 +96,7 @@ export default function CreateETLFromFileForm(props) {
                 <Grid className={classes.item} item xs={12} sm={12} md={12} lg={12}>
                     <Controls.FileInput
                         name="file"
+                        text="Choose ETL file"
                         type="file"
                         placeholder="Upload Scan file"
                         onChange={handleFileChange}

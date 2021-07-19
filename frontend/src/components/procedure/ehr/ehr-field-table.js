@@ -58,33 +58,52 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-export default function TargetFieldTable(props) {
+export default function EHRFieldTable(props) {
 
-    const classes = useStyles();
     const { data, setData } = props;
+    const classes = useStyles();
+    const [sortBy, setSortBy] = useState("");
     const [sortOrder, setSortOrder] = useState("desc");
 
 
-    const sortData = (order) => {
+    const sortData = (paramSort, order) => {
         let itemsToSort = JSON.parse(JSON.stringify(data));
         let sortedItems = [];
-        let compareFn = (i, j) => {
-            let conceptIdI = parseInt(i.conceptId);
-            let conceptIdJ = parseInt(j.conceptId);
+        let compareFn = null;
 
-            if (conceptIdI > conceptIdJ) return order === "desc" ? 1 : -1;
-            else if (conceptIdI < conceptIdJ) return order === "desc" ? -1 : 1;
-            else return 0;
+        switch (paramSort) {
+            case "frequency":
+                compareFn = (i, j) => {
+                    if (i.frequency > j.frequency) return order === "desc" ? 1 : -1
+                    else if (i.frequency < j.frequency) return  order === "desc" ? -1 : 1
+                    else return 0
+                }
+                break;
+            case "percentage":
+                compareFn = (i, j) => {
+                    if (i.percentage > j.percentage) return order === "desc" ? 1 : -1
+                    else if (i.percentage < j.percentage) return  order === "desc" ? -1 : 1
+                    else return 0
+                }
+                break;
+            default:
+                break;
         }
-
         sortedItems = itemsToSort.sort(compareFn);
         return sortedItems;
     }
 
 
-    const requestSort = () => {
-        setSortOrder(sortOrder === "desc" ? "asc" : "desc");
-        setData(sortData(sortOrder));
+    const requestSort = (paramToSort) => {
+        if (paramToSort === sortBy) {
+            // change order
+            setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+        } else {
+            // change param to sort by
+            setSortBy(paramToSort);
+            setSortOrder("desc");
+        }
+        setData(sortData(paramToSort, sortOrder));
     }
 
 
@@ -93,21 +112,25 @@ export default function TargetFieldTable(props) {
             <Table stickyHeader aria-label="customized table">
                 <TableHead>
                     <TableRow>
+                        <StyledTableCell>Value</StyledTableCell>
+
                         <StyledTableCell>
                             <StyledTableSortLabel
-                                active={true}
+                                active={sortBy === "frequency"}
                                 direction={sortOrder}
-                                onClick={() => requestSort()}
+                                onClick={() => requestSort("frequency")}
                             />
-
-                            Concept ID
+                            Frequency
                         </StyledTableCell>
 
-                        <StyledTableCell>Concept Name</StyledTableCell>
-
-                        <StyledTableCell>Class</StyledTableCell>
-
-                        <StyledTableCell>Standard ?</StyledTableCell>
+                        <StyledTableCell>
+                            <StyledTableSortLabel
+                                active={sortBy === "percentage"}
+                                direction={sortOrder}
+                                onClick={() => requestSort("percentage")}
+                            />
+                            Percentage (%)
+                        </StyledTableCell>
                     </TableRow>
                 </TableHead>
 
@@ -115,13 +138,11 @@ export default function TargetFieldTable(props) {
                     {data.map((row, i) => {
                         return(
                             <StyledTableRow key={i}>
-                                <StyledTableCell component="th" scope="row" align="left">{row.conceptId}</StyledTableCell>
+                                <StyledTableCell component="th" scope="row" align="left">{row.value}</StyledTableCell>
 
-                                <StyledTableCell component="th" scope="row" align="left">{row.conceptName}</StyledTableCell>
+                                <StyledTableCell component="th" scope="row" align="left">{row.frequency}</StyledTableCell>
 
-                                <StyledTableCell component="th" scope="row" align="left">{row.conceptClassId}</StyledTableCell>
-
-                                <StyledTableCell component="th" scope="row" align="left">{row.standardConcept}</StyledTableCell>
+                                <StyledTableCell component="th" scope="row" align="left">{row.percentage}</StyledTableCell>
                             </StyledTableRow>
                         )
                     })}

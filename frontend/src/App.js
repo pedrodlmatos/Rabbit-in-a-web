@@ -1,7 +1,8 @@
-import React, { Component, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import { AppBar, CssBaseline, makeStyles, Toolbar, Typography } from '@material-ui/core'
 import './App.css';
 import AuthService from './services/auth-service';
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import Home from "./components/home/home";
 import AdminProcedureList from './components/procedure-list/admin-procedure-list/admin-procedure-list';
 import Procedure from "./components/procedure/procedure";
@@ -10,18 +11,28 @@ import Login from './components/users/login/login'
 import Register from './components/users/register/Register'
 import UserProcedureList from './components/procedure-list/user-procedure-list/user-procedure-list'
 import Instructions from './components/instructions/instructions'
-import { AppBar, makeStyles, Toolbar, Typography } from '@material-ui/core'
+
+const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-        zIndex: theme.zIndex.drawer + 1
+    link:{
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(2),
+        color: "white",
+        textDecoration: 'none',
+        '&:focus, &:hover, &:visited, &:link, &:active': {
+            color: "white",
+            textDecoration: 'none'
+        }
     },
     title: {
         flexGrow: 1
     },
     appBar: {
-        zIndex: theme.zIndex.drawer + 1
+        position: 'relative',
+        zIndex: theme.zIndex.drawer + 1,
+        width: `calc(100%-${drawerWidth}px)`,
+        backgroundColor: "black"
     },
     entry: {
         marginLeft: theme.spacing(1),
@@ -44,135 +55,77 @@ export default function App() {
 
     const logout = () => {
         AuthService.logout();
+        setCurrentUser(undefined);
+        setShowAdminBoard(false);
     }
 
     return(
-        <div className={classes.root}>
+        <div>
             <Router>
-                <nav className="navbar navbar-expand navbar-dark bg-dark">
-                    <Link to={"/"} className="navbar-brand">Rabbit in a web</Link>
+                <CssBaseline />
+                <AppBar position="fixed" className={classes.appBar}>
+                    <Toolbar>
+                        <Typography
+                            style={ currentUser ? { flexGrow: 0 } : { flexGrow: 1}}
+                            className={classes.link}
+                            variant="h4"
+                            component={Link}
+                            to={'/'}>
+                            Rabbit in a web
+                        </Typography>
 
-                    <div className="navbar-nav mr-auto">
                         {showAdminBoard && (
-                            <li className="nav-item">
-                                <Link to={"/all"} className="nav-link">All ETL procedures</Link>
-                            </li>
+                            <Typography className={classes.link} variant="subtitle1" component={Link} to={'/all'}>
+                                All ETL procedures
+                            </Typography>
                         )}
 
                         {currentUser && (
-                            <li className="nav-item">
-                                <Link to={"/procedures"} className="nav-link">ETL Procedures</Link>
-                            </li>
+                            <Typography style={{ flexGrow: 1 }} className={classes.link} variant="subtitle1" component={Link} to={'/procedures'}>
+                                ETL procedures
+                            </Typography>
                         )}
-                    </div>
 
-                    {currentUser ? (
-                        <div className="navbar-nav ml-auto">
-                            <li className="nav-item">
-                                <Link to={"/profile"} className="nav-link">{currentUser.username}</Link>
-                            </li>
+                        {currentUser ? (
+                            <div>
+                                <Typography className={classes.link} variant="subtitle1" component={Link} to={'/profile'}>
+                                    {currentUser.username}
+                                </Typography>
+                                <Typography
+                                    className={classes.link}
+                                    variant="subtitle1"
+                                    onClick={() => logout()}
+                                    component={Link}
+                                    to={'/'}
+                                >
+                                    Log out
+                                </Typography>
+                            </div>
+                        ) : (
+                            <div>
+                                <Typography className={classes.link} variant="subtitle1" component={Link} to={"/login"}>
+                                    Login
+                                </Typography>
+                                <Typography className={classes.link} variant="subtitle1" component={Link} to={"/register"}>
+                                    Register
+                                </Typography>
+                            </div>
+                        )}
+                    </Toolbar>
+                </AppBar>
 
-                            <li className="nav-item">
-                                <a href="/login" className="nav-link" onClick={logout}>Log out</a>
-                            </li>
-                        </div>
-                    ) : (
-                        <div className="navbar-nav ml-auto">
-                            <li className="nav-item">
-                                <Link to={"/login"} className="nav-link">Login</Link>
-                            </li>
-
-                            <li className="nav-item">
-                                <Link to={"/register"} className="nav-link">Sign up</Link>
-                            </li>
-                        </div>
-                    )}
-                </nav>
-
-                <div>
-                    <Switch>
-                        <Route exact path="/" component={Home}/>
-                        <Route exact path="/login" component={Login}/>
-                        <Route exact path="/register" component={Register} />
-                        <Route path='/all' component={AdminProcedureList} />
-                        <Route path="/procedures" component={UserProcedureList} />
-                        <Route path='/procedure/:id' component={Procedure} />
-                        <Route exact path='/documentation' component={Documentation} />
-                        <Route exact path='/instructions' component={Instructions} />
-                    </Switch>
-                </div>
+                <Switch>
+                    <Route exact path="/" component={Home}/>
+                    <Route exact path="/login" component={Login}/>
+                    <Route exact path="/register" component={Register} />
+                    <Route path='/all' component={AdminProcedureList} />
+                    <Route path="/procedures" component={UserProcedureList} />
+                    <Route path='/procedure/:id' component={Procedure} />
+                    <Route exact path='/documentation' component={Documentation} />
+                    <Route exact path='/instructions' component={Instructions} />
+                </Switch>
             </Router>
+
         </div>
     )
 }
-
-/*
-class App extends Component {
-
-
-    render() {
-        const { currentUser, showAdminBoard } = this.state;
-
-        return(
-            <div>
-                <Router>
-                    <nav className="navbar navbar-expand navbar-dark bg-dark">
-                        <Link to={"/"} className="navbar-brand">Rabbit in a web</Link>
-
-                        <div className="navbar-nav mr-auto">
-                            {showAdminBoard && (
-                                <li className="nav-item">
-                                    <Link to={"/all"} className="nav-link">All ETL procedures</Link>
-                                </li>
-                            )}
-
-                            {currentUser && (
-                                <li className="nav-item">
-                                    <Link to={"/procedures"} className="nav-link">ETL Procedures</Link>
-                                </li>
-                            )}
-                        </div>
-
-                        {currentUser ? (
-                            <div className="navbar-nav ml-auto">
-                                <li className="nav-item">
-                                    <Link to={"/profile"} className="nav-link">{currentUser.username}</Link>
-                                </li>
-
-                                <li className="nav-item">
-                                    <a href="/login" className="nav-link" onClick={this.logout}>Log out</a>
-                                </li>
-                            </div>
-                        ) : (
-                            <div className="navbar-nav ml-auto">
-                                <li className="nav-item">
-                                    <Link to={"/login"} className="nav-link">Login</Link>
-                                </li>
-
-                                <li className="nav-item">
-                                    <Link to={"/register"} className="nav-link">Sign up</Link>
-                                </li>
-                            </div>
-                        )}
-                    </nav>
-
-                    <div>
-                        <Switch>
-                            <Route exact path="/" component={Home}/>
-                            <Route exact path="/login" component={Login}/>
-                            <Route exact path="/register" component={Register} />
-                            <Route path='/all' component={AdminProcedureList} />
-                            <Route path="/procedures" component={UserProcedureList} />
-                            <Route path='/procedure/:id' component={Procedure} />
-                            <Route exact path='/documentation' component={Documentation} />
-                            <Route exact path='/instructions' component={Instructions} />
-                        </Switch>
-                    </div>
-                </Router>
-            </div>
-        )
-
-    }
-}
-
-export default App;*/

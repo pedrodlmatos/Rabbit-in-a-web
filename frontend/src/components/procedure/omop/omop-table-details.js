@@ -3,10 +3,10 @@
  * and its fields (field names, data type and description)
  */
 
-import { makeStyles } from '@material-ui/core';
+import { Grid, makeStyles } from '@material-ui/core'
 import React from 'react'
-import Controls from '../controls/controls';
-import InfoTable from '../info-table/info-table';
+import Controls from '../../controls/controls';
+import InfoTable from '../info-table';
 
 const useStyles = makeStyles(theme => ({
     showButton: {
@@ -15,13 +15,28 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-export default function TargetTableDetails(props) {
+export default function OMOPTableDetails(props) {
     const classes = useStyles();
     const { table, columns, data, onChange, disabled, save, ehrTables, verify, connect } = props;
 
     return(
         <div>
-            <h6><strong>Table: </strong>{ table.name}</h6>
+            <Grid container>
+                <Grid item xs={9} sm={9} md={9} lg={9}>
+                    <h6><strong>Table: </strong>{ table.name}</h6>
+                </Grid>
+
+                <Grid item xs={3} sm={3} md={3} lg={3}>
+                    <Controls.DropdownCheckbox
+                        value={[]}
+                        label="Connect to"
+                        options={ehrTables}
+                        verifyMapping={verify}
+                        onChange={connect}
+                    />
+                </Grid>
+            </Grid>
+
             <InfoTable columns={columns} data={data} />
 
             <Controls.Input
@@ -39,16 +54,6 @@ export default function TargetTableDetails(props) {
                 text="Save"
                 onClick={save}
             />
-
-            
-            <Controls.DropdownCheckbox
-                value={[]}
-                label="Connect to"
-                options={ehrTables}
-                verifyMapping={verify}
-                onChange={connect}
-            />
-            
         </div>
     )
 }   

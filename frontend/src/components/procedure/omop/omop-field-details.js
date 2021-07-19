@@ -1,7 +1,7 @@
 import React from 'react'
 import Controls from '../../controls/controls'
-import { makeStyles } from '@material-ui/core'
-import TargetFieldTable from './target-field-table'
+import { Grid, makeStyles } from '@material-ui/core'
+import OMOPFieldTable from './omop-field-table'
 
 const useStyles = makeStyles(theme => ({
     button: {
@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-export default function TargetFieldDetails(props) {
+export default function OMOPFieldDetails(props) {
 
     const classes = useStyles();
     const { field, fieldInfo, setFieldInfo, onCommentChange, saveComment, ehrFields, verify, connect } = props;
@@ -19,11 +19,26 @@ export default function TargetFieldDetails(props) {
 
     return(
         <div>
-            <h6><strong>Field name: </strong>{field.name}</h6>
-            <h6><strong>Field type: </strong>{field.type}</h6>
+            <Grid container>
+                <Grid item xs={9} sm={9} md={9} lg={9}>
+                    <h6><strong>Field name: </strong>{field.name}</h6>
+                    <h6><strong>Field type: </strong>{field.type}</h6>
+                </Grid>
+
+                <Grid item xs={3} sm={3} md={3} lg={3}>
+                    <Controls.DropdownCheckbox
+                        value={[]}
+                        label="Connect to"
+                        options={ehrFields}
+                        verifyMapping={verify}
+                        onChange={connect}
+                    />
+                </Grid>
+            </Grid>
+
 
             {showFieldInfo && (
-                <TargetFieldTable data={fieldInfo} setData={setFieldInfo} />
+                <OMOPFieldTable data={fieldInfo} setData={setFieldInfo} />
             )}
 
 
@@ -41,15 +56,6 @@ export default function TargetFieldDetails(props) {
                 text="Save"
                 onClick={saveComment}
             />
-
-            <Controls.DropdownCheckbox
-                value={[]}
-                label="Connect to"
-                options={ehrFields}
-                verifyMapping={verify}
-                onChange={connect}
-            />
         </div>
-
     )
 }

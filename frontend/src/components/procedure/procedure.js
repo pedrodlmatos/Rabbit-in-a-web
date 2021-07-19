@@ -1,44 +1,36 @@
-import React, { useState, useEffect } from 'react'
-import { Grid, CircularProgress, makeStyles, Menu, MenuItem, Checkbox, Divider } from '@material-ui/core'
-import EditIcon from '@material-ui/icons/Edit';
-import SaveIcon from '@material-ui/icons/Save';
-import Xarrow from 'react-xarrows/lib';
-import ETLService from '../../services/etl-list-service';
-import TableService from '../../services/table-service';
-import TableMappingService from '../../services/table-mapping-service';
-import Controls from '../controls/controls';
-import FieldMappingModal from '../modals/field-mapping-modal/field-mapping-modal';
-import { CDMVersions } from '../../services/CDMVersions';
-import TableMappingLogic from './table-mapping-logic';
-import SourceTableDetails from './source-table-details';
-import TargetTableDetails from './target-table-details';
-import FilesMethods from './files-methods';
-import TableOperations from './table-operations';
-import MappingOperations from '../utilities/mapping-operations';
-import DeleteModal from '../modals/delete-modal/delete-modal';
+import React, { useEffect, useState } from 'react'
+import { Checkbox, CircularProgress, Divider, FormControlLabel, FormGroup, Grid, makeStyles, Menu, MenuItem, Switch } from '@material-ui/core'
+import EditIcon from '@material-ui/icons/Edit'
+import SaveIcon from '@material-ui/icons/Save'
+import ETLService from '../../services/etl-list-service'
+import TableService from '../../services/table-service'
+import TableMappingService from '../../services/table-mapping-service'
+import FieldService from '../../services/field-service'
+import FieldMappingService from '../../services/field-mapping-service'
+import TableOperations from './table-operations'
+import MappingOperations from '../utilities/mapping-operations'
+import FilesMethods from './files-methods'
+import ETLOperations from './etl-operations'
+import { CDMVersions } from '../../services/CDMVersions'
+import Controls from '../controls/controls'
 import InviteCollaboratorModal from '../modals/collaborators/manage-collaborator'
+import DeleteModal from '../modals/delete-modal/delete-modal'
+import TableMappingPanel from './table-mapping-panel'
+import EHRTableDetails from './ehr/ehr-table-details'
+import OMOPTableDetails from './omop/omop-table-details'
+import TableMappingLogic from './table-mapping-logic'
+import FieldMappingPanel from './field-mapping-panel'
+import EHRFieldDetails from './ehr/ehr-field-details'
+import OMOPFieldDetails from './omop/omop-field-details'
+import FieldMappingLogic from './field-mapping-logic'
 
-const useStyles = makeStyles(theme => ({
-    tablesArea: {
+
+const useStyles = makeStyles((theme) => ({
+    container: {
         marginTop: theme.spacing(3),
         marginBottom: theme.spacing(3),
         marginRight: theme.spacing(6),
         marginLeft: theme.spacing(6)
-    },
-    databaseNames: {
-        height: 100,
-        justifyContent: 'center', 
-        alignItems: 'center', 
-    },
-    tableDetails: {
-        //marginLeft: theme.spacing(-20)
-    },
-    hiddenButton: {
-        visibility: 'hidden'
-    },
-    showButton: {
-        marginTop: theme.spacing(1),
-        visibility: 'false'
     },
     iconButton: {
         border: "solid 0px #ffffff",
@@ -48,16 +40,19 @@ const useStyles = makeStyles(theme => ({
             color: "#000000",
             backgroundColor: "#ffffff",
         }
-    }
+    },
+    databaseName: {
+        height: 100,
+        alignItems: 'center',
+    },
 }))
-
 
 export default function Procedure() {
     const classes = useStyles();
 
     const initialETLValues = {
-        id: null, name: null,
-        ehrDatabase: { id: null, tables: [], databaseName: null },
+        id: null, name: '',
+        ehrDatabase: { id: null, tables: [], databaseName: '' },
         omopDatabase: { id: null, tables: [], databaseName: '' }
     }
 
@@ -67,28 +62,43 @@ export default function Procedure() {
         { Header: 'Description', accessor: 'description' }
     ], [])
 
-    const [loading, setLoading] = useState(true);
-    const [etl, setEtl] = useState(initialETLValues);
-    const [ETLUsers, setETLUsers] = useState([]);
+    /* GENERAL ETL INFO */
+    const [loading, setLoading] = useState(true);                                   // loading page
+    const [etl, setEtl] = useState(initialETLValues);                                         // ETL data
+    const [ETLUsers, setETLUsers] = useState([]);                                   // users with access (beside logged user)
+    const [omopName, setOmopName] = useState('');                                   // OMOP CDM name according to its version
+    const [tableMappings, setTableMappings] = useState([]);                         // list of mappings between tables
+
+    /* SELECTED TABLE INFO */
+    const [selectedTable, setSelectedTable] = useState({});                         // selected table info
+    const [ehrTableSelected, setEhrTableSelected] = useState(false);                // flag if table from EHR database is selected
+    const [showTableDetails, setShowTableDetails] = useState(false);                // flag to show selected table details
+    const [tableDetails, setTableDetails] = useState([]);                           // table details (fields and their types and description)
+    const [loadingSaveTableComment, setLoadingSaveTableComment] = useState(false);  // flag if selected table comment is being saved
+
+    const [showTableMappingOptions, setShowTableMappingOptions] = useState(false);
+    const [selectedTableMapping, setSelectedTableMapping] = useState({});
+    const [loadingSaveTableMappingLogic, setLoadingSaveTableMappingLogic] = useState(false);
+
+    const [fieldMappings, setFieldMappings] = useState([]);
+    const [showFieldMappingPanel, setShowFieldMappingPanel] = useState(false);
+    const [selectedField, setSelectedField] = useState({});
+    const [ehrFieldSelected, setEhrFieldSelected] = useState(false);
+    const [showFieldDetails, setShowFieldDetails] = useState(false);
+    const [fieldDetails, setFieldDetails] = useState([]);
+    const [loadingSaveFieldComment, setLoadingSaveFieldComment] = useState(false);
+    const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
+    const [showFieldMappingOptions, setShowFieldMappingOptions] = useState(false);
+    const [loadingSaveFieldMappingLogic, setLoadingSaveFieldMappingLogic] = useState(false);
+
     const [disableETLProcedureName, setDisableETLProcedureName] = useState(true);
     const [disableEHRDatabaseName, setDisableEHRDatabaseName] = useState(true);
-    const [omopName, setOmopName] = useState('');
-    const [tableMappings, setTableMappings] = useState([]);
-    const [selectedTableMapping, setSelectedTableMapping] = useState({});
-    
-    const [selectedTable, setSelectedTable] = useState({})
-    const [sourceSelected, setSourceSelected] = useState(false);
-    const [showTableDetails, setShowTableDetails] = useState(false);
-    const [tableDetails, setTableDetails] = useState([]);
-    const [loadingSaveTableComment, setLoadingSaveTableComment] = useState(false);
 
-    // show/hide modals
     const [anchorEl, setAnchorEl] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showInviteCollaboratorModal, setShowInviteCollaboratorModal] = useState(false);
-    const [showFieldMappingModal, setShowFieldMappingModal] = useState(false);
-    const [loadingSaveTableMappingLogic, setLoadingSaveTableMappingLogic] = useState(false);
-    
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+
     useEffect(() => {
         const etlProcedureId = window.location.pathname.toString().replace("/procedure/", "");
 
@@ -121,7 +131,8 @@ export default function Procedure() {
                         end: item.omopTable,
                         complete: item.complete,
                         logic: item.logic,
-                        color: item.complete ? "black" : "grey"
+                        color: item.complete ? "black" : "grey",
+                        fieldMappings: item.fieldMappings,
                     }
                     maps.push(arrow);
                 });
@@ -132,20 +143,11 @@ export default function Procedure() {
     }, []);
 
 
-    /**
-     * Sends request to API to change ETL procedure name and after receiving response,
-     * disables input to change
-     */
-
-    const saveETLProcedureName = () => {
-        ETLService
-            .changeETLProcedureName(etl.id, etl.name)
-            .then(() => {
-                setDisableETLProcedureName(true);
-            })
-            .catch(e => console.log(e));
-    }
-
+    /*********************************
+     *                               *
+     *  TABLE MAPPING PANEL METHODS  *
+     *                               *
+     *********************************/
 
     /**
      * Changes the name of the EHR database
@@ -156,20 +158,6 @@ export default function Procedure() {
     const changeEHRDatabaseName = e => {
         let newSourceDatabase = {...etl.ehrDatabase, databaseName: e.target.value}
         setEtl({...etl, ehrDatabase: newSourceDatabase});
-    }
-
-    /**
-     * Sends request to API to change EHR database name and after receiving response,
-     * disables input to change
-     */
-
-    const saveEHRDatabaseName = () => {
-        ETLService
-            .changeEHRDatabaseName(etl.ehrDatabase.id, etl.id, etl.ehrDatabase.databaseName)
-            .then(() => {
-                setDisableEHRDatabaseName(true);
-            })
-            .catch(e => console.log(e));
     }
 
 
@@ -184,7 +172,7 @@ export default function Procedure() {
         if (Object.keys(selectedTable).length > 0) {
             // clean state if any table is selected
             setSelectedTable({});
-            setSourceSelected(false);
+            setEhrTableSelected(false);
             setShowTableDetails(false);
             setTableDetails([]);
         }
@@ -206,8 +194,9 @@ export default function Procedure() {
 
 
     /**
+     * Invites a list of user to the ETL procedure
      *
-     * @param usersList
+     * @param usersList users list
      */
 
     const inviteCollaborators = (usersList) => {
@@ -229,8 +218,9 @@ export default function Procedure() {
 
 
     /**
+     * Removes a user from the list of users with access to the ETL procedure
      *
-     * @param userToRemove
+     * @param userToRemove user to remove
      */
 
     const removeCollaborator = (userToRemove) => {
@@ -250,155 +240,41 @@ export default function Procedure() {
 
 
     /**
-     * Delete (mark as deleted) the open ETL procedure and redirect to the user's
-     * ETL procedures list page
+     * Selects a table and show its details
+     *
+     * @param show flag to show or hide
+     * @param table selected table
+     * @param tableInfo selected table details (fields and their data types and descriptions)
+     * @param ehrTableSelected flag if selected table is from EHR database
      */
 
-    const deleteETLProcedure = () => {
-        ETLService.markETLProcedureAsDeleted(etl.id).then(() => { window.location.href = '/procedures' });
-    }
-
-
-    /**
-     * Defines the selected table and changes state of current and previous selected table.
-     *
-     *  - If no table is selected, only changes the state of the selected table
-     *  - If there is a table selected, unselect it and then select the new table changing states
-     *  - If select the table that was previous selected, unselects it
-     *
-     * @param ehrTable selected source table
-     */
-
-    const selectEHRTable = (ehrTable) => {
-        // clean state
-        setSelectedTableMapping({});
-        if (Object.keys(selectedTable).length === 0) {
-            // all tables are unselected
-            setSelectedTable(ehrTable);
-            setSourceSelected(true);
-            MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);        // change color of mappings that comes from the selected table
-            defineData(ehrTable);                                                       // define fields info
-        } else if (selectedTable === ehrTable) {
-            // select the same table -> unselect
-            MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
-            setSourceSelected(false);                                                // unselect
+    const selectTable = (show, table, tableInfo, ehrTableSelected) => {
+        if (show) {
+            // table is selected
+            setSelectedTable(table);
+            setTableDetails(tableInfo);
+            setEhrTableSelected(ehrTableSelected);
+            setShowTableDetails(true);
+        } else {
+            // selected table is unselected
             setShowTableDetails(false);
             setSelectedTable({});
-            setTableDetails(null);
-        } else {
-            // select any other source table
-            MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
-            setSelectedTable(ehrTable);                                                 // change selected table
-            setSourceSelected(true);
-            MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);        // change color of mappings that comes from the selected table
-            defineData(ehrTable);                                                       // change content of fields table
+            setEhrTableSelected(false);
         }
     }
 
-
     /**
-     * Defines the selected table and changes state of current and previous selected table
      *
-     * - If no table is selected, only changes the state of the selected table
-     * - If theres is a source table selected, creates arrow
-     * - If select the same table, unselect
-     * - Else selects a different target table
-     *
-     * @param omopTable selected target table
+     * @param ehrTableId
+     * @param omopTableId
      */
 
-    const selectOMOPTable = (omopTable) => {
-        // clean state
-        setSelectedTableMapping({});
-        if (Object.keys(selectedTable).length === 0) {
-            // no table is selected
-            MappingOperations.selectMappingsToTarget(tableMappings, omopTable);          // change color of mappings that goes to the selected table
-            setSelectedTable(omopTable);                                                 // change select table information
-            setSourceSelected(false);
-            defineData(omopTable);                                                       // change content of fields table
-        } else if (selectedTable === omopTable) {
-            // select the same table -> unselect
-            MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
-            setSourceSelected(false);
-            setShowTableDetails(false);
-            setSelectedTable({});                                                     // unselect
-            setTableDetails(null);
-        } else if (sourceSelected) {
-            // source table is selected -> create arrow
-            const source_id = selectedTable.id;
-            //resetArrowsColor();                                                        // change arrows color to grey
-            //setSelectedTable({})                                                       // unselects tables
-            createTableMapping(source_id, omopTable.id);                                 // create arrow
-            //setSourceSelected(false);                                                  // clean state
-            //setShowTableDetails(false);
-            //setTableDetails(null);
-        } else {
-            // other target table is selected
-            MappingOperations.resetMappingColor(tableMappings);                             // change color of arrows to grey
-            setSelectedTable(omopTable);                                                  // change select table information
-            setSourceSelected(false);
-            MappingOperations.selectMappingsToTarget(tableMappings, omopTable);           // change color of mappings that comes from the selected table
-            defineData(omopTable);                                                        // change content of fields table
-        }
-    }
-
-
-    /**
-     * Creates the stem tables on both source (EHR) and target (OMOP CDM) databases
-     */
-        // TODO: verify
-    const addStemTable = () => {
-        ETLService.addStemTables(etl.id).then(response => {
-            setEtl({
-                ...etl,
-                sourceDatabase: response.data.sourceDatabase,
-                targetDatabase: response.data.targetDatabase
-            });
-            // table mappings
-            let maps = [];
-            response.data.tableMappings.forEach(function(item) {
-                const arrow = {
-                    id: item.id,
-                    start:  item.source,
-                    end: item.target,
-                    complete: item.complete,
-                    logic: item.logic,
-                    color: item.complete ? "black" : "grey"
-                }
-                maps.push(arrow);
-            });
-            setTableMappings(maps);
+    const tablesAreConnected = (ehrTableId, omopTableId) => {
+        let connected = false;
+        tableMappings.forEach(function (item) {
+            if (item.start.id === ehrTableId && item.end.id === omopTableId) connected = true;
         })
-    }
-
-
-    /**
-     * Removes stem table from both databases
-     */
-    // TODO: verify
-    const removeStemTable = () => {
-        ETLService.removeStemTables(etl.id).then(response => {
-            console.log(response.data);
-            setEtl({
-                ...etl,
-                sourceDatabase: response.data.sourceDatabase,
-                targetDatabase: response.data.targetDatabase
-            });
-            // table mappings
-            let maps = [];
-            response.data.tableMappings.forEach(function(item) {
-                const arrow = {
-                    id: item.id,
-                    start:  item.ehrTable,
-                    end: item.omopTable,
-                    complete: item.complete,
-                    logic: item.logic,
-                    color: item.complete ? "black" : "grey"
-                }
-                maps.push(arrow);
-            });
-            setTableMappings(maps);
-        })
+        return connected;
     }
 
 
@@ -411,10 +287,7 @@ export default function Procedure() {
 
     const createTableMapping = (ehrTableId, omopTableId) => {
         // verify if table mapping between those tables already exists
-        let exists = false;
-        tableMappings.forEach(function (item) {
-            if (item.start.id === ehrTableId && item.end.id === omopTableId) exists = true;
-        })
+        let exists = tablesAreConnected(ehrTableId, omopTableId);
 
         // if doesn't exist -> create
         if (!exists) {
@@ -427,7 +300,8 @@ export default function Procedure() {
                         end: res.data.omopTable,
                         complete: res.data.complete,
                         logic: res.data.logic,
-                        color: MappingOperations.defineMappingColor(selectedTable, res.data.complete, res.data.ehrTable.id, res.data.omopTable.id)
+                        color: MappingOperations.defineMappingColor(selectedTable, res.data.complete, res.data.ehrTable.id, res.data.omopTable.id),
+                        fieldMappings: res.fieldMappings,
                     }
                     setTableMappings([arrow].concat(tableMappings));
                 })
@@ -437,245 +311,82 @@ export default function Procedure() {
 
 
     /**
-     * Selects a table mapping (changing its color to red)
-     * - If no table mapping is previously selected, only selects the table mapping
-     * - If selects the table mapping previously selected, unselect it
-     * - If selects other table mapping, unselects previous and selects the new one
-     * 
-     * @param tableMapping selected table mapping
-     */
-
-    const selectTableMapping = (tableMapping) => {
-        // change color to grey
-        MappingOperations.resetMappingColor(tableMappings);
-        // clean state
-        setSelectedTable({});
-        setSourceSelected(false);
-        setShowTableDetails(false);
-        setTableDetails([]);
-        const index = tableMappings.indexOf(tableMapping);
-
-        if (Object.keys(selectedTableMapping).length === 0) {
-            // no arrow is selected
-            let mappings = tableMappings;
-            mappings[index].color = "red";                                              // change to red the selected table mapping
-            setSelectedTableMapping(tableMapping);
-            setTableMappings(mappings);
-        } else if(selectedTableMapping === tableMapping) {
-            // select the arrow previous selected to unselect
-            setSelectedTableMapping({});
-            MappingOperations.resetMappingColor(tableMappings);                         // change color of arrows to grey
-        } else {
-            // select any other unselected arrow
-            MappingOperations.resetMappingColor(tableMappings);                         // change color of arrows to grey
-            let mappings = tableMappings;                                               // select a new one
-            mappings[index].color = "red";                                              // change to red the selected table mapping
-            setSelectedTableMapping(tableMapping);
-            setTableMappings(mappings);
-        }
-    }
-
-
-    /**
-     * Closes the field mapping modal and deletes the selected table mapping
-     */
-
-    const removeTableMapping = () => {
-        // close field mapping modal
-        setShowFieldMappingModal(false);
-        // make request to API
-        removeMapping(etl.id, selectedTableMapping.id);
-        setSelectedTableMapping({});
-    }
-
-
-    /**
-     * Makes a call to API to delete a table mapping and removes the one deleted
-     * 
-     * @param etl_id ETL procedure's
-     * @param tableMappingId table mapping id
-     */
-
-    const removeMapping = (etl_id, tableMappingId) => {
-        TableMappingService
-            .removeTableMapping(etl_id, tableMappingId)
-            .then(() => {
-                let mappings = []
-                tableMappings.forEach(function(item) {
-                    if (item.id !== tableMappingId)
-                        mappings = mappings.concat(item);
-                });
-                setTableMappings(mappings);
-            }).catch(res => { console.log(res) })
-    }
-
-
-    /**
-     * Changes state to close field mapping modal
-     *
-     * @param tableMapping selected table mapping
-     */
-
-    const openFieldMappingModal = (tableMapping) => {
-        setSelectedTableMapping(tableMapping);
-        setShowFieldMappingModal(true);
-    }
-
-
-    /**
-     * Closes the field mapping modal and cleans state
-     */
-
-    const closeFieldMappingModal = () => {
-        setShowFieldMappingModal(false)
-        setSelectedTableMapping({});
-    }
-
-
-    /**
-     * Changes table mapping color according to its completion status
-     *
-     * @param tableMappingId table mapping's id
-     * @param completion table mapping completion status
-     */
-
-    const changeTableMappingCompletionStatus = (tableMappingId, completion) => {
-        tableMappings.forEach(map => {
-            if (map.id === tableMappingId) {
-                map.color = completion ? "black" : "grey";
-                map.complete = completion;
-            }
-        })
-    }
-
-
-    /**
-     * Defines the content of fields table (field name, type and description)
-     *
-     * @param table table with data
-     */
-
-    const defineData = (table) => {
-        let data = [];
-        table.fields.forEach(element => {
-            data.push({
-                field: element.name,
-                type: element.type,
-                description: element.description
-            })
-        })
-        setTableDetails(data);
-        setShowTableDetails(true);
-    }
-
-
-    /**
-     * Save table comment
-     */
-
-    const saveComment = () => {
-        setLoadingSaveTableComment(true);
-        sourceSelected ? saveCommentEHRTable() : saveCommentTargetTable();
-    }
-
-
-    /**
-     * Sends request to API to change the comment of a table from the EHR database
-     */
-
-    const saveCommentEHRTable = () => {
-        TableService
-            .changeEHRTableComment(selectedTable.id, selectedTable.comment, etl.id)
-            .then(response => {
-                const index = etl.ehrDatabase.tables.findIndex(x => x.id === response.data.id);
-                etl.ehrDatabase.tables[index].comment = response.data.comment;
-                setLoadingSaveTableComment(false);
-            }).catch(error => { console.log(error) });
-    }
-
-
-    /**
-     * Sends request to API to change the comment of a table from the OMOP CDM database
-     */
-
-    const saveCommentTargetTable = () => {
-        TableService
-            .changeOMOPTableComment(selectedTable.id, selectedTable.comment, etl.id)
-            .then(response => {
-                const index = etl.omopDatabase.tables.findIndex(x => x.id === response.data.id);
-                etl.omopDatabase.tables[index].comment = response.data.comment;
-                setLoadingSaveTableComment(false);
-            }).catch(error => { console.log(error) });
-    }
-
-
-    /**
      * Verifies if a source table is connect to a target table
      *
-     * @param targetTableId target table's id
+     * @param omopTableId target table's id
      * @returns true if are connect, false otherwise
      */
 
-    const connectedToTargetTable = (targetTableId) => {
-        let result = false;
-        tableMappings.forEach(item => {
-            if (item.end.id === targetTableId && item.start.id === selectedTable.id) result = true
-        })
-        return result;
+    const connectedToOMOPTable = (omopTableId) => {
+        return tablesAreConnected(selectedTable.id, omopTableId)
     }
 
 
     /**
      * Creates a table mapping between two tables or removes it if already exists
-     * 
+     *
      * @param e check event
      */
 
-    const connectToTargetTable = e => {
-        const targetTableId = e.target.value[0];
+    const connectToOMOPTable = e => {
+        const omopTableId = e.target.value[0];
 
-        if (connectedToTargetTable(targetTableId)) {
+        if (tablesAreConnected(selectedTable.id, omopTableId)) {
             tableMappings.forEach(item => {
-                if (item.end.id === targetTableId && item.start.id === selectedTable.id)
+                if (item.end.id === omopTableId && item.start.id === selectedTable.id)
                     removeMapping(etl.id, item.id);
             })
         } else
-            createTableMapping(selectedTable.id, targetTableId);
+            createTableMapping(selectedTable.id, omopTableId);
     }
 
 
     /**
      * Verifies if a target table is connected to a source table
      *
-     * @param sourceTableId source table id
+     * @param ehrTableId source table id
      * @returns true if they are connected, false otherwise
      */
-    
-    const connectedToSourceTable = (sourceTableId) => {
-        let result = false;
-        tableMappings.forEach(item => {
-            if (item.start.id === sourceTableId && item.end.id === selectedTable.id) result = true
-        })
-        return result;
+
+    const connectedToEHRTable = (ehrTableId) => {
+        return tablesAreConnected(ehrTableId, selectedTable.id)
     }
 
 
     /**
      * Creates a table mapping between two tables or removes it if already exists
-     * 
+     *
      * @param e check event
      */
 
-    const connectToSourceTable = e => {
-        const sourceTableId = e.target.value[0];
+    const connectToEHRTable = e => {
+        const ehrTableId = e.target.value[0];
 
-        if (connectedToSourceTable(sourceTableId)) {
+        if (tablesAreConnected(ehrTableId, selectedTable.id)) {
             tableMappings.forEach(item => {
-                if (item.start.id === sourceTableId && item.end.id === selectedTable.id)
+                if (item.start.id === ehrTableId && item.end.id === selectedTable.id)
                     removeMapping(etl.id, item.id);
             })
         } else
-            createTableMapping(sourceTableId, selectedTable.id);
+            createTableMapping(ehrTableId, selectedTable.id);
+    }
+
+
+    /**
+     * Shows the edition table mapping options
+     *
+     * @param show flag to show or hide
+     * @param tableMapping selected table mapping
+     */
+
+    const showTableMapping = (show, tableMapping) => {
+        if (show) {
+            setSelectedTableMapping(tableMapping);
+            setShowTableMappingOptions(true);
+        } else {
+            setSelectedTableMapping({});
+            setShowTableMappingOptions(false);
+        }
     }
 
 
@@ -697,26 +408,379 @@ export default function Procedure() {
 
 
     /**
-     * Updates table mapping logic when field mapping modal is open
-     *
-     * @param tableMappingId table mapping id
-     * @param logic logic to update to
+     * Change the completion status of the table mapping
      */
 
-    const updateTableMappingLogic = (tableMappingId, logic) => {
-        let index = tableMappings.findIndex(x => x.id === tableMappingId);
-        tableMappings[index].logic = logic;
+    const handleCompletionChange = () => {
+        TableMappingService
+            .editCompleteMapping(selectedTableMapping.id, !selectedTableMapping.complete, etl.id)
+            .then(response => {
+                let index = tableMappings.findIndex(x => x.id === response.data.id);
+                tableMappings[index].complete = response.data.complete;
+
+                setSelectedTableMapping({
+                    ...selectedTableMapping,
+                    complete: response.data.complete
+                })
+            }).catch(res => { console.log(res) })
     }
 
 
-    return(
-        <div className={classes.tablesArea}>
+    /**
+     * Closes the field mapping modal and deletes the selected table mapping
+     */
+
+    const removeTableMapping = () => {
+        // make request to API
+        removeMapping(etl.id, selectedTableMapping.id);
+        setShowTableMappingOptions(false);
+        setSelectedTableMapping({});
+    }
+
+
+    /**
+     * Makes a call to API to delete a table mapping and removes the one deleted
+     *
+     * @param etl_id ETL procedure's
+     * @param tableMappingId table mapping id
+     */
+
+    const removeMapping = (etl_id, tableMappingId) => {
+        TableMappingService
+            .removeTableMapping(etl_id, tableMappingId)
+            .then(() => {
+                let mappings = []
+                tableMappings.forEach(function(item) {
+                    if (item.id !== tableMappingId)
+                        mappings = mappings.concat(item);
+                });
+                setTableMappings(mappings);
+            }).catch(res => { console.log(res) })
+    }
+
+
+    /**
+     * Sends request to API to change the comment of a table from the EHR database
+     */
+
+    const saveEHRTableComment = () => {
+        setLoadingSaveTableComment(true);
+        TableService
+            .changeEHRTableComment(selectedTable.id, selectedTable.comment, etl.id)
+            .then(response => {
+                const index = etl.ehrDatabase.tables.findIndex(x => x.id === response.data.id);
+                etl.ehrDatabase.tables[index].comment = response.data.comment;
+                setLoadingSaveTableComment(false);
+            }).catch(error => { console.log(error) });
+    }
+
+
+    /**
+     * Sends request to API to change the comment of a table from the OMOP CDM database
+     */
+
+    const saveOMOPTableComment = () => {
+        setLoadingSaveTableComment(true);
+        TableService
+            .changeOMOPTableComment(selectedTable.id, selectedTable.comment, etl.id)
+            .then(response => {
+                const index = etl.omopDatabase.tables.findIndex(x => x.id === response.data.id);
+                etl.omopDatabase.tables[index].comment = response.data.comment;
+                setLoadingSaveTableComment(false);
+            }).catch(error => { console.log(error) });
+    }
+
+
+    /*********************************
+     *                               *
+     *  FIELD MAPPING PANEL METHODS  *
+     *                               *
+     *********************************/
+
+    /**
+     * Change the view for the Field Mapping panel
+     *
+     * @param tableMapping selected table mapping
+     */
+
+    const openFieldMappingPanel = (tableMapping) => {
+        setSelectedTableMapping(tableMapping);
+        setShowTableMappingOptions(true);
+        setShowFieldMappingPanel(true);
+        // defines field mappings
+        let maps = [];
+        tableMapping.fieldMappings.forEach(item => {
+            const arrow = {
+                id: item.id,
+                start: item.ehrField,
+                end: item.omopField,
+                logic: item.logic,
+                color: 'grey'
+            }
+            maps = maps.concat(arrow);
+        })
+        setFieldMappings(maps);
+    }
+
+
+    /**
+     * Closes the field mapping panel, showing the table mapping panel and updating states
+     */
+
+    const closeFieldMappingPanel = () => {
+        setShowTableMappingOptions(false);
+        setShowFieldMappingPanel(false);
+        setFieldMappings([]);
+        setSelectedTableMapping({});
+        setShowFieldDetails(false);
+        setFieldDetails([]);
+        setShowFieldMappingOptions(false);
+    }
+
+
+    /**
+     *
+     * @param show
+     * @param field
+     * @param fieldData
+     * @param ehrField
+     */
+
+    const selectField = (show, field, fieldData, ehrField) => {
+        if (show && ehrField) {
+            // ehr field is selected
+            setFieldDetails(fieldData);
+            setSelectedField(field);
+            setEhrFieldSelected(true);
+            setShowFieldDetails(true);
+        } else if (show && !ehrField) {
+            // omop field is selected
+            setFieldDetails(fieldData)
+            setSelectedField(field);
+            setEhrFieldSelected(false);
+            setShowFieldDetails(true);
+        } else {
+            // table is unselected
+            setShowFieldDetails(false);
+            setSelectedField({});
+            setFieldDetails(fieldData);
+            setEhrFieldSelected(false);
+        }
+    }
+
+
+    /**
+     * Sends request to save comment of field from EHR database
+     */
+
+    const saveEHRFieldComment = () => {
+        setLoadingSaveFieldComment(true);
+        FieldService
+            .changeEHRFieldComment(selectedField.id, selectedField.comment, etl.id)
+            .then(response => {
+                const index = selectedTableMapping.start.fields.findIndex(x => x.id === response.data.id);
+                selectedTableMapping.start.fields[index].comment = response.data.comment;
+                setLoadingSaveFieldComment(false);
+            }).catch(error => { console.log(error) });
+    }
+
+
+    /**
+     * Sends request to save comment of field from OMOP CDM database
+     */
+
+    const saveOMOPFieldComment = () => {
+        FieldService
+            .changeTargetFieldComment(selectedField.id, selectedField.comment, etl.id)
+            .then(response => {
+                const index = selectedTableMapping.end.fields.findIndex(x => x.id === response.data.id);
+                selectedTableMapping.end.fields[index].comment = response.data.comment;
+            }).catch(error => console.log(error));
+    }
+
+
+    /**
+     * Sends request to API to create a mapping between two fields
+     *
+     * @param ehrFieldId source field id
+     * @param omopFieldId target field id
+     */
+
+    const createFieldMapping = (ehrFieldId, omopFieldId) => {
+        // verify if table mapping between those tables already exists
+        let exists = false;
+        fieldMappings.forEach(function (item) {
+            if (item.start.id === ehrFieldId && item.end.id === omopFieldId) exists = true;
+        })
+
+        // if doesn't exist -> create
+        if (!exists) {
+            FieldMappingService
+                .addFieldMapping(selectedTableMapping.id, ehrFieldId, omopFieldId, etl.id)
+                .then(res => {
+                    const arrow = {
+                        id: res.data.id,
+                        start: res.data.ehrField,
+                        end: res.data.omopField,
+                        logic: res.data.logic,
+                        color: MappingOperations.defineMappingColor(selectedField, false, res.data.ehrField.id, res.data.omopField.id),
+                    }
+                    setFieldMappings(fieldMappings.concat(arrow));
+                }).catch(res => { console.log(res) });
+        }
+    }
+
+
+    /**
+     * Verifies if a source field is connected to a target field
+     *
+     * @param omopFieldId target table's id
+     * @returns true if are connected, false otherwise
+     */
+
+    const connectedToOMOPField = (omopFieldId) => {
+        let result = false;
+        fieldMappings.forEach(item => {
+            if (item.end.id === omopFieldId && item.start.id === selectedField.id) result = true;
+        })
+        return result;
+    }
+
+
+    /**
+     * Creates a field mapping between the selecte source field and the checked target field or removes it if already exists
+     *
+     * @param e check event with selected target field
+     */
+
+    const connectToOMOPField = e => {
+        const omopFieldId = e.target.value[0];
+
+        if (connectedToOMOPField(omopFieldId)) {
+            fieldMappings.forEach(item => {
+                if (item.end.id === omopFieldId && item.start.id === selectedField.id) removeFieldMapping(item.id);
+            })
+        } else {
+            createFieldMapping(selectedField.id, omopFieldId);
+        }
+    }
+
+
+    /**
+     * Verifies if a target field is connected to a source field
+     *
+     * @param ehrFieldId source table id
+     * @returns true if they are connected, false otherwise
+     */
+
+    const connectedToEHRField = (ehrFieldId) => {
+        let result = false;
+        fieldMappings.forEach(item => {
+            if (item.start.id === ehrFieldId && item.end.id === selectedField.id) result = true;
+        })
+        return result;
+    }
+
+
+    /**
+     * Creates a field mapping between the selected target field and the checked source field or removes it if already exists
+     *
+     * @param {*} e check event with checked source field
+     */
+
+    const connectToEHRField = e => {
+        const ehrFieldId = e.target.value[0];
+
+        if (connectedToEHRField(ehrFieldId)) {
+            fieldMappings.forEach(item => {
+                if (item.start.id === ehrFieldId && item.end.id === selectedField.id) removeFieldMapping(item.id);
+            })
+        } else
+            createFieldMapping(ehrFieldId, selectedField.id);
+    }
+
+
+    /**
+     *
+     * @param show
+     * @param fieldMapping
+     */
+
+    const showFieldMapping = (show, fieldMapping) => {
+        if (show) {
+            setSelectedFieldMapping(fieldMapping);
+            setShowFieldMappingOptions(true);
+        } else {
+            setShowFieldMappingOptions(false);
+            setSelectedFieldMapping({});
+        }
+    }
+
+
+    /**
+     * Makes a call to API to delete a field mapping and replace the previous with ones received
+     *
+     * @param fieldMappingId table mapping id
+     */
+
+    const removeFieldMapping = (fieldMappingId) => {
+        FieldMappingService.removeFieldMapping(fieldMappingId, etl.id).then(() => {
+            let maps = []
+            fieldMappings.forEach(function(item) {
+                if (item.id !== fieldMappingId)
+                    maps = maps.concat(item);
+            });
+            setFieldMappings(maps);
+        }).catch(res => {
+            console.log(res);
+        })
+    }
+
+
+    /**
+     * Makes request to API to remove the selected field mapping
+     */
+
+    const removeSelectedFieldMapping = () => {
+        FieldMappingService
+            .removeFieldMapping(selectedFieldMapping.id, etl.id)
+            .then(() => {
+                const index = fieldMappings.findIndex(x => x.id === selectedFieldMapping.id);
+                fieldMappings.splice(index);
+                setSelectedFieldMapping({});
+                setShowFieldMappingOptions(false);
+            })
+    }
+
+
+    /**
+     * Sends request to API to save field mapping logic
+     */
+
+    const saveFieldMappingLogic = () => {
+        setLoadingSaveFieldMappingLogic(true);
+
+        // make request to API
+        FieldMappingService
+            .editMappingLogic(selectedFieldMapping.id, selectedFieldMapping.logic, etl.id)
+            .then(response => {
+                let index = fieldMappings.findIndex(x => x.id === response.data.id);
+                fieldMappings[index].logic = response.data.logic;
+                setLoadingSaveFieldMappingLogic(false);
+            }).catch(error => { console.log(error) });
+    }
+
+
+
+    return (
+        <div className={classes.container}>
             { loading ? (
                 <CircularProgress color="primary" variant="indeterminate" size={40} />
             ) : (
                 <Grid container>
                     <Grid item xs={6} sm={6} md={6} lg={6}>
                         <Grid container>
+                            {/* ETL procedure name */}
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <Controls.Input
                                     label="ETL procedure name"
@@ -732,22 +796,33 @@ export default function Procedure() {
                                     </Controls.Button>
                                 ) : (
                                     <Controls.Button className={classes.iconButton} variant="outlined" color="inherit">
-                                        <SaveIcon onClick={() => saveETLProcedureName()} />
+                                        <SaveIcon onClick={() => ETLOperations.saveETLProcedureName(etl, setDisableETLProcedureName)} />
                                     </Controls.Button>
                                 )}
                             </Grid>
 
-                            {/* Menu (with files, add/remove stem tables) */}
-                            <Grid item xs={2} sm={2} md={2} lg={2}>
-                                <Controls.Button text="Menu" aria-controls="simple-menu" aria-haspopup={true} onClick={(event) => setAnchorEl(event.currentTarget)} />
-                                <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={(event) => setAnchorEl(null)}>
+                            {/* Options menu */}
+                            <Grid item xs={6} sm={6} md={6} lg={6}>
+                                <Controls.Button
+                                    text="Options"
+                                    aria-controls="simple-menu"
+                                    aria-haspopup={true}
+                                    onClick={(event) => setAnchorEl(event.currentTarget)}
+                                />
+                                <Menu
+                                    id="simple-menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={(event) => setAnchorEl(null)}
+                                >
                                     {/* Stem Tables (add/remove) */}
                                     <MenuItem disabled={true}>
                                         Stem tables
                                         <Checkbox
                                             edge="end"
                                             checked={TableOperations.hasStemTable(etl.ehrDatabase.tables)}
-                                            onChange={TableOperations.hasStemTable(etl.ehrDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
+                                            //onChange={TableOperations.hasStemTable(etl.ehrDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
                                         />
                                     </MenuItem>
                                     <Divider />
@@ -768,23 +843,13 @@ export default function Procedure() {
                                     />
 
                                     <MenuItem style={{color: 'red'}} onClick={() => setShowDeleteModal(true)}>Delete procedure</MenuItem>
-                                    <DeleteModal show={showDeleteModal} setShow={setShowDeleteModal} deleteProcedure={() => deleteETLProcedure()}/>
+                                    <DeleteModal show={showDeleteModal} setShow={setShowDeleteModal} deleteProcedure={() => ETLOperations.deleteETLProcedure(etl)}/>
                                 </Menu>
                             </Grid>
-
-                            {/* If a table mapping is selected, allow to remove */}
-                            { Object.keys(selectedTableMapping).length !== 0 && (
-                                <Grid item xs={2} sm={2} md={2} lg={2}>
-                                    <Controls.Button
-                                        color="secondary"
-                                        text="Remove"
-                                        onClick={removeTableMapping}
-                                    />
-                                </Grid>
-                            )}
                         </Grid>
-                            
-                        <Grid className={classes.databaseNames} container>
+
+                        <Grid className={classes.databaseName} container>
+                            {/* EHR database name */}
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <Controls.Input
                                     label="EHR database name"
@@ -800,129 +865,182 @@ export default function Procedure() {
                                     </Controls.Button>
                                 ) : (
                                     <Controls.Button className={classes.iconButton} variant="outlined" color="inherit">
-                                        <SaveIcon onClick={() => saveEHRDatabaseName()} />
+                                        <SaveIcon onClick={() => ETLOperations.saveEHRDatabaseName(etl, setDisableEHRDatabaseName)} />
                                     </Controls.Button>
                                 )}
                             </Grid>
-                            
+
+                            {/* OMOP CDM dropdown*/}
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <Controls.Select 
-                                    name={omopName} 
-                                    label="OMOP CDM" 
+                                <Controls.Select
+                                    name={omopName}
+                                    label="OMOP CDM"
                                     value={etl.omopDatabase.databaseName}
                                     onChange={handleCDMChange}
-                                    options={CDMVersions} 
+                                    options={CDMVersions}
                                 />
                             </Grid>
                         </Grid>
 
                         <Grid container>
-                            <Grid item xs={6} sm={6} md={6} lg={6}>                                
-                                { etl.ehrDatabase.tables.map(item => {
-                                    return(
-                                        <Controls.TooltipBox
-                                            key={item.id}
-                                            id={'s_' + item.name}
-                                            element={item}
-                                            handler="right"
-                                            clicked={selectedTable.id === item.id}
-                                            help="Select first an EHR table and then an OMOP CDM table" 
-                                            position="right-end"
-                                            color={TableOperations.defineSourceTableColor(sourceSelected, selectedTable, item)}
-                                            border="#000000"
-                                            handleSelection={selectEHRTable}
-                                            createMapping={createTableMapping}
-                                        />
-                                    )
-                                })}
-                            </Grid>
-                            
-                            <Grid item xs={6} sm={6} md={6} lg={6}>                               
-                                { etl.omopDatabase.tables.map(item => {
-                                    return(
-                                        <Controls.TooltipBox
-                                            key={item.id}
-                                            id={'t_' + item.name}
-                                            element={item}
-                                            handler="left" 
-                                            clicked={item.id === selectedTable.id}
-                                            help="Select first an EHR table and then an OMOP CDM table" 
-                                            position="right-end"
-                                            color={item.stem ? "#A000A0" : "#53ECEC"}
-                                            border="#000000"
-                                            handleSelection={selectOMOPTable}
-                                            createMapping={createTableMapping}
-                                        />
-                                    )
-                                })}
-                            </Grid>
-                            { tableMappings.map((ar, i) => (
-                                <Xarrow key={i}
-                                    start={'s_' + ar.start.name}
-                                    end={'t_' + ar.end.name}
-                                    startAnchor="right"
-                                    endAnchor="left"
-                                    color={ar.color}
-                                    strokeWidth={7.5}
-                                    curveness={0.5}
-                                    passProps={{
-                                        onClick: () => selectTableMapping(ar),
-                                        onDoubleClick: () => openFieldMappingModal(ar)
-                                    }}
+                            {showFieldMappingPanel ? (
+                                <FieldMappingPanel
+                                    ehrTable={selectedTableMapping.start}
+                                    omopTable={selectedTableMapping.end}
+                                    complete={selectedTableMapping.complete}
+                                    ehrFields={selectedTableMapping.start.fields}
+                                    omopFields={selectedTableMapping.end.fields}
+                                    fieldMappings={fieldMappings}
+                                    selectField={selectField}
+                                    createFieldMapping={createFieldMapping}
+                                    showFieldMapping={showFieldMapping}
                                 />
-                            ))}
-                            <FieldMappingModal 
-                                openModal={showFieldMappingModal}
-                                closeModal={closeFieldMappingModal}
-                                etl_id={etl.id}
-                                tableMappingId={selectedTableMapping.id}
-                                removeTableMapping={removeTableMapping}
-                                changeMappingCompletion={changeTableMappingCompletionStatus}
-                                updateTableMappingLogic={updateTableMappingLogic}
-                            />
+                            ) : (
+                                <TableMappingPanel
+                                    ehrTables={etl.ehrDatabase.tables}
+                                    omopTables={etl.omopDatabase.tables}
+                                    tableMappings={tableMappings}
+                                    selectTable={selectTable}
+                                    createTableMapping={createTableMapping}
+                                    showTableMapping={showTableMapping}
+                                    openFieldMappingPanel={openFieldMappingPanel}
+                                />
+                            )}
                         </Grid>
                     </Grid>
 
-                    <Grid className={classes.tableDetails} item xs={6} sm={6} md={6} lg={6}>
-                        { showTableDetails && (
-                            <div>
-                                { sourceSelected ? (
-                                    <SourceTableDetails
-                                        table={selectedTable}
-                                        columns={columns}
-                                        data={tableDetails}
-                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
-                                        disabled={loadingSaveTableComment}
-                                        save={saveComment}
-                                        omopTables={etl.omopDatabase.tables}
-                                        verify={connectedToTargetTable}
-                                        connect={connectToTargetTable}
+                    <Grid item xs={6} sm={6} md={6} lg={6}>
+                        <Grid container>
+                            {/* Remove table mapping button */}
+                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                                {(showTableMappingOptions || showFieldMappingPanel) && (
+                                    <Controls.Button
+                                        color="secondary"
+                                        text="Remove table mapping"
+                                        onClick={removeTableMapping}
                                     />
-                                ) : (
-                                    <TargetTableDetails
-                                        table={selectedTable}
-                                        columns={columns}
-                                        data={tableDetails}
-                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
-                                        disabled={loadingSaveTableComment}
-                                        save={saveComment}
-                                        ehrTables={etl.ehrDatabase.tables}
-                                        verify={connectedToSourceTable}
-                                        connect={connectToSourceTable}
-                                    />
-                                    
-                                ) }
-                            </div>
-                        )}
+                                )}
+                            </Grid>
 
-                        { Object.keys(selectedTableMapping).length !== 0 && (
-                            <TableMappingLogic
-                                value={selectedTableMapping.logic === null ? '' : selectedTableMapping.logic}
-                                disabled={loadingSaveTableMappingLogic}
-                                onChange={(e) => setSelectedTableMapping({...selectedTableMapping, logic: e.target.value})}
-                                save={() => saveTableMappingLogic()}
-                            />
-                        )}
+                            {/* Complete slider */}
+                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                                {(showTableMappingOptions || showFieldMappingPanel) && (
+                                    <FormGroup>
+                                        <FormControlLabel
+                                            control={<Switch checked={selectedTableMapping.complete} onChange={handleCompletionChange} color='primary'/>}
+                                            label="Complete"
+                                        />
+                                    </FormGroup>
+                                )}
+                            </Grid>
+
+                            {/* Remove field mapping button */}
+                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                                {showFieldMappingPanel && showFieldMappingOptions && (
+                                    <Controls.Button
+                                        color="secondary"
+                                        text="Remove Field Mapping"
+                                        onClick={removeSelectedFieldMapping}
+                                    />
+                                )}
+                            </Grid>
+
+                            {/* Close/back to table mapping panel */}
+                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                                {showFieldMappingPanel && (
+                                    <Controls.Button
+                                        color="inherit"
+                                        text="Close"
+                                        onClick={() => closeFieldMappingPanel()}
+                                    />
+                                )}
+                            </Grid>
+                        </Grid>
+
+                        <Grid container>
+                            <Grid item xs={12} sm={12} md={12} lg={12}>
+                                {/* EHR table selected */}
+                                {showTableDetails && ehrTableSelected && (
+                                    <EHRTableDetails
+                                        table={selectedTable}
+                                        columns={columns}
+                                        data={tableDetails}
+                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
+                                        disabled={loadingSaveTableComment}
+                                        save={saveEHRTableComment}
+                                        omopTables={etl.omopDatabase.tables}
+                                        verify={connectedToOMOPTable}
+                                        connect={connectToOMOPTable}
+                                    />
+                                )}
+
+                                {/* OMOP table selected */}
+                                {showTableDetails && !ehrTableSelected && (
+                                    <OMOPTableDetails
+                                        table={selectedTable}
+                                        columns={columns}
+                                        data={tableDetails}
+                                        onChange={(e) => setSelectedTable({...selectedTable, comment: e.target.value })}
+                                        disabled={loadingSaveTableComment}
+                                        save={saveOMOPTableComment}
+                                        ehrTables={etl.ehrDatabase.tables}
+                                        verify={connectedToEHRTable}
+                                        connect={connectToEHRTable}
+                                    />
+                                )}
+
+                                {/* Table mapping logic */}
+                                {showTableMappingOptions && (
+                                    <div>
+                                        <TableMappingLogic
+                                            value={selectedTableMapping.logic === null ? '' : selectedTableMapping.logic}
+                                            disabled={loadingSaveTableMappingLogic}
+                                            onChange={(e) => setSelectedTableMapping({...selectedTableMapping, logic: e.target.value})}
+                                            save={() => saveTableMappingLogic()}
+                                        />
+
+                                        {/* EHR field details*/}
+                                        {showFieldDetails && ehrFieldSelected  && (
+                                            <EHRFieldDetails
+                                                field={selectedField}
+                                                fieldInfo={fieldDetails}
+                                                setFieldInfo={setFieldDetails}
+                                                onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
+                                                disabled={loadingSaveFieldComment}
+                                                saveComment={saveEHRFieldComment}
+                                                omopFields={selectedTableMapping.end.fields}
+                                                verify={connectedToOMOPField}
+                                                connect={connectToOMOPField}
+                                            />
+                                        )}
+
+                                        {/* OMOP field details */}
+                                        {showFieldDetails && !ehrFieldSelected && (
+                                            <OMOPFieldDetails
+                                                field={selectedField}
+                                                fieldInfo={fieldDetails}
+                                                setFieldInfo={setFieldDetails}
+                                                onCommentChange={(e) => setSelectedField({...selectedField, comment: e.target.value })}
+                                                saveComment={saveOMOPFieldComment}
+                                                ehrFields={selectedTableMapping.start.fields}
+                                                verify={connectedToEHRField}
+                                                connect={connectToEHRField}
+                                            />
+                                        )}
+
+                                        {/* Field mapping logic */}
+                                        {showFieldMappingOptions && (
+                                            <FieldMappingLogic
+                                                value={selectedFieldMapping.logic}
+                                                disabled={loadingSaveFieldMappingLogic}
+                                                onChange={(e) => setSelectedFieldMapping({...selectedFieldMapping, logic: e.target.value})}
+                                                save={saveFieldMappingLogic}
+                                            />
+                                        )}
+                                    </div>
+                                )}
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
             )}

@@ -2,6 +2,9 @@ import Controls from '../controls/controls';
 import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
+    box: {
+        marginTop: theme.spacing(2)
+    },
     button: {
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(2),
@@ -14,7 +17,7 @@ export default function TableMappingLogic(props) {
     const classes = useStyles();
 
     return(
-        <div>
+        <div className={classes.box}>
             <Controls.Input 
                 value={value === null ? '' : value}
                 name="comment"

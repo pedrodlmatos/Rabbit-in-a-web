@@ -48,14 +48,16 @@ public class EHRField {
     @Column(name = "description", columnDefinition = "TEXT")
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.CreateMapping.class
     })
     private String description;
 
     @Column(name = "type")
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.CreateMapping.class
     })
     @Expose
     private String type;
@@ -63,7 +65,8 @@ public class EHRField {
     @Column(name = "stem", nullable = false)
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.CreateMapping.class
     })
     @Expose
     private boolean stem;
@@ -91,7 +94,9 @@ public class EHRField {
     @Column(name = "comment", nullable = true, columnDefinition = "TEXT")
     @JsonView({
             Views.TableMapping.class,
-            Views.ChangeComment.class
+            Views.ChangeComment.class,
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class
     })
     @Expose
     private String comment;
@@ -106,7 +111,7 @@ public class EHRField {
     private List<FieldMapping> mappings;
 
     @OneToMany(mappedBy = "ehrField", cascade = CascadeType.ALL)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({Views.ETLProcedure.class, Views.TableMapping.class})
     @Expose
     private List<ValueCount> valueCounts;
 

@@ -1,3 +1,7 @@
+/**
+ * Creates request to retrieve files data from API and handles file creation with received data
+ */
+
 import ETLService from '../../services/etl-list-service'
 import { saveAs } from 'file-saver';
 

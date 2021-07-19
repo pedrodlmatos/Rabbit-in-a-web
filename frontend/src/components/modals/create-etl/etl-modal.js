@@ -34,7 +34,7 @@ export default function ETLModal(props) {
                         { title }
                     </Typography>
 
-                    <Controls.ActionButton color="secondary" onClick={() => {setShow(false)}}>
+                    <Controls.ActionButton color="inherit" onClick={() => {setShow(false)}}>
                         <CloseIcon />
                     </Controls.ActionButton>
                 </div>

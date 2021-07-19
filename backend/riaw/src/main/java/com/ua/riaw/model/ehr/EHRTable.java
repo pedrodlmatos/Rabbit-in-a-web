@@ -67,7 +67,9 @@ public class EHRTable {
     @OneToMany(mappedBy = "ehrTable", cascade = CascadeType.ALL)
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class
     })
     @Expose
     private List<EHRField> fields;

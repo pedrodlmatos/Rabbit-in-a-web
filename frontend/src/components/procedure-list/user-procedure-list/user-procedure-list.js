@@ -234,21 +234,6 @@ export default function UserProcedureList() {
                         </Table>
                     </TableContainer>
 
-                    {/*
-                    <Grid container spacing={4}>
-                        { procedures.map(session =>
-                            <Grid key={session.id} item xs={12} sm={12} md={2} lg={2}>
-                                <ProcedureCard
-                                    id={session.id}
-                                    name={session.name}
-                                    ehr={session.ehrDatabase.databaseName}
-                                    omop={session.omopDatabase.databaseName}
-                                />
-                            </Grid>
-                        )}
-                    </Grid>
-                    */}
-
                     {/* Modal to choose ETL procedure creation method*/}
                     <ETLModal
                         title="Create ETL procedure"

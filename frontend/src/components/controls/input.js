@@ -19,7 +19,6 @@ export default function Input(props) {
             type={ type || "string" }
             disabled={disabled || false}
             onChange={onChange}
-            autoFocus
             {...other}
             {...(error && {error:true, helperText:error })} 
         />

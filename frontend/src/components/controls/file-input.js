@@ -5,14 +5,15 @@ const useStyles = makeStyles(theme => ({
     fileInput: {
         marginTop: theme.spacing(1),
         marginLeft: theme.spacing(1),
-        width: "250px"
+        width: "250px",
+        height: "50px"
     }
 }))
 
 
 export default function FileInput(props) {
     
-    const { name, type, placeholder, onChange, ...other } = props;
+    const { name, text, type, placeholder, onChange, ...other } = props;
     const classes = useStyles();
 
     return ( 
@@ -29,7 +30,7 @@ export default function FileInput(props) {
                 variant="outlined"
                 component="span"
             >
-                Choose EHR Scan
+                {text}
             </Button>
         </InputLabel>
         

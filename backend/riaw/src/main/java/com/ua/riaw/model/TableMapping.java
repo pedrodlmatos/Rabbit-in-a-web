@@ -57,7 +57,11 @@ public class TableMapping {
     private OMOPTable omopTable;
 
     @OneToMany(mappedBy = "tableMapping", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private List<FieldMapping> fieldMappings;
 

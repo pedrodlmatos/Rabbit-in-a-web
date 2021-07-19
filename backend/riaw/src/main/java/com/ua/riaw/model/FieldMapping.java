@@ -24,6 +24,7 @@ public class FieldMapping {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView({
+            Views.ETLProcedure.class,
             Views.TableMapping.class,
             Views.CreateMapping.class,
             Views.ChangeLogic.class
@@ -33,6 +34,7 @@ public class FieldMapping {
     @ManyToOne
     @JoinColumn(name = "ehr_field_id", nullable = false)
     @JsonView({
+            Views.ETLProcedure.class,
             Views.TableMapping.class,
             Views.CreateMapping.class
     })
@@ -42,6 +44,7 @@ public class FieldMapping {
     @ManyToOne
     @JoinColumn(name = "omop_field_id", nullable = false)
     @JsonView({
+            Views.ETLProcedure.class,
             Views.TableMapping.class,
             Views.CreateMapping.class
     })
@@ -50,6 +53,8 @@ public class FieldMapping {
 
     @Column(name = "logic", nullable = true, columnDefinition = "TEXT")
     @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
             Views.TableMapping.class,
             Views.ChangeLogic.class
     })

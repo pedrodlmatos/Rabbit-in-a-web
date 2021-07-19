@@ -7,7 +7,8 @@ import { CDMVersions } from '../../../services/CDMVersions';
 
 const useStyles = makeStyles(theme => ({
     element: {
-        margin: theme.spacing(1)
+        margin: theme.spacing(1),
+        height: '50px'
     },
     fileInput: {
         width: "50px",
@@ -125,6 +126,7 @@ export default function CreateETLForm(props) {
                 <Grid className={classes.item} item xs={12} sm={6} md={6} lg={6}>
                     <Controls.FileInput
                         name="ehrFile"
+                        text="Choose EHR scan"
                         type="file"
                         placeholder="Upload EHR scan"
                         onChange={handleFileChange}

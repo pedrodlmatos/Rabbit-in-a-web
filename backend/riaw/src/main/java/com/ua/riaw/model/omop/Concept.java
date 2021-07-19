@@ -21,36 +21,64 @@ public class Concept {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
+            Views.TableMapping.class
+    })
     private Long id;
 
     @Column(name = "concept_id", nullable = false)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
+            Views.TableMapping.class
+    })
     @Expose
     private Long conceptId;
 
     @Column(name = "concept_name", nullable = false)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
+            Views.TableMapping.class
+    })
     @Expose
     private String conceptName;
 
     @Column(name = "standard_concept", nullable = false)
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
+            Views.TableMapping.class
+    })
     @Expose
     private String standardConcept;
 
     @Column(name = "domain_id")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
+            Views.TableMapping.class
+    })
     @Expose
     private String domainId;
 
     @Column(name = "vocabulary_id")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
+            Views.TableMapping.class
+    })
     @Expose
     private String vocabularyId;
 
     @Column(name = "concept_class_id")
-    @JsonView(Views.TableMapping.class)
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.CreateMapping.class,
+            Views.TableMapping.class
+    })
     @Expose
     private String conceptClassId;
 
