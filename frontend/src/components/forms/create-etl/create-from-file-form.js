@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { Grid, CircularProgress, makeStyles } from '@material-ui/core'
-import Controls from '../../controls/controls';
-import { useForm, Form } from '../use-form';
-
+import { CircularProgress, Grid, makeStyles } from '@material-ui/core'
+import Controls from '../../controls/controls'
+import { Form, useForm } from '../use-form'
 
 const useStyles = makeStyles(theme => ({
     item: {

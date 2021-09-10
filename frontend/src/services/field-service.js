@@ -1,6 +1,6 @@
-import axios from 'axios';
-import authHeader from './auth-header';
-import {environment} from "./environment"
+import axios from 'axios'
+import authHeader from './auth-header'
+import { environment } from './environment'
 
 const TARGET_FIELD_URL = environment.TARGET_FIELD_URL;
 const SOURCE_FIELD_URL = environment.SOURCE_FIELD_URL;

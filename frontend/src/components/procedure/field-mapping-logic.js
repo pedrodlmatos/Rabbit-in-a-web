@@ -1,5 +1,5 @@
-import Controls from '../controls/controls';
-import { makeStyles } from '@material-ui/core';
+import Controls from '../controls/controls'
+import { makeStyles } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
     button: {

@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { Checkbox, CircularProgress, Divider, FormControlLabel, FormGroup, Grid, makeStyles, Menu, MenuItem, Switch } from '@material-ui/core'
+import {
+  Checkbox,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  makeStyles,
+  Menu,
+  MenuItem,
+  Switch
+} from '@material-ui/core'
 import EditIcon from '@material-ui/icons/Edit'
 import SaveIcon from '@material-ui/icons/Save'
 import ETLService from '../../services/etl-list-service'
@@ -23,7 +34,6 @@ import FieldMappingPanel from './field-mapping-panel'
 import EHRFieldDetails from './ehr/ehr-field-details'
 import OMOPFieldDetails from './omop/omop-field-details'
 import FieldMappingLogic from './field-mapping-logic'
-
 
 const useStyles = makeStyles((theme) => ({
     container: {

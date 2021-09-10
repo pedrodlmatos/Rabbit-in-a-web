@@ -22,6 +22,7 @@ public class EHRDatabase {
     @JsonView({
             Views.AdminETLProcedureList.class,
             Views.UserETLProcedureList.class,
+            Views.RecentETLProcedureList.class,
             Views.ETLProcedure.class
     })
     @Expose

@@ -5,8 +5,8 @@
 
 import { Grid, makeStyles } from '@material-ui/core'
 import React from 'react'
-import Controls from '../../controls/controls';
-import InfoTable from '../info-table';
+import Controls from '../../controls/controls'
+import InfoTable from '../info-table'
 
 const useStyles = makeStyles(theme => ({
     showButton: {

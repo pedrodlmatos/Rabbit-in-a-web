@@ -1,7 +1,5 @@
-import React, { useRef, useState } from 'react'
-import { Fragment } from 'react';
-import Xarrow from 'react-xarrows/lib';
-
+import React, { Fragment, useRef, useState } from 'react'
+import Xarrow from 'react-xarrows/lib'
 
 const connectPointStyle = {
     position: "absolute",

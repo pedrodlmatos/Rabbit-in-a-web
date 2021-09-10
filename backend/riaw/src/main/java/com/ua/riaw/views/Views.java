@@ -17,6 +17,13 @@ public class Views {
 
 
     /**
+     * Field necessary when visiting other user's profile (username, email)
+     */
+
+    public static class VisitingUser {};
+
+
+    /**
      * Fields necessary for ETL procedure list for ADMIN (all ETL procedures)
      */
 
@@ -43,6 +50,8 @@ public class Views {
 
     public static class ETLProcedure {}
 
+    public static class RecentETLProcedureList {}
+
     public static class ChangeComment {}
 
     public static class CreateMapping {}
@@ -52,4 +61,6 @@ public class Views {
     public static class TableMapping {}
 
     public static class ChangeCompletion {}
+
+
 }

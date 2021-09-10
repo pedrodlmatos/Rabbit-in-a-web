@@ -28,6 +28,27 @@ public interface ETLService {
 
 
     /**
+     * Retrieves list of the most recently updated ETL procedures where user has access
+     *
+     * @param username user
+     * @return list of most recent ETL procedures
+     */
+
+    List<ETL> getRecentProcedures(String username);
+
+
+    /**
+     * Retrieves list of ETL procedures shared between two users
+     *
+     * @param username user who made request
+     * @param otherUser other user
+     * @return list of ETL procedures
+     */
+
+    List<ETL> getAllBetweenUsers(String username, String otherUser);
+
+
+    /**
      * Retrieves and ETL procedure's by its id and if user has access to it
      *
      * @param etl_id ETL procedure's id

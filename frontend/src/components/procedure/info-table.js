@@ -1,7 +1,16 @@
-import React from 'react';
-import { makeStyles, Paper, TableBody, TableCell, TableContainer, Table, TableHead, TableRow, withStyles } from '@material-ui/core';
+import React from 'react'
+import {
+  makeStyles,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  withStyles
+} from '@material-ui/core'
 import { useTable } from 'react-table'
-
 
 const StyledTableCell = withStyles((theme) => ({
     head: {

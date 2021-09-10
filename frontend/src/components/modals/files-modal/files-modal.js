@@ -1,10 +1,9 @@
-import React  from 'react';
+import React from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@material-ui/core'
-import CloseIcon from '@material-ui/icons/Close';
-import Controls from '../../controls/controls';
-import ETLService from '../../../services/etl-list-service';
-import { saveAs } from 'file-saver';
-
+import CloseIcon from '@material-ui/icons/Close'
+import Controls from '../../controls/controls'
+import ETLService from '../../../services/etl-list-service'
+import { saveAs } from 'file-saver'
 
 export default function FilesModal(props) {
 

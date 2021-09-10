@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button as MButton, makeStyles } from '@material-ui/core';
+import { Button as MButton, makeStyles } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
     label: {

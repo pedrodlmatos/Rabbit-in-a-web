@@ -3,7 +3,7 @@
  */
 
 import ETLService from '../../services/etl-list-service'
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver'
 
 class FilesMethods {
 

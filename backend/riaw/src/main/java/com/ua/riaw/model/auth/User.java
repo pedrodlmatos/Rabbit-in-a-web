@@ -27,13 +27,14 @@ public class User {
     @Size(max = 20)
     @JsonView({
             Views.AdminETLProcedureList.class, Views.ETLProcedure.class,
-            Views.UserList.class, Views.ETLUsers.class
+            Views.UserList.class, Views.ETLUsers.class, Views.VisitingUser.class
     })
     private String username;
 
     @NotBlank
     @Size(max = 50)
     @Email
+    @JsonView(Views.VisitingUser.class)
     private String email;
 
     @NotBlank

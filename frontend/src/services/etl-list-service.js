@@ -1,7 +1,7 @@
-import axios from 'axios';
-import authHeader from './auth-header';
-import authHeaderMultiPart from "./auth-header-multi-part";
-import {environment} from "./environment";
+import axios from 'axios'
+import authHeader from './auth-header'
+import authHeaderMultiPart from './auth-header-multi-part'
+import { environment } from './environment'
 
 const API_URL = environment.ETL_URL;
 
@@ -87,6 +87,31 @@ class ETLService {
             return axios.get(
                 API_URL + "user_procedures",
                 { headers: authHeader(), params: { username: username } });
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+
+    getRecentETLs = () => {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+
+        try {
+            return axios.get(
+                API_URL + "recent_procedures",
+                { headers: authHeader(), params: { username: username } });
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    getSharedETLs = (otherUser) => {
+        const username = JSON.parse(localStorage.getItem('user')).username;
+
+        try {
+            return axios.get(
+                API_URL + "shared_procedures",
+                { headers: authHeader(), params: { username: username, otherUser: otherUser } });
         } catch (e) {
             console.log(e);
         }

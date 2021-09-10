@@ -1,44 +1,20 @@
-import {
-    CssBaseline,
-    Divider,
-    Drawer,
-    Hidden,
-    List,
-    ListItem,
-    ListItemText,
-    makeStyles, Typography,
-    useTheme
-} from '@material-ui/core'
+import { Divider, Grid, List, ListItem, ListItemText, makeStyles, Typography, } from '@material-ui/core'
 import { useState } from 'react'
 
-const drawerWidth = 240;
-
 const useStyles = makeStyles((theme) => ({
-    drawer: {
-        width: drawerWidth,
-        flexShrink: 0
-    },
-    drawerPaper: {
-        width: drawerWidth,
-    },
-    drawerHeader: {
-        //display: 'flex',
-        alignItems: 'center',
-        padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
-        ...theme.mixins.toolbar,
-        justifyContent: 'flex-end',
+
+    divider: {
+        marginLeft: "-1px",
+        minHeight: '100%'
     },
     content: {
-        //flexGrow: 1,
-        marginLeft: drawerWidth,
+        marginLeft: theme.spacing(2),
+        marginTop: theme.spacing(2),
         padding: theme.spacing(3),
-
     },
 }))
 
 export default function Instructions() {
-
     const classes = useStyles();
     const [createETL, setCreateETL] = useState(true);
 
@@ -52,34 +28,33 @@ export default function Instructions() {
     }
 
     return (
-        <div>
-            <Drawer
-                className={classes.drawer}
-                variant="persistent"
-                anchor="left"
-                open={true}
-                classes={{ paper: classes.drawerPaper }}
-            >
-                <div className={classes.drawerHeader} />
-                <Divider />
+        <Grid container>
+            <Grid item xs={2} sm={2} md={2} lg={2}>
                 <List>
                     <ListItem button onClick={() => showCreateETL()}>
                         <ListItemText primary={"Create ETL procedure"}/>
                     </ListItem>
+
+                    <ListItem button onClick={() => showCreateETL()}>
+                        <ListItemText primary={"Create ETL procedure"}/>
+                    </ListItem>
+
+                    <ListItem button onClick={() => showCreateETL()}>
+                        <ListItemText primary={"Create ETL procedure"}/>
+                    </ListItem>
                 </List>
-            </Drawer>
-
-            <main className={classes.content}>
+            </Grid>
+            <Divider orientation="vertical" flexItem className={classes.divider} />
+            <Grid item xs={10} sm={10} md={10} lg={10}>
                 {/* ETL procedure creation */}
-                {createETL && (
-                    <Typography paragraph>
-                        Click the button to create an ETL procedure and it will be presented two ways of creating one
-
-
-                    </Typography>
-                )}
-            </main>
-        </div>
-
+                <div className={classes.content}>
+                    {createETL && (
+                        <Typography paragraph>
+                            Click the button to create an ETL procedure and it will be presented two ways of creating one
+                        </Typography>
+                    )}
+                </div>
+            </Grid>
+        </Grid>
     )
 }

@@ -1,22 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react'
 import {
-    makeStyles,
-    Grid,
-    CircularProgress,
-    IconButton,
+    CircularProgress, createStyles,
     Divider,
+    Grid,
+    IconButton,
+    makeStyles,
     Paper,
     Table,
-    TableRow, TableBody, TableContainer, TableCell
+    TableBody,
+    TableCell,
+    TableContainer, TableHead,
+    TableRow, TableSortLabel, withStyles
 } from '@material-ui/core'
-import AddIcon from '@material-ui/icons/Add';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
-import ETLService from "../../../services/etl-list-service";
-import Controls from '../../controls/controls';
-import CreateETLForm from '../../forms/create-etl/create-new-etl-form';
+import AddIcon from '@material-ui/icons/Add'
+import AttachFileIcon from '@material-ui/icons/AttachFile'
+import ETLService from '../../../services/etl-list-service'
+import Controls from '../../controls/controls'
+import CreateETLForm from '../../forms/create-etl/create-new-etl-form'
 import ETLModal from '../../modals/create-etl/etl-modal'
 import CreateETLFromFileForm from '../../forms/create-etl/create-from-file-form'
 import { CDMVersions } from '../../../services/CDMVersions'
+import moment from 'moment'
 
 const useStyles = makeStyles(theme => ({
     pageContainer: {
@@ -45,6 +49,42 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
+const StyledTableCell = withStyles((theme) => ({
+    head: {
+        backgroundColor: theme.palette.common.black,
+        color: theme.palette.common.white
+    },
+    body: {
+        fontSize: 14,
+    }
+}))(TableCell);
+
+const StyledTableRow = withStyles((theme) => ({
+    root: {
+        '&:nth-of-type(odd)': {
+            backgroundColor: theme.palette.action.hover
+        }
+    }
+}))(TableRow)
+
+
+const StyledTableSortLabel = withStyles((theme) =>
+    createStyles({
+        root: {
+            color: 'white',
+            "&:hover": {
+                color: 'white',
+            },
+            '&$active': {
+                color: 'white',
+            },
+        },
+        active: {},
+        icon: {
+            color: 'inherit !important'
+        },
+    })
+)(TableSortLabel);
 
 export default function UserProcedureList() {
 
@@ -52,6 +92,9 @@ export default function UserProcedureList() {
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(false);
     const [procedures, setProcedures] = useState({ });
+    const [sortBy, setSortBy] = useState("omop");
+    const [sortOrder, setSortOrder] = useState("desc");
+
     const [showETLCreationModal, setShowETLCreationModal] = useState(false);
     const [showCreateNewETLModal, setShowCreateNewETLModal] = useState(false);
     const [showCreateETLFromFileModal, setShowCreateETLFromFileModal] = useState(false);
@@ -70,6 +113,97 @@ export default function UserProcedureList() {
             console.log(response);
         })
     }, []);
+
+
+    /**
+     * Redirects for the ETL procedure page
+     *
+     * @param id
+     */
+
+    const accessETLProcedure = (id) => {
+        window.location.href = '/procedure/' + id;
+    }
+
+    /**
+     * Sorts the list of ETL procedures according to the parameter and order
+     *
+     * @param paramSort parameter to sort to (OMOP CDM, creation date, modification date)
+     * @param sortOrder sort order (descendent or ascendant)
+     * @returns {*|*[]} list of sorted items
+     */
+
+    const sortData = (paramSort, sortOrder) => {
+        let itemsToSort = JSON.parse(JSON.stringify(procedures));
+        let sortedItems = [];
+        let compareFn = null;
+
+        switch (paramSort) {
+            case "omop":
+                compareFn = (i, j) => {
+                    let cdmIndexI = CDMVersions.findIndex(function(item) { return item.id === i.omopDatabase.databaseName});
+                    let cdmIndexJ = CDMVersions.findIndex(function(item) { return item.id === j.omopDatabase.databaseName});
+                    if (cdmIndexI < cdmIndexJ)
+                        return sortOrder === "desc" ? -1 : 1;
+                    else if (cdmIndexI > cdmIndexJ)
+                        return sortOrder === "desc" ? 1 : -1;
+                    else
+                        return 0;
+                }
+                break;
+            case "creationDate":
+                compareFn = (i, j) => {
+                    let dateI = moment(i.creationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+                    let dateJ = moment(j.creationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+
+                    if (dateI > dateJ)
+                        return sortOrder === "desc" ? 1 : -1;
+                    else if (dateI < dateJ)
+                        return sortOrder === "desc" ? -1 : 1;
+                    else
+                        return 0;
+                }
+                break;
+            case "modificationDate":
+                compareFn = (i, j) => {
+                    let dateI = moment(i.modificationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+                    let dateJ = moment(j.modificationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
+
+                    if (dateI > dateJ)
+                        return sortOrder === "desc" ? 1 : -1;
+                    else if (dateI < dateJ)
+                        return sortOrder === "desc" ? -1 : 1;
+                    else
+                        return 0;
+                }
+                break;
+            default:
+                break;
+        }
+
+        sortedItems = itemsToSort.sort(compareFn);
+        return sortedItems;
+    }
+
+
+    /**
+     * Defines the parameter to sort by and the order and sort list of procedures
+     *
+     * @param paramToSort Parameter to sort by
+     */
+
+    const requestSort = (paramToSort) => {
+        if (paramToSort === sortBy) {
+            // change sort order
+            setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+        } else {
+            // change param sorted by
+            setSortBy(paramToSort);
+            setSortOrder("desc");
+        }
+        let sortedProcedures = sortData(sortBy, sortOrder);
+        setProcedures(sortedProcedures);
+    }
 
 
     /**
@@ -192,42 +326,81 @@ export default function UserProcedureList() {
 
                     <TableContainer className={classes.table} component={Paper}>
                         <Table stickyHeader aria-label="customized table">
+                            <colgroup>
+                                <col style={{ width: "20%"}} />{/* ETL procedure name */}
+                                <col style={{ width: "16%"}} />{/* EHR database name */}
+                                <col style={{ width: "16%"}} />{/* OMOP CDM version */}
+                                <col style={{ width: "16%"}} />{/* Creation date */}
+                                <col style={{ width: "16%"}} />{/* Modification date */}
+                                <col style={{ width: "16%"}} />{/* Access button */}
+                            </colgroup>
+                            <TableHead>
+                                <TableRow>
+                                    <StyledTableCell align="left">Name</StyledTableCell>
+
+                                    <StyledTableCell align="left">EHR Database</StyledTableCell>
+
+                                    <StyledTableCell align="left">
+                                        OMOP CDM
+                                        <StyledTableSortLabel
+                                            active={sortBy === "omop"}
+                                            direction={sortOrder}
+                                            onClick={() => requestSort("omop")}
+                                        />
+                                    </StyledTableCell>
+
+                                    <StyledTableCell align="left">
+                                        Creation Date
+                                        <StyledTableSortLabel
+                                            active={sortBy === "creationDate"}
+                                            direction={sortOrder}
+                                            onClick={() => requestSort("creationDate")}
+                                        />
+                                    </StyledTableCell>
+
+                                    <StyledTableCell align="left">
+                                        Modification Date
+                                        <StyledTableSortLabel
+                                            active={sortBy === "modificationDate"}
+                                            direction={sortOrder}
+                                            onClick={() => requestSort("modificationDate")}
+                                        />
+                                    </StyledTableCell>
+                                    <StyledTableCell />
+                                </TableRow>
+                            </TableHead>
+
                             <TableBody>
                                 {procedures.map((procedure, i) => {
                                     return(
-                                        <TableRow key={i}>
-                                            <TableCell component="th" scope="row" align="left">
+                                        <StyledTableRow key={i}>
+                                            <StyledTableCell component="th" scope="row">
                                                 {procedure.name}
-                                            </TableCell>
+                                            </StyledTableCell>
 
-                                            <TableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="left">
                                                 {procedure.ehrDatabase.databaseName}
-                                            </TableCell>
+                                            </StyledTableCell>
 
-                                            <TableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="left">
                                                 {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
-                                            </TableCell>
+                                            </StyledTableCell>
 
-                                            <TableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="left">
                                                 {procedure.creationDate}
-                                            </TableCell>
+                                            </StyledTableCell>
 
-                                            <TableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="left">
                                                 {procedure.modificationDate}
-                                            </TableCell>
-                                            {/*
-                                            <TableCell component="th" scope="row" align="left">
-                                                {procedure.users.map((user, i) => { return(<div key={i}>{user.username}</div>)})}
-                                            </TableCell>
-                                            */}
+                                            </StyledTableCell>
 
-                                            <TableCell component="th" scope="row" align="left">
+                                            <StyledTableCell component="th" scope="row" align="center">
                                                 <Controls.Button
                                                     text="Access"
-                                                    onClick={() => window.location.href = '/procedure/' + procedure.id}
+                                                    onClick={() => accessETLProcedure(procedure.id)}
                                                 />
-                                            </TableCell>
-                                        </TableRow>
+                                            </StyledTableCell>
+                                        </StyledTableRow>
                                     )
                                 })}
                             </TableBody>

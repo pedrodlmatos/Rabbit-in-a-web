@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
-import { Grid, CircularProgress, makeStyles } from '@material-ui/core';
-import Controls from '../../controls/controls';
-import { useForm, Form } from '../use-form';
-import { CDMVersions } from '../../../services/CDMVersions';
-
+import { CircularProgress, Grid, makeStyles } from '@material-ui/core'
+import Controls from '../../controls/controls'
+import { Form, useForm } from '../use-form'
+import { CDMVersions } from '../../../services/CDMVersions'
 
 const useStyles = makeStyles(theme => ({
     element: {
@@ -130,7 +129,7 @@ export default function CreateETLForm(props) {
                         type="file"
                         placeholder="Upload EHR scan"
                         onChange={handleFileChange}
-                        error={errors.ehrFile}
+                        errors={errors.ehrFile}
                     />
                     <p className={classes.errorText} style={{ color: errors.ehrFile === "" ? "black" : "red" }}>
                         {errors.ehrFile === "" ? values.ehrFile.name : errors.ehrFile}

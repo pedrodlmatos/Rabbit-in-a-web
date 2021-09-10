@@ -1,6 +1,6 @@
-import axios from 'axios';
-import authHeader from './auth-header';
-import {environment} from "./environment"
+import axios from 'axios'
+import authHeader from './auth-header'
+import { environment } from './environment'
 
 const TARGET_TABLE_URL = environment.TARGET_TABLE_URL;
 const SOURCE_TABLE_URL = environment.SOURCE_TABLE_URL;

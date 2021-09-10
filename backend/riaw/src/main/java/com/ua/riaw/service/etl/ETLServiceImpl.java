@@ -16,6 +16,8 @@ import com.ua.riaw.model.omop.OMOPDatabase;
 import com.ua.riaw.model.omop.OMOPField;
 import com.ua.riaw.model.omop.OMOPTable;
 import com.ua.riaw.security.services.UserDetailsServiceImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import rabbitcore.utilities.ETLSummaryGenerator;
 import rabbitcore.utilities.files.Row;
@@ -32,6 +34,7 @@ import rabbitinahat.model.ETL_RIAH;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -83,6 +86,61 @@ public class ETLServiceImpl implements ETLService {
         if (user == null) throw new EntityNotFoundException(User.class, "username", username);
 
         return etlRepository.findAllByUsersContainingAndDeleted(user, false);
+    }
+
+    /**
+     * Retrieves list of the most recently updated ETL procedures where user has access
+     *
+     * @param username user
+     * @return list of most recent ETL procedures
+     */
+    @Override
+    public List<ETL> getRecentProcedures(String username) {
+        User user = userService.getUserByUsername(username);
+
+        // user not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        // retrieve list of procedures
+        List<ETL> procedures = etlRepository.findAllByUsersContainingAndDeleted(user, false);
+        procedures.sort(Comparator.comparing(ETL::getModificationDate).reversed());
+
+        if (procedures.size() > 10) return procedures.subList(0, 9);
+        else return procedures;
+    }
+
+
+    /**
+     * Retrieves list of ETL procedures shared between two users
+     *
+     * @param username  user who made request
+     * @param otherUser other user
+     * @return list of ETL procedures
+     */
+
+    @Override
+    public List<ETL> getAllBetweenUsers(String username, String otherUser) {
+        User user = userService.getUserByUsername(username);
+        // user not found
+        if (user == null) throw new EntityNotFoundException(User.class, "username", username);
+
+        User visited = userService.getUserByUsername(otherUser);
+        // visited user not found
+        if (visited == null) throw new EntityNotFoundException(User.class, "username", otherUser);
+
+        // get ETL procedures of user who made request
+        List<ETL> userETL = etlRepository.findAllByUsersContainingAndDeleted(user, false);
+
+        // Verify if visited user has access
+        List<ETL> response = new ArrayList<>();
+        for (ETL etl : userETL) {
+            if (etl.getUsers().contains(visited)) response.add(etl);
+        }
+
+        // sort and split
+        response.sort(Comparator.comparing(ETL::getModificationDate).reversed());
+        if (response.size() > 10) return response.subList(0, 9);
+        else return response;
     }
 
 

@@ -22,6 +22,7 @@ public class ETL {
     @JsonView({
             Views.AdminETLProcedureList.class,
             Views.UserETLProcedureList.class,
+            Views.RecentETLProcedureList.class,
             Views.CreateETLProcedure.class,
             Views.ETLProcedure.class
     })
@@ -31,6 +32,7 @@ public class ETL {
     @JsonView({
             Views.AdminETLProcedureList.class,
             Views.UserETLProcedureList.class,
+            Views.RecentETLProcedureList.class,
             Views.ETLProcedure.class
     })
     @Expose
@@ -54,6 +56,7 @@ public class ETL {
     @JsonView({
             Views.AdminETLProcedureList.class,
             Views.UserETLProcedureList.class,
+            Views.RecentETLProcedureList.class,
             Views.ETLProcedure.class
     })
     @Expose
@@ -64,6 +67,7 @@ public class ETL {
     @JsonView({
             Views.AdminETLProcedureList.class,
             Views.UserETLProcedureList.class,
+            Views.RecentETLProcedureList.class,
             Views.ETLProcedure.class
     })
     @Expose
@@ -79,13 +83,13 @@ public class ETL {
     private boolean deleted;
 
     @Column(name = "creation_date", nullable = false)
-    @JsonView(Views.AdminETLProcedureList.class)
+    @JsonView({Views.AdminETLProcedureList.class, Views.UserETLProcedureList.class})
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy HH:mm", timezone = "UTC")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
 
     @Column(name = "modification_date", nullable = false)
-    @JsonView(Views.AdminETLProcedureList.class)
+    @JsonView({Views.AdminETLProcedureList.class, Views.UserETLProcedureList.class})
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy HH:mm", timezone = "UTC")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationDate;

@@ -23,13 +23,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -148,6 +144,28 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(users);
+    }
+
+    @PutMapping("changeEmail")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> changeEmail(
+            @Param(value = "username") String username,
+            @Param(value = "newEmail") String newEmail)
+    {
+
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(User.class, "username", username));
+        user.setEmail(newEmail);
+        user = userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+
+    @GetMapping("user")
+    @PreAuthorize("hasRole('USER')")
+    @JsonView(Views.VisitingUser.class)
+    public ResponseEntity<?> getUserInfo(@Param(value = "username") String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException(User.class, "username", username));
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
 }

@@ -104,6 +104,66 @@ public class ETLController {
     }
 
 
+    @Operation(summary = "Retrieve most recent ETL procedures of a given user")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Retrieves most recent ETL procedures which user has access to and are not deleted",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ETL.class))
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            )
+    })
+    @GetMapping("/recent_procedures")
+    @JsonView(Views.RecentETLProcedureList.class)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getMostRecentETLs(@Param("username") String username) {
+        logger.info("ETL CONTROLLER - Requesting most recent ETL procedures of user " + username);
+
+        List<ETL> response = etlService.getRecentProcedures(username);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+
+    @Operation(summary = "Retrieve ETL procedures with a user")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Retrieves ETL procedures shared between two users",
+                    content = { @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ETL.class))
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content
+            )
+    })
+    @GetMapping("/shared_procedures")
+    @JsonView(Views.RecentETLProcedureList.class)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getETLProcedureWithUser(
+            @Param(value = "username") String username,
+            @Param(value = "otherUser") String otherUser
+            ) {
+        logger.info(String.format("ETL CONTROLLER - Requesting ETL procedures shared between user %s and %s", username, otherUser));
+        List<ETL> response = etlService.getAllBetweenUsers(username, otherUser);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+
     @Operation(summary = "Retrieve a ETL procedure by its id")
     @ApiResponses(value = {
             @ApiResponse(
@@ -225,7 +285,7 @@ public class ETLController {
     }
 
 
-    @Operation(summary = "Deletes and ETL procedure (only possible if user is ADMIN)")
+    @Operation(summary = "Deletes an ETL procedure (only possible if user is ADMIN)")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",

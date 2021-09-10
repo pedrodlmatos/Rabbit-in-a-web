@@ -24,10 +24,12 @@ postgres | 5432 | 5432
 backend | 8000 | 8100
 frontend | 3000 | 3000
 
+API Documentation: http://localhost:8100/swagger-ui-custom.html
+
 Postgres details:
  - User: `postgres`
  - Password: `postgres`
- - Database name: `hiah`
+ - Database name: `riaw`
 
 
 ## CI/CD Virtual machine

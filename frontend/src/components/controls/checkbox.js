@@ -1,4 +1,4 @@
-import { CheckBox as MCheckBox} from '@material-ui/icons'
+import { CheckBox as MCheckBox } from '@material-ui/icons'
 
 export default function Checkbox(props) {
 

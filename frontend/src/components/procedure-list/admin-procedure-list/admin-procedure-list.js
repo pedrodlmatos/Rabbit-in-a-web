@@ -1,13 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react'
 import {
-    makeStyles, CircularProgress, Paper, Table, TableHead, TableRow, TableBody, Checkbox,
-    TableContainer, withStyles, TableCell, createStyles, TableSortLabel
+  Checkbox,
+  CircularProgress,
+  createStyles,
+  makeStyles,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  withStyles
 } from '@material-ui/core'
-import ETLService from "../../../services/etl-list-service";
-import { CDMVersions } from '../../../services/CDMVersions';
+import ETLService from '../../../services/etl-list-service'
+import { CDMVersions } from '../../../services/CDMVersions'
 import Controls from '../../controls/controls'
 import moment from 'moment'
-
 
 const useStyles = makeStyles(theme => ({
     pageContainer: {

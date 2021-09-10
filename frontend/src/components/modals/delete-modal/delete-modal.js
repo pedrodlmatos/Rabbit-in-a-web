@@ -1,10 +1,4 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    makeStyles,
-    Typography
-} from '@material-ui/core'
+import { Dialog, DialogContent, DialogTitle, makeStyles, Typography } from '@material-ui/core'
 import Controls from '../../controls/controls'
 import CloseIcon from '@material-ui/icons/Close'
 import React from 'react'

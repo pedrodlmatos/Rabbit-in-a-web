@@ -1,5 +1,5 @@
 import React from 'react'
-import { Input, Button, InputLabel, makeStyles } from '@material-ui/core'
+import { Button, Input, InputLabel, makeStyles } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
     fileInput: {

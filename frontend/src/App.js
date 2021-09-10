@@ -1,103 +1,48 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
-import { AppBar, Box, CssBaseline, makeStyles, Menu, MenuItem, Toolbar, Typography } from '@material-ui/core'
-import HomeIcon from '@material-ui/icons/Home';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import PersonAddIcon from '@material-ui/icons/PersonAdd';
-import PersonIcon from '@material-ui/icons/Person';
-import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import './App.css';
-import AuthService from './services/auth-service';
-import Home from "./components/home/home";
-import AdminProcedureList from './components/procedure-list/admin-procedure-list/admin-procedure-list';
-import Procedure from "./components/procedure/procedure";
-import Documentation from "./components/documentation/Documentation";
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import { makeStyles } from '@material-ui/core'
+import HomeIcon from '@material-ui/icons/Home'
+import ExitToAppIcon from '@material-ui/icons/ExitToApp'
+import PersonAddIcon from '@material-ui/icons/PersonAdd'
+import PersonIcon from '@material-ui/icons/Person'
+import './App.css'
+import AuthService from './services/auth-service'
+import Home from './components/home/home'
+import AdminProcedureList from './components/procedure-list/admin-procedure-list/admin-procedure-list'
+import Procedure from './components/procedure/procedure'
+import Documentation from './components/documentation/Documentation'
 import Login from './components/users/login/login'
 import Register from './components/users/register/Register'
 import UserProcedureList from './components/procedure-list/user-procedure-list/user-procedure-list'
 import Instructions from './components/instructions/instructions'
-import Controls from './components/controls/controls'
-import { Container, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap'
-
-
-const drawerWidth = 240;
+import { Nav, Navbar, NavDropdown, Row } from 'react-bootstrap'
+import Profile from './components/users/profile/profile'
 
 const useStyles = makeStyles((theme) => ({
-    appBar: {
-        position: 'relative',
-        zIndex: theme.zIndex.drawer + 1,
-        width: `calc(100%-${drawerWidth}px)`,
-        backgroundColor: 'black'
+    navbar: {
+        zIndex: 1,
+        position: 'relative'
     },
     icon: {
         marginRight: theme.spacing(1),
-        bottom: "2px",
+        bottom: '2px',
         position: 'relative'
     },
     link:{
         marginLeft: theme.spacing(1),
         marginRight: theme.spacing(2),
-        color: "white",
+        color: 'white',
         textDecoration: 'none',
         //alignItems: 'center',
         '&:focus, &:hover, &:visited, &:link, &:active': {
-            color: "white",
+            color: 'white',
             textDecoration: 'none'
         }
-    },
-    /*
-    appBar: {
-        position: 'relative',
-        zIndex: theme.zIndex.drawer + 1,
-        width: `calc(100%-${drawerWidth}px)`,
-        backgroundColor: "black"
-    },
-    wrapIcon: {
-        verticalAlign: 'middle',
-        display: 'inline-flex'
-    },
-    link:{
-        marginLeft: theme.spacing(1),
-        marginRight: theme.spacing(2),
-        color: "white",
-        textDecoration: 'none',
-        //alignItems: 'center',
-        '&:focus, &:hover, &:visited, &:link, &:active': {
-            color: "white",
-            textDecoration: 'none'
-        }
-    },
-    dropdown: {
-        background: 'black',
-        borderColor: 'black',
-        '&:focus, &:hover, &:visited, &:link, &:active': {
-            background: 'black',
-            borderColor: 'black'
-        }
-    },
-    dropdownLink:{
-        color: "black",
-        textDecoration: 'none',
-        //alignItems: 'center',
-        '&:focus, &:hover, &:visited, &:link, &:active': {
-            color: "black",
-            textDecoration: 'none'
-        }
-    },
-    icon: {
-        marginRight: theme.spacing(1),
-        bottom: "2px",
-        position: 'relative'
-    },
-    text: {
-        marginTop: theme.spacing(0.5)
     }
-    */
 }))
 
-export default function App() {
+export default function App () {
     const classes = useStyles();
-    const [anchorEl, setAnchorEl] = useState(null);
     const [showAdminBoard, setShowAdminBoard] = useState(false);
     const [currentUser, setCurrentUser] = useState(undefined);
 
@@ -144,7 +89,7 @@ export default function App() {
                     {currentUser ? (
                         <Row>
                             <Nav.Item className="ml-auto">
-                                <Nav.Link href="#">
+                                <Nav.Link href={"/profile/" + currentUser.username}>
                                     <PersonIcon className={classes.icon}/>
                                     {currentUser.username}
                                 </Nav.Link>
@@ -184,6 +129,7 @@ export default function App() {
                     <Route path='/all' component={AdminProcedureList} />
                     <Route path="/procedures" component={UserProcedureList} />
                     <Route path='/procedure/:id' component={Procedure} />
+                    <Route path='/profile/:username' component={Profile} />
                     <Route exact path='/documentation' component={Documentation} />
                     <Route exact path='/instructions' component={Instructions} />
                 </Switch>

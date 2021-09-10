@@ -1,6 +1,6 @@
-import axios from 'axios';
-import authHeader from './auth-header';
-import {environment} from "./environment";
+import axios from 'axios'
+import authHeader from './auth-header'
+import { environment } from './environment'
 
 const API_URL = environment.TABLE_MAP_URL;
 

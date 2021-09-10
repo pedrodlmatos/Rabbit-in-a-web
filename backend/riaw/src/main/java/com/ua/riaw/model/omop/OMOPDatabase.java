@@ -29,6 +29,7 @@ public class OMOPDatabase {
     @JsonView({
             Views.AdminETLProcedureList.class,
             Views.UserETLProcedureList.class,
+            Views.RecentETLProcedureList.class,
             Views.ETLProcedure.class
     })
     @Expose

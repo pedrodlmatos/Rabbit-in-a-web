@@ -1,15 +1,9 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle, Divider,
-    makeStyles, NoSsr,
-    Typography
-} from '@material-ui/core'
-import useAutocomplete from '@material-ui/lab/useAutocomplete';
+import { Dialog, DialogContent, DialogTitle, Divider, makeStyles, NoSsr, Typography } from '@material-ui/core'
+import useAutocomplete from '@material-ui/lab/useAutocomplete'
 import CloseIcon from '@material-ui/icons/Close'
 import CheckIcon from '@material-ui/icons/Check'
 import React, { useRef, useState } from 'react'
-import Controls from '../../controls/controls';
+import Controls from '../../controls/controls'
 import styled from 'styled-components'
 import AuthService from '../../../services/auth-service'
 
