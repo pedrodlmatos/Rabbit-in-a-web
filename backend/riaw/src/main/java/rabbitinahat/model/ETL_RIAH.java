@@ -1,9 +1,9 @@
 /* Adapted from ETL (rabbit-in-a-hat) */
 package rabbitinahat.model;
 
-import com.ua.riaw.model.ETL;
-import com.ua.riaw.model.FieldMapping;
-import com.ua.riaw.model.TableMapping;
+import com.ua.riaw.etlProcedure.ETL;
+import com.ua.riaw.etlProcedure.fieldMapping.FieldMapping;
+import com.ua.riaw.etlProcedure.tableMapping.TableMapping;
 
 import java.util.*;
 

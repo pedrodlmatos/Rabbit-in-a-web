@@ -1,10 +1,10 @@
 /* Adapted from Field (rabbit-core) */
 package rabbitinahat.model;
 
-import com.ua.riaw.model.ehr.EHRField;
-import com.ua.riaw.model.ehr.ValueCount;
-import com.ua.riaw.model.omop.Concept;
-import com.ua.riaw.model.omop.OMOPField;
+import com.ua.riaw.etlProcedure.source.ehrField.EHRField;
+import com.ua.riaw.etlProcedure.source.valueCounts.ValueCount;
+import com.ua.riaw.etlProcedure.target.concept.Concept;
+import com.ua.riaw.etlProcedure.target.omopField.OMOPField;
 import rabbitcore.riah_datamodel.ConceptsMap;
 
 import java.util.ArrayList;

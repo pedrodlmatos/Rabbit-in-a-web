@@ -1,10 +1,10 @@
 /* Adapted from Table (rabbit-core) */
 package rabbitinahat.model;
 
-import com.ua.riaw.model.ehr.EHRField;
-import com.ua.riaw.model.ehr.EHRTable;
-import com.ua.riaw.model.omop.OMOPField;
-import com.ua.riaw.model.omop.OMOPTable;
+import com.ua.riaw.etlProcedure.source.ehrField.EHRField;
+import com.ua.riaw.etlProcedure.source.ehrTable.EHRTable;
+import com.ua.riaw.etlProcedure.target.omopField.OMOPField;
+import com.ua.riaw.etlProcedure.target.omopTable.OMOPTable;
 
 import java.util.ArrayList;
 import java.util.List;

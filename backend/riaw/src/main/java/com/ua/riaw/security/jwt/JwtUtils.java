@@ -1,6 +1,6 @@
 package com.ua.riaw.security.jwt;
 
-import com.ua.riaw.security.services.UserDetailsImpl;
+import com.ua.riaw.user.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

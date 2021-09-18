@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { Redirect } from 'react-router-dom'
 import AuthService from '../../../services/auth-service'
 import ETLService from '../../../services/etl-list-service'
+import UserService from '../../../services/user-service'
 import Controls from '../../controls/controls'
 import EditIcon from '@material-ui/icons/Edit'
 import SaveIcon from '@material-ui/icons/Save'
 import {
     Grid,
+    Checkbox,
     makeStyles,
     Paper,
     Table,
@@ -58,34 +60,36 @@ const StyledTableRow = withStyles((theme) => ({
 export default function Profile() {
     const classes = useStyles();
     const initialUserValues = { username: "" }
-
     const [ready, setReady] = useState(false);
     const [redirect, setRedirect] = useState(null);
-    const [currentUser, setCurrentUser] = useState(initialUserValues);
-
-    // when search own profile
-    const [ownProfile, setOwnProfile] = useState(false);
-    const [procedures, setProcedures] = useState([]);
-
-    // when visiting other user's profile
-    const [userProfile, setUserProfile] = useState({});
-
+    const [procedures, setProcedures] = useState([]);                                   // list of procedures
+    const [loggedUser, setLoggedUser] = useState(initialUserValues);                              // logged user
+    const [loggedAdmin, setLoggedAdmin] = useState(false);                              // if logged user is ADMIN
+    const [ownProfile, setOwnProfile] = useState(false);                                  // when search own profile
+    const [visitedUser, setVisitedUser] = useState({});                                 // when visiting other user's profile
+    const [visitedAdmin, setVisitedAdmin] = useState(false);                            // if visited user is admin
     const [disableChangeUsername, setDisableChangeUsername] = useState(true);           // flag to disable/enable username change
     const [disableChangeEmail, setDisableChangeEmail] = useState(true);                 // flag to disable/enable email change
+
+    const columns = React.useMemo(() => [
+        { Header: 'Name', accessor: 'name', sorted: 'false', size: '25%'},
+        { Header: 'EHR Database', accessor: 'ehrDatabase.databaseName', sorted: 'false', size: '25%'},
+        { Header: 'OMOP CDM', accessor: 'omopDatabase.databaseName', sorted: 'false', size: '25%'},
+        { Header: '', accessor: 'access', sorted: 'false', size: '25%'}
+    ], [])
 
     useEffect(() => {
         // get logged user
         const currentUser = AuthService.getCurrentUser();
-
-        if (!currentUser) {
+        if (!currentUser)
             setRedirect("/home");
-        }
-        setCurrentUser(currentUser);
+        setLoggedUser(currentUser);
+        setLoggedAdmin(currentUser.roles.includes("ROLE_ADMIN"));
 
-        // get other user's profile
+        // get username by url
         const username = window.location.pathname.toString().replace("/profile/", "");
         if (username === currentUser.username) {
-            // logged user is the same as the searched
+            // logged user is the same as the visited
             setOwnProfile(true);
             // get most recent ETL procedures
             ETLService.getRecentETLs()
@@ -93,9 +97,13 @@ export default function Profile() {
                 .catch(error => console.log(error))
         } else {
             // logged user visits other user's profile
-            AuthService
+            UserService
                 .getVisitedProfile(username)
-                .then(response => setUserProfile(response.data))
+                .then(response => {
+                    console.log(response.data);
+                    setVisitedUser(response.data);
+                    setVisitedAdmin(response.data.roles.some(role => role['name'] === "ROLE_ADMIN"))
+                })
                 .catch(error => console.log(error));
 
             // get shared ETL procedures
@@ -104,7 +112,6 @@ export default function Profile() {
                 .then(response => setProcedures(response.data))
                 .catch(error => console.log(error));
         }
-
         setReady(true);
     }, [])
 
@@ -119,14 +126,30 @@ export default function Profile() {
         window.location.href = '/procedure/' + id;
     }
 
+
     const changeEmail = () => {
-        AuthService
-            .changeUserEmail(currentUser.email)
+        UserService
+            .changeUserEmail(loggedUser.email)
             .then(response => {
-                setCurrentUser(response.data);
+                setLoggedUser(response.data);
                 setDisableChangeEmail(true);
             })
             .catch(error => console.log(error))
+    }
+
+
+    /**
+     *
+     */
+
+    const makeVisitedUserAdmin = () => {
+        UserService
+            .addPrivileges(loggedUser.username, visitedUser.username)
+            .then(response => {
+                setVisitedUser(response.data);
+                setVisitedAdmin(true)
+            })
+            .catch(error => console.log(error));
     }
 
 
@@ -139,11 +162,12 @@ export default function Profile() {
             {ready && (
                 <div>
                     {ownProfile ? (
+                        /* when visiting own profile */
                         <Grid container>
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <header>
                                     <h3>
-                                        <strong>{currentUser.username}</strong> Profile
+                                        <strong>{loggedUser.username}</strong> Profile
                                     </h3>
                                 </header>
 
@@ -157,7 +181,7 @@ export default function Profile() {
                                         <Controls.Input
                                             label="Username"
                                             placeholder="Username"
-                                            value={currentUser.username}
+                                            value={loggedUser.username}
                                             size="small"
                                             disabled={disableChangeUsername}
                                             //onChange={e => setEtl({...etl, name: e.target.value})}
@@ -184,7 +208,7 @@ export default function Profile() {
                                         <Controls.Input
                                             label="Username"
                                             placeholder="Username"
-                                            value={currentUser.email}
+                                            value={loggedUser.email}
                                             size="small"
                                             disabled={disableChangeEmail}
                                             // onChange={e => setCurrentUser({...currentUser, email: e.target.value})}
@@ -202,65 +226,32 @@ export default function Profile() {
                                         )}
                                     </Grid>
                                 </Grid>
+
+                                {loggedAdmin && (
+                                    <p>
+                                        <strong>Administrator: </strong>
+                                        <Checkbox checked={loggedAdmin} disabled={true}/>
+                                    </p>
+                                )}
                             </Grid>
 
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <TableContainer className={classes.table} component={Paper}>
-                                    <Table stickyHeader aria-label="customized table">
-                                        <colgroup>
-                                            <col style={{ width: "20%"}} />{/* ETL procedure name */}
-                                            <col style={{ width: "16%"}} />{/* EHR database name */}
-                                            <col style={{ width: "16%"}} />{/* OMOP CDM version */}
-                                            <col style={{ width: "16%"}} />{/* Access button */}
-                                        </colgroup>
-                                        <TableHead>
-                                            <TableRow>
-                                                <StyledTableCell align="left">Name</StyledTableCell>
-
-                                                <StyledTableCell align="left">EHR Database</StyledTableCell>
-
-                                                <StyledTableCell align="left">OMOP CDM</StyledTableCell>
-
-                                                <StyledTableCell />
-                                            </TableRow>
-                                        </TableHead>
-
-                                        <TableBody>
-                                            {procedures.map((procedure, i) => {
-                                                return(
-                                                    <StyledTableRow key={i}>
-                                                        <StyledTableCell component="th" scope="row">
-                                                            {procedure.name}
-                                                        </StyledTableCell>
-
-                                                        <StyledTableCell component="th" scope="row" align="left">
-                                                            {procedure.ehrDatabase.databaseName}
-                                                        </StyledTableCell>
-
-                                                        <StyledTableCell component="th" scope="row" align="left">
-                                                            {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
-                                                        </StyledTableCell>
-
-                                                        <StyledTableCell component="th" scope="row" align="center">
-                                                            <Controls.Button
-                                                                text="Access"
-                                                                onClick={() => accessETLProcedure(procedure.id)}
-                                                            />
-                                                        </StyledTableCell>
-                                                    </StyledTableRow>
-                                                )
-                                            })}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
+                                <h5>Most recent updates</h5>
+                                <br />
+                                <Controls.Table
+                                    columns={columns}
+                                    data={procedures}
+                                    onAccess={accessETLProcedure}
+                                />
                             </Grid>
                         </Grid>
                     ) : (
+                        /* When visiting other user's profile */
                         <Grid container>
                             <Grid item xs={6} sm={6} md={6} lg={6}>
                                 <header>
                                     <h3>
-                                        <strong>{currentUser.username}</strong> Profile
+                                        <strong>{visitedUser.username}</strong> Profile
                                     </h3>
                                 </header>
 
@@ -270,7 +261,7 @@ export default function Profile() {
                                         <h5><strong>Username:</strong></h5>
                                     </Grid>
                                     <Grid item>
-                                        {userProfile.username}
+                                        {visitedUser.username}
                                     </Grid>
                                 </Grid>
 
@@ -281,62 +272,30 @@ export default function Profile() {
                                     </Grid>
 
                                     <Grid item>
-                                        {userProfile.email}
+                                        {visitedUser.email}
                                     </Grid>
                                 </Grid>
+
+                                {loggedAdmin && (
+                                    <p>
+                                        <strong>Administrator: </strong>
+                                        <Checkbox
+                                            checked={visitedAdmin}
+                                            disabled={visitedAdmin}
+                                            onClick={() => makeVisitedUserAdmin()}
+                                        />
+                                    </p>
+                                )}
                             </Grid>
 
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <h3>ETL procedures with {userProfile.username}</h3>
+                                <h3>ETL procedures with {visitedUser.username}</h3>
                                 <br />
-                                <TableContainer className={classes.table} component={Paper}>
-                                    <Table stickyHeader aria-label="customized table">
-                                        <colgroup>
-                                            <col style={{ width: "20%"}} />{/* ETL procedure name */}
-                                            <col style={{ width: "16%"}} />{/* EHR database name */}
-                                            <col style={{ width: "16%"}} />{/* OMOP CDM version */}
-                                            <col style={{ width: "16%"}} />{/* Access button */}
-                                        </colgroup>
-                                        <TableHead>
-                                            <TableRow>
-                                                <StyledTableCell align="left">Name</StyledTableCell>
-
-                                                <StyledTableCell align="left">EHR Database</StyledTableCell>
-
-                                                <StyledTableCell align="left">OMOP CDM</StyledTableCell>
-
-                                                <StyledTableCell />
-                                            </TableRow>
-                                        </TableHead>
-
-                                        <TableBody>
-                                            {procedures.map((procedure, i) => {
-                                                return(
-                                                    <StyledTableRow key={i}>
-                                                        <StyledTableCell component="th" scope="row">
-                                                            {procedure.name}
-                                                        </StyledTableCell>
-
-                                                        <StyledTableCell component="th" scope="row" align="left">
-                                                            {procedure.ehrDatabase.databaseName}
-                                                        </StyledTableCell>
-
-                                                        <StyledTableCell component="th" scope="row" align="left">
-                                                            {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
-                                                        </StyledTableCell>
-
-                                                        <StyledTableCell component="th" scope="row" align="center">
-                                                            <Controls.Button
-                                                                text="Access"
-                                                                onClick={() => accessETLProcedure(procedure.id)}
-                                                            />
-                                                        </StyledTableCell>
-                                                    </StyledTableRow>
-                                                )
-                                            })}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
+                                <Controls.Table
+                                    columns={columns}
+                                    data={procedures}
+                                    onAccess={accessETLProcedure}
+                                />
                             </Grid>
                         </Grid>
                     )}

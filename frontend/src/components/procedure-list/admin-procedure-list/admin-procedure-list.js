@@ -375,7 +375,11 @@ export default function AdminProcedureList() {
 
                                             <StyledTableCell component="th" scope="row" align="center">
                                                 {procedure.users.map((user, i) => {
-                                                    return(<div key={i}>{user.username}</div>)
+                                                    return(
+                                                        <div key={i}>
+                                                            <a href={"/profile/" + user.username}>{user.username}</a>
+                                                        </div>
+                                                    )
                                                 })}
                                             </StyledTableCell>
 

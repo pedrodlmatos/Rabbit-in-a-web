@@ -1,7 +1,7 @@
 package com.ua.riaw;
 
-import com.ua.riaw.security.services.UserDetailsServiceImpl;
-import com.ua.riaw.service.role.RoleService;
+import com.ua.riaw.user.UserDetailsServiceImpl;
+import com.ua.riaw.user.role.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

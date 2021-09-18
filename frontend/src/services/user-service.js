@@ -1,25 +1,50 @@
 import axios from 'axios'
 import authHeader from './auth-header'
+import { environment } from './environment'
 
-const API_URL = 'http://localhost:8081/api/test/';
+const API_URL = environment.USER_URL;
 
 class UserService {
 
-    getPublicContent() {
-        return axios.get(API_URL + 'all');
-    }
+	getListOfUsers() {
+		const username = JSON.parse(localStorage.getItem('user')).username;
+		return axios.get(
+			API_URL + "other_users",
+			{ headers: authHeader(), params: { username: username } }
+		);
+	}
 
-    getUserBoard() {
-        return axios.get(API_URL + 'user', { headers: authHeader() });
-    }
+	changeUserEmail (newEmail) {
+		const username = JSON.parse(localStorage.getItem('user')).username;
+		return axios.put(
+			API_URL + "changeEmail",
+			null,
+			{ headers: authHeader(), params: { username: username, newEmail: newEmail}}
+		)
+	}
 
-    getModeratorBoard() {
-        return axios.get(API_URL + 'moderator', { headers: authHeader() });
-    }
+	getVisitedProfile(username) {
+		return axios.get(
+			API_URL + "user",
+			{ headers: authHeader(), params: { username: username } }
+		)
+	}
 
-    getAdminBoard() {
-        return axios.get(API_URL + 'admin', { headers: authHeader() });
-    }
+	
+	/**
+	 *
+	 * @param loggedUsername
+	 * @param visitedUsername
+	 * @returns {Promise<AxiosResponse<any>>}
+	 */
+
+	addPrivileges (loggedUsername, visitedUsername) {
+		return axios.put(
+			API_URL + "add_privilege",
+			null,
+			{ headers: authHeader(), params: { loggedUsername: loggedUsername, visitedUsername: visitedUsername}}
+		)
+	}
 }
 
 export default new UserService();

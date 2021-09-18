@@ -9,6 +9,7 @@ import TooltipBox from './tooltip-box'
 import ElementBox from './elementBox'
 import DownloadButton from './download-button'
 import Checkbox from './checkbox'
+import Table from './table'
 
 const Controls = {
     FileInput,
@@ -21,7 +22,8 @@ const Controls = {
     TooltipBox,
     ElementBox,
     DownloadButton,
-    Checkbox
+    Checkbox,
+    Table
 }
 
 export default Controls;
