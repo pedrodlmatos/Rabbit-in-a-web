@@ -9,6 +9,10 @@ public class Views {
     public static class UserList {}
 
 
+
+    public static class AllUsers {}
+
+
     /**
      *
      */

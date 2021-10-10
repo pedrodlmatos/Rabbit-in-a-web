@@ -2,10 +2,6 @@
   font-family: 'Montserrat', sans-serif;
 }
 
-label {
-  display: block;
-}
-
 .custom-dropdown {
   background: inherit;
   color: white;

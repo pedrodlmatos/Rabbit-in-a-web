@@ -1,24 +1,18 @@
-import { Grid, makeStyles } from '@material-ui/core'
+import { Grid } from '@material-ui/core'
 import Controls from '../controls/controls'
 import TableOperations from './table-operations'
 import React, { useState } from 'react'
 import Xarrow from 'react-xarrows'
 import MappingOperations from '../utilities/mapping-operations'
 
-const useStyles = makeStyles((theme) => ({
-    tableDetails: {
-        //marginLeft: theme.spacing(-20)
-    },
-}))
-
 export default function TableMappingPanel(props) {
 
-    const classes = useStyles();
     const {
         ehrTables,
         omopTables,
         tableMappings,
         selectTable,
+        updateTableMappings,
         createTableMapping,
         showTableMapping,
         openFieldMappingPanel
@@ -26,7 +20,7 @@ export default function TableMappingPanel(props) {
 
     const [selectedTable, setSelectedTable] = useState({});
     const [sourceSelected, setSourceSelected] = useState(false);
-
+    const [targetSelected, setTargetSelected] = useState(false);
     const [selectedTableMapping, setSelectedTableMapping] = useState({});
 
     /**
@@ -44,6 +38,7 @@ export default function TableMappingPanel(props) {
         showTableMapping(false, {});
         if (Object.keys(selectedTable).length === 0) {
             // all tables are unselected -> select table
+            setTargetSelected(false);
             setSelectedTable(ehrTable);
             setSourceSelected(true);
             MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);                // change color of mappings that comes from the selected table
@@ -52,12 +47,14 @@ export default function TableMappingPanel(props) {
             // select the same table -> unselect
             MappingOperations.resetMappingColor(tableMappings);                                 // change color of arrows to grey
             setSourceSelected(false);                                                     // unselect
+            setTargetSelected(false);
             setSelectedTable({});
             selectTable(false, {}, [], false);                                                  // update parent
         } else {
             // select any other source table
             MappingOperations.resetMappingColor(tableMappings);                                 // change color of arrows to grey
             setSelectedTable(ehrTable);                                                         // change selected table
+            setTargetSelected(false);
             setSourceSelected(true);
             MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);                // change color of mappings that comes from the selected table
             selectTable(true, ehrTable, defineData(ehrTable), true)                             // change content of fields table in parent
@@ -79,16 +76,29 @@ export default function TableMappingPanel(props) {
     const selectOMOPTable = (omopTable) => {
         // clean state
         showTableMapping(false, {});
+
+        // change order of table mappings
+        let newTableMappings = [];
+        let others = [];
+        tableMappings.forEach(item => {
+            if (item.end.id === omopTable.id) newTableMappings.push(item)
+            else others.push(item)
+        })
+        newTableMappings = others.concat(newTableMappings)
+        updateTableMappings(newTableMappings)
+
         if (Object.keys(selectedTable).length === 0) {
             // no table is selected
             MappingOperations.selectMappingsToTarget(tableMappings, omopTable);          // change color of mappings that goes to the selected table
             setSelectedTable(omopTable);                                                 // change select table information
             setSourceSelected(false);
+            setTargetSelected(true);
             selectTable(true, omopTable, defineData(omopTable), false);                  // change content of fields table
         } else if (selectedTable === omopTable) {
             // select the same table -> unselect
             MappingOperations.resetMappingColor(tableMappings);                          // change color of arrows to grey
             setSourceSelected(false);
+            setTargetSelected(false);
             setSelectedTable({});                                                  // unselect
             selectTable(false, {}, {}, false);
         } else if (sourceSelected) {
@@ -105,6 +115,7 @@ export default function TableMappingPanel(props) {
             MappingOperations.resetMappingColor(tableMappings);                            // change color of arrows to grey
             setSelectedTable(omopTable);                                                   // change select table information
             setSourceSelected(false);
+            setTargetSelected(true);
             MappingOperations.selectMappingsToTarget(tableMappings, omopTable);            // change color of mappings that comes from the selected table
             selectTable(true, omopTable, defineData(omopTable), false);                    // change content of fields table
         }
@@ -120,8 +131,10 @@ export default function TableMappingPanel(props) {
     const defineData = table => {
         let data = [];
         table.fields.forEach(element => {
+            let name = element.name
+            if (!sourceSelected && !element.isNullable) name = "*" + name
             data.push({
-                field: element.name,
+                field: name,
                 type: element.type,
                 description: element.description
             })
@@ -205,7 +218,7 @@ export default function TableMappingPanel(props) {
                             clicked={item.id === selectedTable.id}
                             help="Select first an EHR table and then an OMOP CDM table"
                             position="right-end"
-                            color={item.stem ? "#A000A0" : "#53ECEC"}
+                            color={TableOperations.defineTargetTableColor(targetSelected, selectedTable, item)}
                             border="#000000"
                             handleSelection={selectOMOPTable}
                             createMapping={createTableMapping}
@@ -222,8 +235,9 @@ export default function TableMappingPanel(props) {
                         startAnchor="right"
                         endAnchor="left"
                         color={ar.color}
-                        strokeWidth={7.5}
+                        strokeWidth={6}
                         curveness={0.5}
+                        headSize={3}
                         passProps={{
                             onClick: () => selectTableMapping(ar),
                             onDoubleClick: () => openFieldMappingPanel(ar)

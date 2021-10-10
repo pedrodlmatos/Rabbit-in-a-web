@@ -1,9 +1,19 @@
 package com.ua.riaw.user;
 
+import com.ua.riaw.etlProcedure.ETL;
+import com.ua.riaw.etlProcedure.ETLService;
+import com.ua.riaw.payload.request.LoginRequest;
+import com.ua.riaw.payload.response.JwtResponse;
+import com.ua.riaw.security.jwt.JwtUtils;
 import com.ua.riaw.user.role.Role;
 import com.ua.riaw.user.role.RoleEnum;
 import com.ua.riaw.user.role.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -24,7 +35,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     RoleRepository roleRepository;
 
     @Autowired
+    ETLService etlService;
+
+    @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Override
     @Transactional
@@ -37,24 +57,29 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
     /**
-     * Creates a default user
+     * Creates 3 default users
      */
 
     public void createDefaultUser () {
-        if (!userRepository.findByUsername("user123").isPresent()) {
-            User user = new User(
-                    "user123",
-                    "user123@mail.com",
-                    encoder.encode("user123")
-            );
-            Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElse(null);
-            List<Role> roles = new ArrayList<>();
+        for (int i = 1; i <= 3; i++) {
+            String username = "user00" + i;
+            String email = username.concat("@mail.com");
 
-            if (userRole != null) {
-                roles.add(userRole);
-                user.setRoles(roles);
+            if (!(userRepository.findByUsername(username).isPresent() || userRepository.findByEmail(email).isPresent())) {
+                User user = new User(
+                        username,
+                        email,
+                        encoder.encode(username)
+                );
+                Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElse(null);
+                List<Role> roles = new ArrayList<>();
+
+                if (userRole != null) {
+                    roles.add(userRole);
+                    user.setRoles(roles);
+                }
+                userRepository.save(user);
             }
-            userRepository.save(user);
         }
     }
 
@@ -64,11 +89,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
 
     public void createDefaultAdmin() {
-        if (!userRepository.findByUsername("admin123").isPresent()) {
+        String username = "admin";
+        String email = username.concat("@mail.com");
+        if (!userRepository.findByUsername(username).isPresent()) {
             User admin = new User(
-                    "admin123",
-                    "admin123@gmail.com",
-                    encoder.encode("admin123")
+                    username,
+                    email,
+                    encoder.encode(username)
             );
             List<Role> roles = new ArrayList<>(roleRepository.findAll());
             admin.setRoles(roles);
@@ -103,5 +130,43 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         return false;
+    }
+
+
+    /**
+     * Deletes user account
+     *
+     * @param user user to remove
+     */
+
+    public void deleteAccount(User user) {
+        List<ETL> proceduresToRemove = new ArrayList<>();
+        for (ETL etl : user.getEtls()) {
+            if (etl.getUsers().size() == 1) {
+                // remove etls if user is the only collaborator
+                proceduresToRemove.add(etl);
+            } else if (etl.getUsers().size() >= 2) {
+                // remove collaborator from list of collaborators but keep procedure
+                etlService.removeETLCollaborator(user, etl.getId());
+            }
+        }
+
+        for (ETL etl : proceduresToRemove) etlService.deleteETLProcedure(etl.getId());
+        user.setEtls(new ArrayList<>());
+        user = userRepository.save(user);
+        userRepository.delete(user);
+    }
+
+
+    public JwtResponse generateNewToken(User user) {
+        String token = jwtUtils.generateNewJetToken(user.getUsername());
+
+        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+
+        List<String> roles = userDetails.getAuthorities().stream().map(
+                GrantedAuthority::getAuthority
+        ).collect(Collectors.toList());
+
+        return new JwtResponse(token, user.getId(), user.getUsername(), user.getEmail(), roles);
     }
 }

@@ -22,8 +22,8 @@ export default function OMOPTableDetails(props) {
     return(
         <div>
             <Grid container>
-                <Grid item xs={9} sm={9} md={9} lg={9}>
-                    <h6><strong>Table: </strong>{ table.name}</h6>
+                <Grid style={{position: 'relative'}} item xs={9} sm={9} md={9} lg={9}>
+                    <h6 style={{position:'absolute', bottom: 0}}><strong>Table: </strong>{table.name}</h6>
                 </Grid>
 
                 <Grid item xs={3} sm={3} md={3} lg={3}>
@@ -37,23 +37,32 @@ export default function OMOPTableDetails(props) {
                 </Grid>
             </Grid>
 
-            <InfoTable columns={columns} data={data} />
+            <Grid container>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <br/>
+                    <InfoTable columns={columns} data={data} />
+                    <br/>
+                    <Controls.Input
+                        value={ table.comment === null ? "" : table.comment }
+                        name="comment"
+                        fullWidth={true}
+                        label="Comment"
+                        placeholder="Edit table comment"
+                        rows={5}
+                        onChange={onChange}
+                    />
+                    <Controls.Button
+                        className={classes.showButton}
+                        disabled={disabled}
+                        text="Save"
+                        onClick={save}
+                    />
+                </Grid>
+            </Grid>
 
-            <Controls.Input
-                value={ table.comment === null ? "" : table.comment }
-                name="comment"
-                fullWidth={true}
-                label="Comment"
-                placeholder="Edit table comment"
-                rows={5}
-                onChange={onChange}
-            />
-            <Controls.Button
-                className={classes.showButton}
-                disabled={disabled}
-                text="Save"
-                onClick={save}
-            />
+
+
+
         </div>
     )
 }   

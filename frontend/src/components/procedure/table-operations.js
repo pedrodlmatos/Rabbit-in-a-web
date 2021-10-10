@@ -21,6 +21,27 @@ class TableOperations {
 
 
     /**
+     * Defines the color of a table from the EHR database according to table selection
+     *  - If no table is selected -> color = orange
+     *  - If a table from the OMOP CDM is selected -> color = orange
+     *  - If the table from the EHR database is selected:
+     *    - selected table -> color = orange
+     *    - other tables -> color = light orange
+     *
+     * @param targetSelected if a table from EHR database is selected
+     * @param selectedTable previous selected table
+     * @param table new selected table
+     */
+
+    defineTargetTableColor = (targetSelected, selectedTable, table) => {
+        if (table.stem) return "#A000A0";                                                       // stem table
+        if (targetSelected && selectedTable.id !== table.id) return "rgb(20,134,215, 0.6)";       // unselected source table (when a source table is selected)
+        else return "rgb(20,134,215)";                                                     // selected source source or when none is selected
+    }
+
+
+
+    /**
      * Verifies if there is a stem table
      *
      * @returns {boolean}

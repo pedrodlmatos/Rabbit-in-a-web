@@ -6,6 +6,7 @@
 
 package com.ua.riaw.user;
 
+import com.ua.riaw.etlProcedure.ETLController;
 import com.ua.riaw.payload.request.LoginRequest;
 import com.ua.riaw.payload.request.SignupRequest;
 import com.ua.riaw.payload.response.JwtResponse;
@@ -17,12 +18,15 @@ import com.ua.riaw.user.role.RoleRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +57,8 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
 
     @Operation(summary = "User signs up in the system")
     @ApiResponses(value = {
@@ -68,6 +74,7 @@ public class AuthController {
     })
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+        logger.info("AUTH CONTROLLER - Register user");
 
         /* user name already exists */
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
@@ -132,6 +139,8 @@ public class AuthController {
     })
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        logger.info("AUTH CONTROLLER - Sign in user");
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
         );
@@ -143,7 +152,7 @@ public class AuthController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         List<String> roles = userDetails.getAuthorities().stream().map(
-                item -> item.getAuthority()
+                GrantedAuthority::getAuthority
         ).collect(Collectors.toList());
 
         return new ResponseEntity<>(

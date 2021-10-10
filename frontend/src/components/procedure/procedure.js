@@ -22,10 +22,9 @@ import TableOperations from './table-operations'
 import MappingOperations from '../utilities/mapping-operations'
 import FilesMethods from './files-methods'
 import ETLOperations from './etl-operations'
-import { CDMVersions } from '../../services/CDMVersions'
+import { CDMVersions } from '../utilities/CDMVersions'
 import Controls from '../controls/controls'
 import InviteCollaboratorModal from '../modals/collaborators/manage-collaborator'
-import DeleteModal from '../modals/delete-modal/delete-modal'
 import TableMappingPanel from './table-mapping-panel'
 import EHRTableDetails from './ehr/ehr-table-details'
 import OMOPTableDetails from './omop/omop-table-details'
@@ -853,7 +852,14 @@ export default function Procedure() {
                                     />
 
                                     <MenuItem style={{color: 'red'}} onClick={() => setShowDeleteModal(true)}>Delete procedure</MenuItem>
-                                    <DeleteModal show={showDeleteModal} setShow={setShowDeleteModal} deleteProcedure={() => ETLOperations.deleteETLProcedure(etl)}/>
+                                    <Controls.Modal
+                                        show={showDeleteModal}
+                                        setShow={setShowDeleteModal}
+                                        title="Delete ETL procedure"
+                                        onDelete={() => ETLOperations.deleteETLProcedure(etl)}
+                                    >
+                                        Do you want to remove this ETL procedure?
+                                    </Controls.Modal>
                                 </Menu>
                             </Grid>
                         </Grid>
@@ -911,6 +917,7 @@ export default function Procedure() {
                                     omopTables={etl.omopDatabase.tables}
                                     tableMappings={tableMappings}
                                     selectTable={selectTable}
+                                    updateTableMappings={setTableMappings}
                                     createTableMapping={createTableMapping}
                                     showTableMapping={showTableMapping}
                                     openFieldMappingPanel={openFieldMappingPanel}

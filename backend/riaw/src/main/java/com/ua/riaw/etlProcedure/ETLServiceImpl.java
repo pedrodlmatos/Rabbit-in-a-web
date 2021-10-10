@@ -43,10 +43,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -429,6 +426,24 @@ public class ETLServiceImpl implements ETLService {
             etl.setModificationDate(Date.from(Instant.now()));
             return etlRepository.save(etl);
         } else throw new UnauthorizedAccessException(ETL.class, username, etl_id);
+    }
+
+
+    /**
+     * Removes a user from the list of collaborators of an ETL procedure
+     * @param user user to remove
+     * @param etl_id       ETL procedure's id
+     */
+
+    @Override
+    public void removeETLCollaborator(User user, Long etl_id) {
+        ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
+        Set<User> newUsers = new HashSet<>();
+        for (User u : etl.getUsers()) {
+            if (!u.equals(user)) newUsers.add(u);
+        }
+        etl.setUsers(newUsers);
+        etlRepository.save(etl);
     }
 
 

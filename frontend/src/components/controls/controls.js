@@ -10,6 +10,7 @@ import ElementBox from './elementBox'
 import DownloadButton from './download-button'
 import Checkbox from './checkbox'
 import Table from './table'
+import Modal from './modal'
 
 const Controls = {
     FileInput,
@@ -23,7 +24,8 @@ const Controls = {
     ElementBox,
     DownloadButton,
     Checkbox,
-    Table
+    Table,
+	Modal
 }
 
 export default Controls;

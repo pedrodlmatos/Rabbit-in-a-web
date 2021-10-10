@@ -5,10 +5,11 @@ import HomeIcon from '@material-ui/icons/Home'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import PersonAddIcon from '@material-ui/icons/PersonAdd'
 import PersonIcon from '@material-ui/icons/Person'
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount'
 import './App.css'
 import AuthService from './services/auth-service'
 import Home from './components/home/home'
-import AdminProcedureList from './components/procedure-list/admin-procedure-list/admin-procedure-list'
+import AdminProcedureList from './components/admin/admin-procedure-list/admin-procedure-list'
 import Procedure from './components/procedure/procedure'
 import Documentation from './components/documentation/Documentation'
 import Login from './components/users/login/login'
@@ -17,6 +18,7 @@ import UserProcedureList from './components/procedure-list/user-procedure-list/u
 import Instructions from './components/instructions/instructions'
 import { Nav, Navbar, NavDropdown, Row } from 'react-bootstrap'
 import Profile from './components/users/profile/profile'
+import UserList from './components/admin/user-list/user-list'
 
 const useStyles = makeStyles((theme) => ({
     navbar: {
@@ -95,9 +97,12 @@ export default function App () {
 
                             {showAdminBoard && (
                                 <Nav.Item className="mr-auto">
-                                    <NavDropdown title="Admin" id="basic-nav-dropdown">
+                                    <NavDropdown
+                                        title={<span><SupervisorAccountIcon className={classes.icon} />Admin</span>}
+                                        id="basic-nav-dropdown"
+                                    >
                                         <NavDropdown.Item href="/all">Manage ETL Procedures</NavDropdown.Item>
-                                        <NavDropdown.Item href="#">Manage users</NavDropdown.Item>
+                                        <NavDropdown.Item href="/users/all">Manage users</NavDropdown.Item>
                                     </NavDropdown>
                                 </Nav.Item>
                             )}
@@ -142,10 +147,11 @@ export default function App () {
                             <Route exact path="/" component={Home}/>
                             <Route exact path="/login" component={Login}/>
                             <Route exact path="/register" component={Register} />
-                            <Route path='/all' component={AdminProcedureList} />
                             <Route path="/procedures" component={UserProcedureList} />
                             <Route path='/procedure/:id' component={Procedure} />
+                            <Route path='/all' component={AdminProcedureList} />
                             <Route path='/profile/:username' component={Profile} />
+                            <Route path='/users/all' component={UserList} />
                             <Route exact path='/documentation' component={Documentation} />
                             <Route exact path='/instructions' component={Instructions} />
                         </Switch>

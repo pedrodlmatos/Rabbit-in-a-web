@@ -16,7 +16,7 @@ public class Role {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    @JsonView(Views.VisitingUser.class)
+    @JsonView({Views.VisitingUser.class, Views.AllUsers.class})
     private RoleEnum name;
 
 

@@ -149,6 +149,17 @@ public interface ETLService {
 
 
     /**
+     * Removes a user from the list of collaborators of an ETL procedure
+     *  @param user user to remove
+     * @param etl_id ETL procedure's id
+     */
+
+    void removeETLCollaborator(User user, Long etl_id);
+
+
+
+
+    /**
      * Marks an ETL procedure as deleted but doesn't remove it from database
      *
      * @param etl_id ETL procedure's id

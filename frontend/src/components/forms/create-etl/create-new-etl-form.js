@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { CircularProgress, Grid, makeStyles } from '@material-ui/core'
 import Controls from '../../controls/controls'
 import { Form, useForm } from '../use-form'
-import { CDMVersions } from '../../../services/CDMVersions'
+import { CDMVersions } from '../../utilities/CDMVersions'
 
 const useStyles = makeStyles(theme => ({
     element: {
@@ -113,7 +113,7 @@ export default function CreateETLForm(props) {
                 <Grid className={classes.item} item xs={12} sm={6} md={6} lg={6}>
                     <Controls.Input
                         className={classes.element}
-                        label="EHR Name"
+                        label="EHR Database name"
                         placeholder="EHR database name"
                         name="ehrName"
                         error={errors.ehrName}

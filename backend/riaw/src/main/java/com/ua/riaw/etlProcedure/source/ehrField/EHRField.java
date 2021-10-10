@@ -74,6 +74,11 @@ public class EHRField {
     private boolean stem;
 
     @Column(name = "nullable")
+    @JsonView({
+            Views.ETLProcedure.class,
+            Views.TableMapping.class,
+            Views.CreateMapping.class
+    })
     @Expose
     private boolean isNullable;
 

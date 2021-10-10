@@ -5,7 +5,7 @@ import CheckIcon from '@material-ui/icons/Check'
 import React, { useRef, useState } from 'react'
 import Controls from '../../controls/controls'
 import styled from 'styled-components'
-import AuthService from '../../../services/auth-service'
+import UserService from '../../../services/user-service'
 
 const useStyles = makeStyles(theme => ({
     dialogWrapper: {
@@ -202,7 +202,7 @@ export default function InviteCollaboratorModal(props) {
         // reset previous selected
         value = []
 
-        AuthService
+        UserService
             .getListOfUsers()
             .then(response => {
                 let tempUsers = [];

@@ -204,8 +204,9 @@ export default function FieldMappingPanel(props) {
                         startAnchor="right"
                         endAnchor="left"
                         color={complete ? 'black' : 'grey'}
-                        strokeWidth={7.5}
+                        strokeWidth={6}
                         curveness={0.5}
+                        headSize={3}
                     />
                 </Grid>
 
@@ -261,8 +262,9 @@ export default function FieldMappingPanel(props) {
                             startAnchor="right"
                             endAnchor="left"
                             color={ar.color}
-                            strokeWidth={7.5}
+                            strokeWidth={6}
                             curveness={0.5}
+                            headSize={3}
                             passProps={{
                                  onClick: () => selectFieldMapping(ar)
                             }}

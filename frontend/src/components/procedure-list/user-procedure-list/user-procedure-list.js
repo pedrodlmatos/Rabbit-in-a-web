@@ -1,28 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import {
-    CircularProgress, createStyles,
-    Divider,
-    Grid,
-    IconButton,
-    makeStyles,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer, TableHead,
-    TableRow, TableSortLabel, withStyles
-} from '@material-ui/core'
+import { withStyles, makeStyles, createStyles, Divider, CircularProgress, Paper, Grid, IconButton, Table, TableBody,
+    TableCell, TableContainer, TableFooter, TableHead, TableRow, TableSortLabel, TablePagination } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add'
 import AttachFileIcon from '@material-ui/icons/AttachFile'
+import PropTypes from 'prop-types';
 import ETLService from '../../../services/etl-list-service'
 import Controls from '../../controls/controls'
 import CreateETLForm from '../../forms/create-etl/create-new-etl-form'
 import ETLModal from '../../modals/create-etl/etl-modal'
 import CreateETLFromFileForm from '../../forms/create-etl/create-from-file-form'
-import { CDMVersions } from '../../../services/CDMVersions'
-import moment from 'moment'
+import { CDMVersions } from '../../utilities/CDMVersions'
+import TableOperations from '../../utilities/table-operations'
+import TablePaginationActions from '@material-ui/core/TablePagination/TablePaginationActions'
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     pageContainer: {
         margin: theme.spacing(1),
         padding: theme.spacing(1)
@@ -42,7 +33,7 @@ const useStyles = makeStyles(theme => ({
         height: "50px"
     },
     table: {
-        maxHeight: 500,
+        maxHeight: 700,
         minWidth: 700,
         marginTop: theme.spacing(3),
         marginBottom: theme.spacing(5)
@@ -62,7 +53,7 @@ const StyledTableCell = withStyles((theme) => ({
 const StyledTableRow = withStyles((theme) => ({
     root: {
         '&:nth-of-type(odd)': {
-            backgroundColor: theme.palette.action.hover
+            //backgroundColor: theme.palette.action.hover
         }
     }
 }))(TableRow)
@@ -86,19 +77,27 @@ const StyledTableSortLabel = withStyles((theme) =>
     })
 )(TableSortLabel);
 
+TablePaginationActions.propTypes = {
+    count: PropTypes.number.isRequired,
+    onPageChange: PropTypes.func.isRequired,
+    page: PropTypes.number.isRequired,
+    rowsPerPage: PropTypes.number.isRequired,
+};
+
 export default function UserProcedureList() {
 
     const classes = useStyles();
     const [loading, setLoading] = useState(true);
     const [disabled, setDisabled] = useState(false);
     const [procedures, setProcedures] = useState({ });
-    const [sortBy, setSortBy] = useState("omop");
+    const [sortBy, setSortBy] = useState("creationDate");
     const [sortOrder, setSortOrder] = useState("desc");
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [page, setPage] = useState(0);
 
     const [showETLCreationModal, setShowETLCreationModal] = useState(false);
     const [showCreateNewETLModal, setShowCreateNewETLModal] = useState(false);
     const [showCreateETLFromFileModal, setShowCreateETLFromFileModal] = useState(false);
-
 
 
     /**
@@ -107,12 +106,13 @@ export default function UserProcedureList() {
 
     useEffect(() => {
         ETLService.getUserETL().then(response => {
-            setProcedures(response.data);
+            const sortedList = TableOperations.sortData(sortBy, sortOrder, response.data);              /* Sort procedures */
+            setProcedures(sortedList);
             setLoading(false);
         }).catch(response => {
             console.log(response);
         })
-    }, []);
+    }, [sortBy, sortOrder]);
 
 
     /**
@@ -123,66 +123,6 @@ export default function UserProcedureList() {
 
     const accessETLProcedure = (id) => {
         window.location.href = '/procedure/' + id;
-    }
-
-    /**
-     * Sorts the list of ETL procedures according to the parameter and order
-     *
-     * @param paramSort parameter to sort to (OMOP CDM, creation date, modification date)
-     * @param sortOrder sort order (descendent or ascendant)
-     * @returns {*|*[]} list of sorted items
-     */
-
-    const sortData = (paramSort, sortOrder) => {
-        let itemsToSort = JSON.parse(JSON.stringify(procedures));
-        let sortedItems = [];
-        let compareFn = null;
-
-        switch (paramSort) {
-            case "omop":
-                compareFn = (i, j) => {
-                    let cdmIndexI = CDMVersions.findIndex(function(item) { return item.id === i.omopDatabase.databaseName});
-                    let cdmIndexJ = CDMVersions.findIndex(function(item) { return item.id === j.omopDatabase.databaseName});
-                    if (cdmIndexI < cdmIndexJ)
-                        return sortOrder === "desc" ? -1 : 1;
-                    else if (cdmIndexI > cdmIndexJ)
-                        return sortOrder === "desc" ? 1 : -1;
-                    else
-                        return 0;
-                }
-                break;
-            case "creationDate":
-                compareFn = (i, j) => {
-                    let dateI = moment(i.creationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
-                    let dateJ = moment(j.creationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
-
-                    if (dateI > dateJ)
-                        return sortOrder === "desc" ? 1 : -1;
-                    else if (dateI < dateJ)
-                        return sortOrder === "desc" ? -1 : 1;
-                    else
-                        return 0;
-                }
-                break;
-            case "modificationDate":
-                compareFn = (i, j) => {
-                    let dateI = moment(i.modificationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
-                    let dateJ = moment(j.modificationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
-
-                    if (dateI > dateJ)
-                        return sortOrder === "desc" ? 1 : -1;
-                    else if (dateI < dateJ)
-                        return sortOrder === "desc" ? -1 : 1;
-                    else
-                        return 0;
-                }
-                break;
-            default:
-                break;
-        }
-
-        sortedItems = itemsToSort.sort(compareFn);
-        return sortedItems;
     }
 
 
@@ -201,7 +141,7 @@ export default function UserProcedureList() {
             setSortBy(paramToSort);
             setSortOrder("desc");
         }
-        let sortedProcedures = sortData(sortBy, sortOrder);
+        let sortedProcedures = TableOperations.sortData(sortBy, sortOrder, procedures);
         setProcedures(sortedProcedures);
     }
 
@@ -300,6 +240,30 @@ export default function UserProcedureList() {
     }
 
 
+    /**
+     * Changes the number of the page in the table (providing new ETL procedures)
+     *
+     * @param event change event
+     * @param newPage number of the new page
+     */
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+
+    /**
+     * Changes the number of rows per page in the table and bring back to the first page
+     *
+     * @param event chang event
+     */
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+
     return(
         <div className={classes.pageContainer}>
             { loading ? (
@@ -323,89 +287,110 @@ export default function UserProcedureList() {
                         </Grid>
                     </Grid>
 
+                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                        <TableContainer sx={{ maxHeight: 600 }}>
+                            <Table stickyHeader aria-label="sticky table">
+                                <colgroup>
+                                    <col style={{ width: "20%"}} />{/* ETL procedure name */}
+                                    <col style={{ width: "16%"}} />{/* EHR database name */}
+                                    <col style={{ width: "16%"}} />{/* OMOP CDM version */}
+                                    <col style={{ width: "16%"}} />{/* Creation date */}
+                                    <col style={{ width: "16%"}} />{/* Modification date */}
+                                    <col style={{ width: "16%"}} />{/* Access button */}
+                                </colgroup>
 
-                    <TableContainer className={classes.table} component={Paper}>
-                        <Table stickyHeader aria-label="customized table">
-                            <colgroup>
-                                <col style={{ width: "20%"}} />{/* ETL procedure name */}
-                                <col style={{ width: "16%"}} />{/* EHR database name */}
-                                <col style={{ width: "16%"}} />{/* OMOP CDM version */}
-                                <col style={{ width: "16%"}} />{/* Creation date */}
-                                <col style={{ width: "16%"}} />{/* Modification date */}
-                                <col style={{ width: "16%"}} />{/* Access button */}
-                            </colgroup>
-                            <TableHead>
-                                <TableRow>
-                                    <StyledTableCell align="left">Name</StyledTableCell>
+                                <TableHead>
+                                    <StyledTableRow>
+                                        <StyledTableCell align="left">Name</StyledTableCell>
 
-                                    <StyledTableCell align="left">EHR Database</StyledTableCell>
+                                        <StyledTableCell align="left">EHR Database</StyledTableCell>
 
-                                    <StyledTableCell align="left">
-                                        OMOP CDM
-                                        <StyledTableSortLabel
-                                            active={sortBy === "omop"}
-                                            direction={sortOrder}
-                                            onClick={() => requestSort("omop")}
+                                        <StyledTableCell align="left">
+                                            OMOP CDM
+                                            <StyledTableSortLabel
+                                                active={sortBy === "omop"}
+                                                direction={sortOrder}
+                                                onClick={() => requestSort("omop")}
+                                            />
+                                        </StyledTableCell>
+
+                                        <StyledTableCell align="left">
+                                            Creation Date
+                                            <StyledTableSortLabel
+                                                active={sortBy === "creationDate"}
+                                                direction={sortOrder}
+                                                onClick={() => requestSort("creationDate")}
+                                            />
+                                        </StyledTableCell>
+
+                                        <StyledTableCell align="left">
+                                            Modification Date
+                                            <StyledTableSortLabel
+                                                active={sortBy === "modificationDate"}
+                                                direction={sortOrder}
+                                                onClick={() => requestSort("modificationDate")}
+                                            />
+                                        </StyledTableCell>
+                                        <StyledTableCell />
+                                    </StyledTableRow>
+                                </TableHead>
+
+                                <TableBody>
+                                    {(rowsPerPage > 0 ?
+                                        procedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : procedures)
+                                        .map((procedure, i) => {
+                                            return(
+                                                <StyledTableRow key={i}>
+                                                    <StyledTableCell component="th" scope="row">
+                                                        {procedure.name}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {procedure.ehrDatabase.databaseName}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {procedure.creationDate}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {procedure.modificationDate}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="center">
+                                                        <Controls.Button
+                                                            text="Access"
+                                                            onClick={() => accessETLProcedure(procedure.id)}
+                                                        />
+                                                    </StyledTableCell>
+                                                </StyledTableRow>
+                                            )
+                                        })
+                                    }
+                                </TableBody>
+
+                                <TableFooter>
+                                    <TableRow>
+                                        <TablePagination
+                                            rowsPerPageOptions={[5, 10, 25]}
+                                            colSpan={6}
+                                            count={procedures.length}
+                                            rowsPerPage={rowsPerPage}
+                                            page={page}
+                                            onChangePage={(event, page) => handleChangePage(event, page)}
+                                            onChangeRowsPerPage={(event) => handleChangeRowsPerPage(event)}
                                         />
-                                    </StyledTableCell>
+                                    </TableRow>
+                                </TableFooter>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
 
-                                    <StyledTableCell align="left">
-                                        Creation Date
-                                        <StyledTableSortLabel
-                                            active={sortBy === "creationDate"}
-                                            direction={sortOrder}
-                                            onClick={() => requestSort("creationDate")}
-                                        />
-                                    </StyledTableCell>
 
-                                    <StyledTableCell align="left">
-                                        Modification Date
-                                        <StyledTableSortLabel
-                                            active={sortBy === "modificationDate"}
-                                            direction={sortOrder}
-                                            onClick={() => requestSort("modificationDate")}
-                                        />
-                                    </StyledTableCell>
-                                    <StyledTableCell />
-                                </TableRow>
-                            </TableHead>
-
-                            <TableBody>
-                                {procedures.map((procedure, i) => {
-                                    return(
-                                        <StyledTableRow key={i}>
-                                            <StyledTableCell component="th" scope="row">
-                                                {procedure.name}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell component="th" scope="row" align="left">
-                                                {procedure.ehrDatabase.databaseName}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell component="th" scope="row" align="left">
-                                                {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell component="th" scope="row" align="left">
-                                                {procedure.creationDate}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell component="th" scope="row" align="left">
-                                                {procedure.modificationDate}
-                                            </StyledTableCell>
-
-                                            <StyledTableCell component="th" scope="row" align="center">
-                                                <Controls.Button
-                                                    text="Access"
-                                                    onClick={() => accessETLProcedure(procedure.id)}
-                                                />
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    )
-                                })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
 
                     {/* Modal to choose ETL procedure creation method*/}
                     <ETLModal
@@ -441,7 +426,7 @@ export default function UserProcedureList() {
 
                     {/* Modal to create ETL procedure from file */}
                     <ETLModal
-                        title={"Create ETL procedure from file"}
+                        title={"Create ETL procedure from summary file"}
                         show={showCreateETLFromFileModal}
                         setShow={setShowCreateETLFromFileModal}
                     >

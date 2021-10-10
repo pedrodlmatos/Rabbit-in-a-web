@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { environment } from './environment'
-import authHeader from './auth-header'
 
 const API_URL = environment.AUTH_URL;
 

@@ -28,14 +28,14 @@ public class User {
     @Size(max = 20)
     @JsonView({
             Views.AdminETLProcedureList.class, Views.ETLProcedure.class,
-            Views.UserList.class, Views.ETLUsers.class, Views.VisitingUser.class
+            Views.UserList.class, Views.ETLUsers.class, Views.VisitingUser.class, Views.AllUsers.class
     })
     private String username;
 
     @NotBlank
     @Size(max = 50)
     @Email
-    @JsonView(Views.VisitingUser.class)
+    @JsonView({Views.VisitingUser.class, Views.AllUsers.class})
     private String email;
 
     @NotBlank
@@ -48,7 +48,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    @JsonView(Views.VisitingUser.class)
+    @JsonView({Views.VisitingUser.class, Views.AllUsers.class})
     private List<Role> roles = new ArrayList<>();
 
     @ManyToMany(mappedBy = "users")
@@ -106,6 +106,14 @@ public class User {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<ETL> getEtls() {
+        return etls;
+    }
+
+    public void setEtls(List<ETL> etls) {
+        this.etls = etls;
     }
 
     @Override

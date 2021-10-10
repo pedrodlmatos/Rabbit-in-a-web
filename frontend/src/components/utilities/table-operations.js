@@ -1,13 +1,14 @@
-import { CDMVersions } from '../../services/CDMVersions'
+import { CDMVersions } from './CDMVersions'
 import moment from 'moment'
 
-class ProcedureSort {
+class TableOperations {
 
 	/**
 	 * Sorts the list of ETL procedures according to the parameter and order
 	 *
 	 * @param paramSort parameter to sort to (OMOP CDM, creation date, modification date)
 	 * @param sortOrder sort order (descendent or ascendant)
+	 * @param procedures list of ETL procedures
 	 * @returns {*|*[]} list of sorted items
 	 */
 
@@ -45,9 +46,9 @@ class ProcedureSort {
 					let dateJ = moment(j.creationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
 
 					if (dateI > dateJ)
-						return sortOrder === "desc" ? 1 : -1;
-					else if (dateI < dateJ)
 						return sortOrder === "desc" ? -1 : 1;
+					else if (dateI < dateJ)
+						return sortOrder === "desc" ? 1 : -1;
 					else
 						return 0;
 				}
@@ -58,11 +59,21 @@ class ProcedureSort {
 					let dateJ = moment(j.modificationDate, "DD-MM-YYYY HH:mm").format('DD-MMM-YYYY HH:mm')
 
 					if (dateI > dateJ)
-						return sortOrder === "desc" ? 1 : -1;
-					else if (dateI < dateJ)
 						return sortOrder === "desc" ? -1 : 1;
+					else if (dateI < dateJ)
+						return sortOrder === "desc" ? 1 : -1;
 					else
 						return 0;
+				}
+				break;
+			case "admin":
+				compareFn = (i, j) => {
+					let userA = i.roles.some(role => role['name'] === "ROLE_ADMIN");
+					let userB = j.roles.some(role => role['name'] === "ROLE_ADMIN");
+
+					if (userA === userB) return 0;
+					else if (userA === true && userB === false) return sortOrder === 'desc' ? -1 : 1;
+					else return sortOrder === 'desc' ? 1 : -1;
 				}
 				break;
 			default:
@@ -70,31 +81,9 @@ class ProcedureSort {
 		}
 
 		sortedItems = itemsToSort.sort(compareFn);
-		return sortedItems;
-	}
-
-	/**
-	 * Defines the parameter to sort by and the order and sort list of procedures
-	 *
-	 * @param paramToSort Parameter to sort by
-	 */
-
-	requestSort = (paramToSort, sortBy, sortOrder, procedures) => {
-		if (paramToSort === sortBy) {
-			// change sort order
-			sortOrder = "desc" ? "asc" : "desc";
-		} else {
-			// change param sorted by
-			sortBy = paramToSort
-			sortOrder = "desc"
-		}
-
-		let sortedProcedures = this.sortData(sortBy, sortOrder, procedures);
-		//setProcedures(sortedProcedures);
-		//return
+		return sortedItems
 	}
 }
-
 
 export default new TableOperations();
 
