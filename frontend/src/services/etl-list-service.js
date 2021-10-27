@@ -1,6 +1,6 @@
 import axios from 'axios'
-import authHeader from './auth-header'
-import authHeaderMultiPart from './auth-header-multi-part'
+import authHeader from './headers/auth-header'
+import authHeaderMultiPart from './headers/auth-header-multi-part'
 import { environment } from './environment'
 
 const API_URL = environment.ETL_URL;
@@ -93,6 +93,12 @@ class ETLService {
     }
 
 
+    /**
+     * Sends GET request to retrieve the most recently modified procedures of a user
+     *
+     * @returns {Promise<AxiosResponse<any>>}
+     */
+
     getRecentETLs = () => {
         const username = JSON.parse(localStorage.getItem('user')).username;
 
@@ -104,6 +110,15 @@ class ETLService {
             console.log(e);
         }
     }
+
+
+    /**
+     * Sends GET request to retrieve the most recently modified procedures that the logged user
+     * has in common with other user
+     *
+     * @param otherUser the other user, different than the logged user
+     * @returns {Promise<AxiosResponse<any>>}
+     */
 
     getSharedETLs = (otherUser) => {
         const username = JSON.parse(localStorage.getItem('user')).username;

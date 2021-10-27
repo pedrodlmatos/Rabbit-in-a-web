@@ -117,8 +117,8 @@ public class EHRField {
     @JsonIgnore
     private List<FieldMapping> mappings;
 
-    @OneToMany(mappedBy = "ehrField", cascade = CascadeType.ALL)
-    @JsonView({Views.ETLProcedure.class, Views.TableMapping.class})
+    @OneToMany(mappedBy = "ehrField", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonView({Views.ETLProcedure.class, Views.TableMapping.class, Views.CreateMapping.class})
     @Expose
     private List<ValueCount> valueCounts;
 

@@ -336,13 +336,19 @@ export default function Profile() {
                             </Grid>
 
                             <Grid item xs={6} sm={6} md={6} lg={6}>
-                                <h3>ETL procedures with {visitedUser.username}</h3>
-                                <br />
-                                <Controls.Table
-                                    columns={columns}
-                                    data={procedures}
-                                    onAccess={accessETLProcedure}
-                                />
+                                {procedures.length === 0 ? (
+                                    <h3>No ETL procedures with {visitedUser.username}</h3>
+                                ) : (
+                                    <div>
+                                        <h3>ETL procedures with {visitedUser.username}</h3>
+                                        <br />
+                                        <Controls.Table
+                                            columns={columns}
+                                            data={procedures}
+                                            onAccess={accessETLProcedure}
+                                        />
+                                    </div>
+                                )}
                             </Grid>
                         </Grid>
                     )}

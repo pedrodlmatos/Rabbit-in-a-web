@@ -8,16 +8,7 @@ import com.ua.riaw.etlProcedure.tableMapping.TableMapping;
 import com.ua.riaw.etlProcedure.source.ehrField.EHRField;
 import com.ua.riaw.utils.views.Views;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +37,7 @@ public class EHRTable {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "ehr_database_id", nullable = false)
+    @JoinColumn(name = "ehr_database_id")
     @JsonIgnore
     private EHRDatabase ehrDatabase;
 
@@ -75,7 +66,7 @@ public class EHRTable {
     @Expose
     private int rowsCheckedCount;
 
-    @OneToMany(mappedBy = "ehrTable", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "ehrTable", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({
             Views.ETLProcedure.class,
             Views.TableMapping.class,

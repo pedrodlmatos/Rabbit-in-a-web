@@ -36,9 +36,10 @@ export default function TableMappingPanel(props) {
     const selectEHRTable = (ehrTable) => {
         // clean state
         showTableMapping(false, {});
+        setTargetSelected(false);
+
         if (Object.keys(selectedTable).length === 0) {
             // all tables are unselected -> select table
-            setTargetSelected(false);
             setSelectedTable(ehrTable);
             setSourceSelected(true);
             MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);                // change color of mappings that comes from the selected table
@@ -47,14 +48,12 @@ export default function TableMappingPanel(props) {
             // select the same table -> unselect
             MappingOperations.resetMappingColor(tableMappings);                                 // change color of arrows to grey
             setSourceSelected(false);                                                     // unselect
-            setTargetSelected(false);
             setSelectedTable({});
             selectTable(false, {}, [], false);                                                  // update parent
         } else {
             // select any other source table
             MappingOperations.resetMappingColor(tableMappings);                                 // change color of arrows to grey
             setSelectedTable(ehrTable);                                                         // change selected table
-            setTargetSelected(false);
             setSourceSelected(true);
             MappingOperations.selectMappingsFromSource(tableMappings, ehrTable);                // change color of mappings that comes from the selected table
             selectTable(true, ehrTable, defineData(ehrTable), true)                             // change content of fields table in parent

@@ -8,7 +8,7 @@
 package com.ua.riaw.user;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.ua.riaw.payload.response.JwtResponse;
+import com.ua.riaw.security.payload.response.JwtResponse;
 import com.ua.riaw.utils.error.exceptions.EntityNotFoundException;
 import com.ua.riaw.utils.error.exceptions.UnauthorizedAccessException;
 import com.ua.riaw.user.role.Role;
@@ -31,7 +31,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

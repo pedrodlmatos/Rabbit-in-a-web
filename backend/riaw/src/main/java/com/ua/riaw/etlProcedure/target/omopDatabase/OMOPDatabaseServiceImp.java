@@ -5,7 +5,7 @@ import com.ua.riaw.etlProcedure.target.concept.Concept;
 import com.ua.riaw.etlProcedure.target.omopField.OMOPField;
 import com.ua.riaw.etlProcedure.target.omopTable.OMOPTable;
 import com.ua.riaw.etlProcedure.target.omopTable.OMOPTableService;
-import rabbitcore.riah_datamodel.ConceptsMap;
+import databaseReader.riah_datamodel.ConceptsMap;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -203,6 +203,7 @@ public class OMOPDatabaseServiceImp implements OMOPDatabaseService {
      */
 
     @Override
+    @Transactional
     public OMOPTable createTargetStemTable(CDMVersion version, OMOPDatabase omopDatabase) {
         OMOPTable stemOMOPTable = new OMOPTable(
             "stem_table",

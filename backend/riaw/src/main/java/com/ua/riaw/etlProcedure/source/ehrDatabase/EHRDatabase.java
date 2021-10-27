@@ -38,7 +38,7 @@ public class EHRDatabase {
     @Expose
     private String databaseName;
 
-    @OneToMany(mappedBy = "ehrDatabase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "ehrDatabase", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(Views.ETLProcedure.class)
     @Expose
     private List<EHRTable> tables;

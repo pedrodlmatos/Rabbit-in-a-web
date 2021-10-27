@@ -3,6 +3,7 @@ import Controls from '../controls/controls'
 import React, { useState } from 'react'
 import Xarrow from 'react-xarrows'
 import MappingOperations from '../utilities/mapping-operations'
+import TableOperations from './table-operations'
 
 export default function FieldMappingPanel(props) {
 
@@ -20,7 +21,9 @@ export default function FieldMappingPanel(props) {
 
     const [selectedField, setSelectedField] = useState({});
     const [sourceSelected, setSourceSelected] = useState(false);
+    const [targetSelected, setTargetSelected] = useState(false);
     const [selectedFieldMapping, setSelectedFieldMapping] = useState({});
+
 
     /**
      * Defines the selected field and changes state of current and previous selected field.
@@ -33,6 +36,8 @@ export default function FieldMappingPanel(props) {
      */
 
     const selectEHRField = (ehrField) => {
+        setTargetSelected(false);
+
         if (Object.keys(selectedField).length === 0) {
             // no field is selected
             setSelectedField(ehrField);
@@ -91,12 +96,14 @@ export default function FieldMappingPanel(props) {
             // no field is selected
             MappingOperations.selectMappingsToTarget(fieldMappings, omopField)          // change color of mappings that goes to the selected field
             setSelectedField(omopField);                                                // change select field information
+            setTargetSelected(true);
             setSourceSelected(false);
             selectField(true, omopField, defineOMOPFieldData(omopField), false);                                          // change content of fields table
         } else if (selectedField === omopField) {
             // select the same field -> unselect
             MappingOperations.resetMappingColor(fieldMappings);                     // change color of mappings to grey
             setSelectedField({});                                             // unselect
+            setTargetSelected(false);
             setSourceSelected(false);
             selectField(false, omopField, defineOMOPFieldData(omopField), false);
         } else if (sourceSelected) {
@@ -110,6 +117,7 @@ export default function FieldMappingPanel(props) {
         } else {
             // other target field is selected
             MappingOperations.resetMappingColor(fieldMappings);                     // change color of mappings to grey
+            setTargetSelected(true);
             setSelectedField(omopField);                                                // change select table information
             setSourceSelected(false);
             MappingOperations.selectMappingsToTarget(fieldMappings, omopField)          // change color of mappings that goes to the selected field
@@ -184,7 +192,7 @@ export default function FieldMappingPanel(props) {
                         <Controls.ElementBox
                             id={ehrTable.name + 't'}
                             element={ehrTable}
-                            color={ehrTable.stem ? "#A000A0" : "#FF9224"}
+                            color={ehrTable.stem ? "#A000A0" : "rgba(255, 126, 0, 1)"}
                             border="#000000"
                         />
                     </Grid>
@@ -194,7 +202,7 @@ export default function FieldMappingPanel(props) {
                         <Controls.ElementBox
                             id={omopTable.name + 't'}
                             element={omopTable}
-                            color="#53ECEC"
+                            color={ehrTable.stem ? "#A000A0" : "rgb(20,134,215)"}
                             border="#000000"
                         />
                     </Grid>
@@ -223,7 +231,7 @@ export default function FieldMappingPanel(props) {
                                     clicked={selectedField.id === item.id}
                                     help="Select first an EHR field and then an OMOP CDM field"
                                     position="right-end"
-                                    color='#FFE3C6'
+                                    color={TableOperations.defineSourceFieldColor(sourceSelected, selectedField, item)}
                                     border="#000000"
                                     handleSelection={selectEHRField}
                                     createMapping={createFieldMapping}
@@ -244,7 +252,7 @@ export default function FieldMappingPanel(props) {
                                     clicked={selectedField.id === item.id}
                                     help="Select first an EHR field and then an OMOP CDM field"
                                     position="right-end"
-                                    color="#D5FFFF"
+                                    color={TableOperations.defineTargetFieldColor(targetSelected, selectedField, item)}
                                     border="#000000"
                                     handleSelection={selectOMOPField}
                                     createMapping={createFieldMapping}

@@ -1,53 +1,14 @@
 import React, { useState } from 'react'
 import {
-  createStyles,
   makeStyles,
   Paper,
   Table,
   TableBody,
-  TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  TableSortLabel,
-  withStyles
+  TableRow
 } from '@material-ui/core'
-
-const StyledTableCell = withStyles((theme) => ({
-    head: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white
-    },
-    body: {
-        fontSize: 14
-    }
-}))(TableCell);
-
-const StyledTableRow = withStyles((theme) => ({
-    root: {
-        '&:nth-of-type(odd)': {
-            backgroundColor: theme.palette.action.hover
-        }
-    }
-}))(TableRow)
-
-const StyledTableSortLabel = withStyles((theme) =>
-    createStyles({
-        root: {
-            color: 'white',
-            "&:hover": {
-                color: 'white',
-            },
-            '&$active': {
-                color: 'white',
-            },
-        },
-        active: {},
-        icon: {
-            color: 'inherit !important'
-        },
-    })
-)(TableSortLabel);
+import { StyledTableCell, StyledTableRow, StyledTableSortLabel } from '../../utilities/styled-table-elements'
 
 const useStyles = makeStyles(theme => ({
     table: {
@@ -115,21 +76,21 @@ export default function EHRFieldTable(props) {
                         <StyledTableCell>Value</StyledTableCell>
 
                         <StyledTableCell>
+                            Frequency
                             <StyledTableSortLabel
                                 active={sortBy === "frequency"}
                                 direction={sortOrder}
                                 onClick={() => requestSort("frequency")}
                             />
-                            Frequency
                         </StyledTableCell>
 
                         <StyledTableCell>
+                            Percentage (%)
                             <StyledTableSortLabel
                                 active={sortBy === "percentage"}
                                 direction={sortOrder}
                                 onClick={() => requestSort("percentage")}
                             />
-                            Percentage (%)
                         </StyledTableCell>
                     </TableRow>
                 </TableHead>

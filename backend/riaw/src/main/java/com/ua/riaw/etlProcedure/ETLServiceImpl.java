@@ -25,10 +25,10 @@ import com.ua.riaw.user.UserDetailsServiceImpl;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import rabbitcore.utilities.ETLSummaryGenerator;
-import rabbitcore.utilities.files.Row;
-import rabbitinahat.ETLWordDocumentGenerator;
-import rabbitinahat.model.ETL_RIAH;
+import summaryGenerator.ETLSummaryGenerator;
+import databaseReader.utilities.files.Row;
+import summaryGenerator.ETLWordDocumentGenerator;
+import summaryGenerator.model.ETL_RIAH;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -482,7 +482,7 @@ public class ETLServiceImpl implements ETLService {
 
     @Override
     public boolean userHasAccessToEtl(ETL etl, User user) {
-        return etl.getUsers().contains(user);
+        return etl.getUsers().contains(user) || userService.userIsAdmin(user);
     }
 
 
@@ -583,21 +583,27 @@ public class ETLServiceImpl implements ETLService {
                 EHRDatabase ehrDatabase = etl.getSourceDatabase();
                 EHRTable sourceStemTable = ehrDatabaseService.createEHRStemTable(version, ehrDatabase);
                 ehrDatabase.getTables().add(sourceStemTable);
-                etl.setSourceDatabase(ehrDatabase);
+                //etl.setSourceDatabase(ehrDatabase);
+                etl = etlRepository.saveAndFlush(etl);
 
                 // add stem table on OMOP CDM database
                 OMOPDatabase omopDatabase = etl.getTargetDatabase();
                 OMOPTable targetStemTable = omopDatabaseService.createTargetStemTable(version, omopDatabase);
                 omopDatabase.getTables().add(targetStemTable);
-                etl.setTargetDatabase(omopDatabase);
+                //etl.setTargetDatabase(omopDatabase);
+                etl = etlRepository.saveAndFlush(etl);
 
                 // add mappings from and to stem table
-                List<TableMapping> prevTableMappings = etl.getTableMappings();
                 List<TableMapping> tableMappings = mappingService.createMappingsWithStemTable(version, omopDatabase, sourceStemTable, etl);
-                prevTableMappings.addAll(tableMappings);
-                etl.setTableMappings(prevTableMappings);
+                //List<TableMapping> prevTableMappings = etl.getTableMappings();
+                //prevTableMappings.addAll(tableMappings);
+                etl.getTableMappings().addAll(tableMappings);
+                //etl.getTableMappings().addAll(tableMappings);
+                //etl.setTableMappings(prevTableMappings);
+                //etl = etlRepository.save(etl);
 
-                // define dates
+
+                // define dates and save
                 etl.setModificationDate(Date.from(Instant.now()));
                 return etlRepository.save(etl);
             } else
@@ -639,22 +645,32 @@ public class ETLServiceImpl implements ETLService {
         ETL etl = etlRepository.findById(etl_id).orElseThrow(() -> new EntityNotFoundException(ETL.class, "id", etl_id.toString()));
 
         if (userHasAccessToEtl(etl, user)) {
+            // manage tables from EHR database
+            List<EHRTable> newEHRTables = new ArrayList<>();
             for (EHRTable table : etl.getSourceDatabase().getTables()) {
-                if (table.isStem()) {
-                    //mappingService.removeTableMappingsFromTable(etl_id, table);
-                    ehrDatabaseService.removeTable(table);
+                if (!table.isStem()) {
+                    newEHRTables.add(table);
                 }
             }
+            etl.getSourceDatabase().getTables().clear();
+            etl.getSourceDatabase().getTables().addAll(newEHRTables);
 
-            for (OMOPTable table : etl.getTargetDatabase().getTables())
-                if (table.isStem()) {
+            // manage tables from OMOP CDM database
+            List<OMOPTable> newOMOPTables = new ArrayList<>();
+            for (OMOPTable table : etl.getTargetDatabase().getTables()) {
+                if (!table.isStem()) {
                     //mappingService.removeTableMappingsToTable(etl_id, table);
-                    omopDatabaseService.removeTable(table);
+                    //omopDatabaseService.removeTable(table);
+                    newOMOPTables.add(table);
                 }
+            }
+            etl.getTargetDatabase().getTables().clear();
+            etl.getTargetDatabase().getTables().addAll(newOMOPTables);
+
 
             // define dates
             etl.setModificationDate(Date.from(Instant.now()));
-            return etlRepository.findById(etl_id).orElse(null);
+            return etlRepository.save(etl);
         } else
             throw new UnauthorizedAccessException(ETL.class, username, etl_id);
     }

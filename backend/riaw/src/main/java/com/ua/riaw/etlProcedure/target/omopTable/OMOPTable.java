@@ -67,10 +67,11 @@ public class OMOPTable {
     @Expose
     private boolean stem;
 
-    @OneToMany(mappedBy = "omopTable", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "omopTable", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView({
             Views.ETLProcedure.class,
-            Views.TableMapping.class
+            Views.TableMapping.class,
+            Views.CreateMapping.class
     })
     @Expose
     private List<OMOPField> fields;

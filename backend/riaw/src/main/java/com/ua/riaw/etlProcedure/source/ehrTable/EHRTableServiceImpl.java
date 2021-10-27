@@ -1,5 +1,8 @@
 package com.ua.riaw.etlProcedure.source.ehrTable;
 
+import com.ua.riaw.etlProcedure.source.ehrField.EHRField;
+import com.ua.riaw.etlProcedure.source.ehrField.EHRFieldRepository;
+import com.ua.riaw.etlProcedure.source.valueCounts.ValueCountRepository;
 import com.ua.riaw.utils.error.exceptions.EntityNotFoundException;
 import com.ua.riaw.utils.error.exceptions.UnauthorizedAccessException;
 import com.ua.riaw.etlProcedure.ETLService;
@@ -13,6 +16,12 @@ public class EHRTableServiceImpl implements EHRTableService {
 
     @Autowired
     private EHRTableRepository repository;
+
+    @Autowired
+    private EHRFieldRepository fieldRepository;
+
+    @Autowired
+    private ValueCountRepository valueCountRepository;
 
     @Autowired
     private ETLService etlService;
@@ -66,7 +75,15 @@ public class EHRTableServiceImpl implements EHRTableService {
      */
 
     @Override
+    @Transactional
     public void removeStemTable(EHRTable table) {
+        for (EHRField field : table.getFields()) {
+            // delete all value count from field
+            valueCountRepository.deleteAll(field.getValueCounts());
+            // delete field
+            fieldRepository.delete(field);
+        }
+        // delete table
         repository.delete(table);
     }
 }

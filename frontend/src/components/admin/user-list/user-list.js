@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { StyledTableCell, StyledTableRow, StyledTableSortLabel } from '../../utilities/styled-table-elements'
-import { makeStyles, TableRow, TableHead } from '@material-ui/core'
 import {
+	makeStyles,
+	TableRow,
+	TableHead,
 	Checkbox,
 	CircularProgress,
 	Paper,
@@ -9,8 +11,7 @@ import {
 	TableBody,
 	TableContainer,
 	TableFooter,
-	TablePagination
-} from '@mui/material'
+	TablePagination } from '@material-ui/core'
 import SearchBar from "material-ui-search-bar";
 import Controls from '../../controls/controls'
 import TableOperations from '../../utilities/table-operations';
@@ -176,17 +177,18 @@ export default function UserList() {
 					<h1 className={classes.title}>All users</h1>
 
 					<SearchBar
-						style={{ width: "200px"}}
+						style={{ width: "400px"}}
 						value={searched}
+						placeholder={"Search by username or e-mail"}
 						onChange={(searchedVal) => requestSearch(searchedVal)}
 						onCancelSearch={() => cancelSearch()}
 					/>
 					<TableContainer className={classes.table} component={Paper}>
 						<Table stickyHeader>
 							<colgroup>
-								<col style={{ width: "20%" }} />{/* Username */}
-								<col style={{ width: "20%" }} />{/* E-mail */}
-								<col style={{ width: "20%" }} />{/* Admin checkbox */}
+								<col style={{ width: "25%" }} />{/* Username */}
+								<col style={{ width: "25%" }} />{/* E-mail */}
+								<col style={{ width: "10%" }} />{/* Admin checkbox */}
 								<col style={{ width: "20%" }} />{/* Visit profile button */}
 								<col style={{ width: "20%" }} />{/* Delete account button */}
 							</colgroup>
@@ -255,17 +257,13 @@ export default function UserList() {
 							<TableFooter>
 								<StyledTableRow>
 									<TablePagination
-										rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+										rowsPerPageOptions={[5, 10, 25]}
 										colSpan={9}
 										count={filteredUsers.length}
 										rowsPerPage={rowsPerPage}
 										page={page}
-										SelectProps={{
-											inputProps: { 'aria-label': 'rows per page' },
-											native: true
-										}}
-										onPageChange={handleChangePage}
-										onRowsPerPageChange={handleChangeRowsPerPage}
+										onChangePage={handleChangePage}
+										onChangeRowsPerPage={handleChangeRowsPerPage}
 									/>
 								</StyledTableRow>
 							</TableFooter>

@@ -11,7 +11,6 @@ import AuthService from './services/auth-service'
 import Home from './components/home/home'
 import AdminProcedureList from './components/admin/admin-procedure-list/admin-procedure-list'
 import Procedure from './components/procedure/procedure'
-import Documentation from './components/documentation/Documentation'
 import Login from './components/users/login/login'
 import Register from './components/users/register/Register'
 import UserProcedureList from './components/procedure-list/user-procedure-list/user-procedure-list'
@@ -152,7 +151,6 @@ export default function App () {
                             <Route path='/all' component={AdminProcedureList} />
                             <Route path='/profile/:username' component={Profile} />
                             <Route path='/users/all' component={UserList} />
-                            <Route exact path='/documentation' component={Documentation} />
                             <Route exact path='/instructions' component={Instructions} />
                         </Switch>
                     </Router>

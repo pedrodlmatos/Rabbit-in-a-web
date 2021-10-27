@@ -6,11 +6,10 @@
 
 package com.ua.riaw.user;
 
-import com.ua.riaw.etlProcedure.ETLController;
-import com.ua.riaw.payload.request.LoginRequest;
-import com.ua.riaw.payload.request.SignupRequest;
-import com.ua.riaw.payload.response.JwtResponse;
-import com.ua.riaw.payload.response.MessageResponse;
+import com.ua.riaw.security.payload.request.LoginRequest;
+import com.ua.riaw.security.payload.request.SignupRequest;
+import com.ua.riaw.security.payload.response.JwtResponse;
+import com.ua.riaw.security.payload.response.MessageResponse;
 import com.ua.riaw.security.jwt.JwtUtils;
 import com.ua.riaw.user.role.Role;
 import com.ua.riaw.user.role.RoleEnum;

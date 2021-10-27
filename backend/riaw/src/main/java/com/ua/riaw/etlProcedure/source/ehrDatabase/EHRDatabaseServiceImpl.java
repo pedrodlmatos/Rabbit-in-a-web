@@ -8,15 +8,16 @@ import com.ua.riaw.etlProcedure.source.valueCounts.ValueCount;
 import com.ua.riaw.etlProcedure.source.ehrTable.EHRTableService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import rabbitcore.utilities.ScanFieldName;
-import rabbitcore.utilities.ScanSheetName;
-import rabbitcore.utilities.files.QuickAndDirtyXlsxReader;
-import rabbitcore.utilities.files.QuickAndDirtyXlsxReader.Row;
-import rabbitcore.utilities.files.QuickAndDirtyXlsxReader.Sheet;
+import databaseReader.utilities.ScanFieldName;
+import databaseReader.utilities.ScanSheetName;
+import databaseReader.utilities.files.QuickAndDirtyXlsxReader;
+import databaseReader.utilities.files.QuickAndDirtyXlsxReader.Row;
+import databaseReader.utilities.files.QuickAndDirtyXlsxReader.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class EHRDatabaseServiceImpl implements EHRDatabaseService {
 
     @Autowired
@@ -85,6 +87,7 @@ public class EHRDatabaseServiceImpl implements EHRDatabaseService {
                         nameToTable.put(tableName, table);
                     }
                     tables.add(table);
+                    //database.addTable(table);
 
                     // Get field
                     EHRField field = new EHRField(
@@ -186,6 +189,7 @@ public class EHRDatabaseServiceImpl implements EHRDatabaseService {
      */
 
     @Override
+    @Transactional
     public EHRTable createEHRStemTable(CDMVersion version, EHRDatabase ehrDatabase) {
         EHRTable stemEHRTable = new EHRTable(
             "stem_table",

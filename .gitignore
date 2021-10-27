@@ -29,3 +29,5 @@ frontend/build
 
 
 backend/hiah/src/main/resources/Scans/ScanReportCOHORT.xlsx
+
+.DS_Store

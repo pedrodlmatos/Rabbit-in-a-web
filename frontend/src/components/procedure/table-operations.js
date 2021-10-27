@@ -14,9 +14,16 @@ class TableOperations {
      */
 
     defineSourceTableColor = (sourceSelected, selectedTable, table) => {
-        if (table.stem) return "#A000A0";                                           // stem table
-        if (sourceSelected && selectedTable.id !== table.id) return "#FFD3A6";      // unselected source table (when a source table is selected)
-        else return "#FF9224";                                                      // selected source source or when none is selected
+        if (table.stem) return "#A000A0";                                                           // stem table
+        if (sourceSelected && selectedTable.id !== table.id) return "rgba(255,167,84,0.86)";        // unselected source table (when a source table is selected)
+        else return "rgba(255, 126, 0, 1)";                                                         // selected source source or when none is selected
+
+    }
+
+
+    defineSourceFieldColor = (sourceSelected, selectedField, field) => {
+        if (sourceSelected && selectedField.id !== field.id) return "rgba(255,192,135,0.86)";      // unselected source table (when a source table is selected)
+        else return "rgba(255,167,84,0.86)";
     }
 
 
@@ -34,9 +41,15 @@ class TableOperations {
      */
 
     defineTargetTableColor = (targetSelected, selectedTable, table) => {
-        if (table.stem) return "#A000A0";                                                       // stem table
+        if (table.stem) return "#A000A0";                                                         // stem table
         if (targetSelected && selectedTable.id !== table.id) return "rgb(20,134,215, 0.6)";       // unselected source table (when a source table is selected)
-        else return "rgb(20,134,215)";                                                     // selected source source or when none is selected
+        else return "rgb(20,134,215)";                                                            // selected source source or when none is selected
+    }
+
+
+    defineTargetFieldColor = (targetSelected, selectedField, field) => {
+        if (targetSelected && selectedField.id !== field.id) return "rgb(20,134,215, 0.4)";       // unselected source table (when a source table is selected)
+        else return "rgb(20,134,215, 0.6)";
     }
 
 

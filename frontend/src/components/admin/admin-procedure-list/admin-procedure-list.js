@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { Paper, TableFooter, TablePagination } from '@mui/material'
 import {
-  Checkbox,
-  CircularProgress,
-  makeStyles,
-  Table,
-  TableBody,
-  TableContainer,
-  TableHead,
-  TableRow,
+    Checkbox,
+    CircularProgress,
+    makeStyles,
+    Table,
+    TableBody,
+    TableContainer,
+    TablePagination,
+    TableFooter,
+    Paper,
+    TableHead,
+    TableRow,
 } from '@material-ui/core'
 import ETLService from '../../../services/etl-list-service'
 import { CDMVersions } from '../../utilities/CDMVersions'
@@ -35,7 +37,7 @@ const useStyles = makeStyles(theme => ({
         height: "50px"
     },
     table: {
-        maxHeight: 600,
+        maxHeight: 700,
         minWidth: 700,
         marginTop: theme.spacing(3),
         marginBottom: theme.spacing(5)
@@ -207,149 +209,149 @@ export default function AdminProcedureList() {
                 <div>
                     <h1 className={classes.title}>All ETL Procedures</h1>
 
-                    <TableContainer className={classes.table} component={Paper}>
-                        <Table stickyHeader aria-label="customized table">
-                            <colgroup>
-                                <col style={{ width: "15%"}} />{/* ETL procedure name */}
-                                <col style={{ width: "15%"}} />{/* EHR database name */}
-                                <col style={{ width: "15%"}} />{/* OMOP CDM version */}
-                                <col style={{ width: "8%"}} />{/* Deleted */}
-                                <col style={{ width: "13%"}} />{/* Creation date */}
-                                <col style={{ width: "13%"}} />{/* Modification date */}
-                                <col style={{ width: "7%"}} />{/* Users */}
-                                <col style={{ width: "7%"}} />{/* Access button */}
-                                <col style={{ width: "7%"}} />{/* Delete button */}
-                            </colgroup>
-                            <TableHead>
-                                <TableRow>
-                                    <StyledTableCell align="left">Name</StyledTableCell>
+                    {procedures.length === 0 ? (
+                        <h5>No ETL procedures created</h5>
+                    ) : (
+                        <TableContainer className={classes.table} component={Paper}>
+                            <Table stickyHeader aria-label="customized table">
+                                <colgroup>
+                                    <col style={{ width: "15%"}} />{/* ETL procedure name */}
+                                    <col style={{ width: "15%"}} />{/* EHR database name */}
+                                    <col style={{ width: "15%"}} />{/* OMOP CDM version */}
+                                    <col style={{ width: "8%"}} />{/* Deleted */}
+                                    <col style={{ width: "13%"}} />{/* Creation date */}
+                                    <col style={{ width: "13%"}} />{/* Modification date */}
+                                    <col style={{ width: "7%"}} />{/* Users */}
+                                    <col style={{ width: "7%"}} />{/* Access button */}
+                                    <col style={{ width: "7%"}} />{/* Delete button */}
+                                </colgroup>
+                                <TableHead>
+                                    <TableRow>
+                                        <StyledTableCell align="left">Name</StyledTableCell>
 
-                                    <StyledTableCell align="left">EHR Database</StyledTableCell>
+                                        <StyledTableCell align="left">EHR Database</StyledTableCell>
 
-                                    <StyledTableCell align="left">
-                                        OMOP CDM
-                                        <StyledTableSortLabel
-                                            active={sortBy === "omop"}
-                                            direction={sortOrder}
-                                            onClick={() => requestSort("omop")}
+                                        <StyledTableCell align="left">
+                                            OMOP CDM
+                                            <StyledTableSortLabel
+                                                active={sortBy === "omop"}
+                                                direction={sortOrder}
+                                                onClick={() => requestSort("omop")}
+                                            />
+                                        </StyledTableCell>
+
+                                        <StyledTableCell align="left">
+                                            Deleted
+                                            <StyledTableSortLabel
+                                                active={sortBy === "deleted"}
+                                                direction={sortOrder}
+                                                onClick={() => requestSort("deleted")}
+                                            />
+                                        </StyledTableCell>
+
+                                        <StyledTableCell align="left">
+                                            Creation Date
+                                            <StyledTableSortLabel
+                                                active={sortBy === "creationDate"}
+                                                direction={sortOrder}
+                                                onClick={() => requestSort("creationDate")}
+                                            />
+                                        </StyledTableCell>
+
+                                        <StyledTableCell align="left">
+                                            Modification Date
+                                            <StyledTableSortLabel
+                                                active={sortBy === "modificationDate"}
+                                                direction={sortOrder}
+                                                onClick={() => requestSort("modificationDate")}
+                                            />
+                                        </StyledTableCell>
+
+                                        <StyledTableCell align="left">Users</StyledTableCell>
+
+                                        <StyledTableCell />
+                                        <StyledTableCell />
+                                    </TableRow>
+                                </TableHead>
+
+                                <TableBody>
+                                    {(rowsPerPage > 0 ?
+                                        procedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : procedures)
+                                        .map((procedure, i) => {
+                                            return(
+                                                <StyledTableRow key={i}>
+                                                    <StyledTableCell component="th" scope="row">
+                                                        {procedure.name}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {procedure.ehrDatabase.databaseName}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        <Checkbox checked={getDeletionStatus(procedure.id)} onClick={() => handleETLProcedureDeletion(procedure)} />
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {procedure.creationDate}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {procedure.modificationDate}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        {procedure.users.map((user, i) => {
+                                                            return(
+                                                                <div key={i}>
+                                                                    <a href={"/profile/" + user.username}>{user.username}</a>
+                                                                </div>
+                                                            )
+                                                        })}
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        <Controls.Button
+                                                            text="Access"
+                                                            onClick={() => accessETLProcedure(procedure.id)}
+                                                        />
+                                                    </StyledTableCell>
+
+                                                    <StyledTableCell component="th" scope="row" align="left">
+                                                        <Controls.Button
+                                                            id="del"
+                                                            text="Delete"
+                                                            color="secondary"
+                                                            disabled={false}
+                                                            onClick={() => deleteETLProcedure(procedure.id)}
+                                                        />
+                                                    </StyledTableCell>
+                                                </StyledTableRow>
+                                            )
+                                        })
+                                    }
+                                </TableBody>
+
+                                <TableFooter>
+                                    <TableRow>
+                                        <TablePagination
+                                            rowsPerPageOptions={[5, 10, 25]}
+                                            colSpan={9}
+                                            count={procedures.length}
+                                            rowsPerPage={rowsPerPage}
+                                            page={page}
+                                            onChangePage={handleChangePage}
+                                            onChangeRowsPerPage={handleChangeRowsPerPage}
                                         />
-                                    </StyledTableCell>
-
-                                    <StyledTableCell align="left">
-                                        Deleted
-                                        <StyledTableSortLabel
-                                            active={sortBy === "deleted"}
-                                            direction={sortOrder}
-                                            onClick={() => requestSort("deleted")}
-                                        />
-                                    </StyledTableCell>
-
-                                    <StyledTableCell align="left">
-                                        Creation Date
-                                        <StyledTableSortLabel
-                                            active={sortBy === "creationDate"}
-                                            direction={sortOrder}
-                                            onClick={() => requestSort("creationDate")}
-                                        />
-                                    </StyledTableCell>
-
-                                    <StyledTableCell align="left">
-                                        Modification Date
-                                        <StyledTableSortLabel
-                                            active={sortBy === "modificationDate"}
-                                            direction={sortOrder}
-                                            onClick={() => requestSort("modificationDate")}
-                                        />
-                                    </StyledTableCell>
-
-                                    <StyledTableCell align="left">Users</StyledTableCell>
-
-                                    <StyledTableCell />
-                                    <StyledTableCell />
-                                </TableRow>
-                            </TableHead>
-
-                            <TableBody>
-                                {(rowsPerPage > 0 ?
-                                    procedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : procedures)
-                                    .map((procedure, i) => {
-                                        return(
-                                            <StyledTableRow key={i}>
-                                                <StyledTableCell component="th" scope="row">
-                                                    {procedure.name}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    {procedure.ehrDatabase.databaseName}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    <Checkbox checked={getDeletionStatus(procedure.id)} onClick={() => handleETLProcedureDeletion(procedure)} />
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    {procedure.creationDate}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    {procedure.modificationDate}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    {procedure.users.map((user, i) => {
-                                                        return(
-                                                            <div key={i}>
-                                                                <a href={"/profile/" + user.username}>{user.username}</a>
-                                                            </div>
-                                                        )
-                                                    })}
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    <Controls.Button
-                                                        text="Access"
-                                                        onClick={() => accessETLProcedure(procedure.id)}
-                                                    />
-                                                </StyledTableCell>
-
-                                                <StyledTableCell component="th" scope="row" align="left">
-                                                    <Controls.Button
-                                                        id="del"
-                                                        text="Delete"
-                                                        color="secondary"
-                                                        disabled={false}
-                                                        onClick={() => deleteETLProcedure(procedure.id)}
-                                                    />
-                                                </StyledTableCell>
-                                            </StyledTableRow>
-                                        )
-                                    })
-                                }
-                            </TableBody>
-
-                            <TableFooter>
-                                <TableRow>
-                                    <TablePagination
-                                        rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                                        colSpan={9}
-                                        count={procedures.length}
-                                        rowsPerPage={rowsPerPage}
-                                        page={page}
-                                        SelectProps={{
-                                            inputProps: { 'aria-label': 'rows per page' },
-                                            native: true
-                                        }}
-                                        onPageChange={handleChangePage}
-                                        onRowsPerPageChange={handleChangeRowsPerPage}
-                                    />
-                                </TableRow>
-                            </TableFooter>
-                        </Table>
-                    </TableContainer>
+                                    </TableRow>
+                                </TableFooter>
+                            </Table>
+                        </TableContainer>
+                    )}
                 </div>
             )}
         </div>

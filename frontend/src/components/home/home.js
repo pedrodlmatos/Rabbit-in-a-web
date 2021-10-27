@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
     },
     banner: {
         position: 'relative',
-        height: "600px"
+        height: "400px"
     },
     bannerGrid: {
         height: '100%',
@@ -22,14 +22,12 @@ const useStyles = makeStyles((theme) => ({
         height: '100%',
         overflow: 'hidden',
         position: 'relative',
-        //opacity: '50%'
     },
     mediaCaption: {
         textAlign: 'center',
         textOverflow: 'ellipsis',
         position: 'absolute',
         bottom: 0,
-        padding: theme.spacing(3),
         backgroundColor: 'black',
         color: 'white',
         opacity: 0.6,
@@ -46,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-
+/* Items in the carousel */
 const items = [
     {
         name: "Rabbit-in-a-web",
@@ -54,9 +52,9 @@ const items = [
         image: "/carousel/rabbitinaweb_logo.jpg"
     },
     {
-        name: "Other things",
-        description: "DDDD",
-        image: "https://source.unsplash.com/featured/?iphone"
+        name: "Dissertation project",
+        description: "Application developed under the Dissertation for Master Degree",
+        image: "/carousel/web_app.jpeg"
     }
 ]
 
@@ -69,12 +67,11 @@ export default function Home() {
             <Card raised className={classes.banner}>
                 <Grid container spacing={0} className={classes.bannerGrid}>
                     <Grid item xs={12}>
-                        <CardMedia className={classes.media} image={props.item.image}>
-                            <Typography className={classes.mediaCaption}>
-                                <h2>{props.item.name}</h2>
-                                <p>{props.item.description}</p>
-                            </Typography>
-                        </CardMedia>
+                        <CardMedia className={classes.media} image={props.item.image} />
+                        <Typography className={classes.mediaCaption}>
+                            <h2>{props.item.name}</h2>
+                            <p>{props.item.description}</p>
+                        </Typography>
                     </Grid>
                 </Grid>
             </Card>
@@ -91,27 +88,11 @@ export default function Home() {
                 navButtonsAlwaysVisible={false}
                 navButtonsAlwaysInvisible={false}
                 cycleNavigation={true}
-                //navButtonsProps={{style: {backgroundColor: 'cornflowerblue', borderRadius: 0}}}
             >
                 {items.map((item, i) => {
                     return <Banner item={item} key={i}/>
                 })}
             </Carousel>
-
-            {/*
-            <img className="logo" src="/rabbitinahatlogo.png" alt="Logo" />
-
-            <p>Rabbit in a Hat is a project developed by Observational Health Data Sciences and Informatics (OHDSI) and allows to:</p>
-
-            <ul className="text">
-                <li>Read a scan created with White Rabbit</li>
-                <li>Read data from OMOP Common Data Models (CDM)</li>
-                <li>Map a source table of EHR database to a target table of CDM</li>
-                <li>Map field between two tables</li>
-            </ul>
-
-            <p>To check documentation, click <a href="instructions">here</a></p>
-            */}
         </div>
     )
 }

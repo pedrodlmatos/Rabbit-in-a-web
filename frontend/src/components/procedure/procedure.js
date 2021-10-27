@@ -115,13 +115,7 @@ export default function Procedure() {
         ETLService
             .getETLById(etlProcedureId)
             .then(res => {
-                setEtl({
-                    id: res.data.id,
-                    name: res.data.name,
-                    ehrDatabase: res.data.ehrDatabase,
-                    omopDatabase: res.data.omopDatabase,
-                });
-                setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === res.data.omopDatabase.databaseName })[0].name);
+                adaptPanel(res);
 
                 // get users with access to ETL procedure (excluding the user in session)
                 const username = JSON.parse(localStorage.getItem('user')).username;
@@ -130,26 +124,43 @@ export default function Procedure() {
                     if (user.username !== username) users.push(user);
                 })
                 setETLUsers(users);
-
-                // table mappings
-                let maps = [];
-                res.data.tableMappings.forEach(function(item) {
-                    const arrow = {
-                        id: item.id,
-                        start:  item.ehrTable,
-                        end: item.omopTable,
-                        complete: item.complete,
-                        logic: item.logic,
-                        color: item.complete ? "black" : "grey",
-                        fieldMappings: item.fieldMappings,
-                    }
-                    maps.push(arrow);
-                });
-                setTableMappings(maps);
                 setLoading(false);
             })
             .catch(res => { console.log(res) })
     }, []);
+
+
+    /**
+     * Adapts the response data to create the arrows and define the procedure data
+     *
+     * @param response response from request
+     */
+
+    const adaptPanel = (response) => {
+        setEtl({
+            id: response.data.id,
+            name: response.data.name,
+            ehrDatabase: response.data.ehrDatabase,
+            omopDatabase: response.data.omopDatabase,
+        });
+        setOmopName(CDMVersions.filter(function(cdm) { return cdm.id === response.data.omopDatabase.databaseName })[0].name);
+
+        // table mappings
+        let maps = [];
+        response.data.tableMappings.forEach(function(item) {
+            const arrow = {
+                id: item.id,
+                start:  item.ehrTable,
+                end: item.omopTable,
+                complete: item.complete,
+                logic: item.logic,
+                color: item.complete ? "black" : "grey",
+                fieldMappings: item.fieldMappings,
+            }
+            maps.push(arrow);
+        });
+        setTableMappings(maps);
+    }
 
 
     /*********************************
@@ -199,6 +210,34 @@ export default function Procedure() {
                 setTableMappings([]);
                 setLoading(false);
             }).catch(error => console.log(error));
+    }
+
+
+    /**
+     * Sends request to API to add stem table to procedure.
+     * Updates tables in the panel
+     */
+
+    const addStemTable = () => {
+        setLoading(true);
+        ETLService
+            .addStemTables(etl.id)
+            .then(response => {
+                adaptPanel(response)
+                setLoading(false);
+            })
+            .catch(error => console.log(error))
+    }
+
+    const removeStemTable = () => {
+        setLoading(true);
+        ETLService
+            .removeStemTables(etl.id)
+            .then(response => {
+                adaptPanel(response)
+                setLoading(false);
+            })
+            .catch(error => console.log(error))
     }
 
 
@@ -303,6 +342,7 @@ export default function Procedure() {
             TableMappingService
                 .addTableMapping(etl.id, ehrTableId, omopTableId)
                 .then(res => {
+                    console.log(res.data);
                     const arrow = {
                         id: res.data.id,
                         start: res.data.ehrTable,
@@ -310,7 +350,7 @@ export default function Procedure() {
                         complete: res.data.complete,
                         logic: res.data.logic,
                         color: MappingOperations.defineMappingColor(selectedTable, res.data.complete, res.data.ehrTable.id, res.data.omopTable.id),
-                        fieldMappings: res.fieldMappings,
+                        fieldMappings: [],
                     }
                     setTableMappings([arrow].concat(tableMappings));
                 })
@@ -518,6 +558,7 @@ export default function Procedure() {
         setShowFieldMappingPanel(true);
         // defines field mappings
         let maps = [];
+        console.log(tableMapping)
         tableMapping.fieldMappings.forEach(item => {
             const arrow = {
                 id: item.id,
@@ -826,12 +867,12 @@ export default function Procedure() {
                                     onClose={(event) => setAnchorEl(null)}
                                 >
                                     {/* Stem Tables (add/remove) */}
-                                    <MenuItem disabled={true}>
+                                    <MenuItem>
                                         Stem tables
                                         <Checkbox
                                             edge="end"
                                             checked={TableOperations.hasStemTable(etl.ehrDatabase.tables)}
-                                            //onChange={TableOperations.hasStemTable(etl.ehrDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
+                                            onChange={TableOperations.hasStemTable(etl.ehrDatabase.tables) ? () => removeStemTable() : () => addStemTable()}
                                         />
                                     </MenuItem>
                                     <Divider />

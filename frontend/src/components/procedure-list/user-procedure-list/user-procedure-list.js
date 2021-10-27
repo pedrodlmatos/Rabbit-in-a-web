@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { withStyles, makeStyles, createStyles, Divider, CircularProgress, Paper, Grid, IconButton, Table, TableBody,
-    TableCell, TableContainer, TableFooter, TableHead, TableRow, TableSortLabel, TablePagination } from '@material-ui/core';
+import {
+    makeStyles,
+    Divider,
+    CircularProgress,
+    Paper,
+    Grid,
+    IconButton,
+    Table,
+    TableBody,
+    TableContainer,
+    TableFooter,
+    TableHead,
+    TableRow,
+    TablePagination } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add'
 import AttachFileIcon from '@material-ui/icons/AttachFile'
 import PropTypes from 'prop-types';
@@ -12,6 +24,7 @@ import CreateETLFromFileForm from '../../forms/create-etl/create-from-file-form'
 import { CDMVersions } from '../../utilities/CDMVersions'
 import TableOperations from '../../utilities/table-operations'
 import TablePaginationActions from '@material-ui/core/TablePagination/TablePaginationActions'
+import { StyledTableCell, StyledTableRow, StyledTableSortLabel } from '../../utilities/styled-table-elements'
 
 const useStyles = makeStyles((theme) => ({
     pageContainer: {
@@ -39,43 +52,6 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(5)
     }
 }))
-
-const StyledTableCell = withStyles((theme) => ({
-    head: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white
-    },
-    body: {
-        fontSize: 14,
-    }
-}))(TableCell);
-
-const StyledTableRow = withStyles((theme) => ({
-    root: {
-        '&:nth-of-type(odd)': {
-            //backgroundColor: theme.palette.action.hover
-        }
-    }
-}))(TableRow)
-
-
-const StyledTableSortLabel = withStyles((theme) =>
-    createStyles({
-        root: {
-            color: 'white',
-            "&:hover": {
-                color: 'white',
-            },
-            '&$active': {
-                color: 'white',
-            },
-        },
-        active: {},
-        icon: {
-            color: 'inherit !important'
-        },
-    })
-)(TableSortLabel);
 
 TablePaginationActions.propTypes = {
     count: PropTypes.number.isRequired,
@@ -285,153 +261,155 @@ export default function UserProcedureList() {
                                 <AddIcon fontSize="large" />
                             </Controls.Button>
                         </Grid>
+
+                        {/* Modal to choose ETL procedure creation method*/}
+                        <ETLModal
+                            title="Create ETL procedure"
+                            show={showETLCreationModal}
+                            setShow={setShowETLCreationModal}
+                        >
+                            <Grid container>
+                                <Grid item xs={6} sm={6} md={6} lg={6} align="center">
+                                    <IconButton color="inherit" onClick={openCreateNewETLModal}>
+                                        <AddIcon className={classes.iconButton} />
+                                    </IconButton>
+                                    <p>Create a new ETL procedure</p>
+                                </Grid>
+                                <Divider orientation="vertical" flexItem className={classes.divider} />
+                                <Grid item xs={6} sm={6} md={6} lg={6} align="center">
+                                    <IconButton color="inherit" onClick={openCreateETLFromFileModal}>
+                                        <AttachFileIcon className={classes.iconButton} />
+                                    </IconButton>
+                                    <p>Create from file</p>
+                                </Grid>
+                            </Grid>
+                        </ETLModal>
+
+                        {/* Modal to create a new ETL procedure */}
+                        <ETLModal
+                            title={"Create new ETL procedure"}
+                            show={showCreateNewETLModal}
+                            setShow={setShowCreateNewETLModal}
+                        >
+                            <CreateETLForm addSession={createNewETLProcedure} back={backToMethodSelection} close={closeCreateModal} />
+                        </ETLModal>
+
+                        {/* Modal to create ETL procedure from file */}
+                        <ETLModal
+                            title={"Create ETL procedure from summary file"}
+                            show={showCreateETLFromFileModal}
+                            setShow={setShowCreateETLFromFileModal}
+                        >
+                            <CreateETLFromFileForm addSession={createETLProcedureFromJSONFile} back={backToMethodSelection} close={closeCreateFromFileModal} />
+                        </ETLModal>
                     </Grid>
 
-                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                        <TableContainer sx={{ maxHeight: 600 }}>
-                            <Table stickyHeader aria-label="sticky table">
-                                <colgroup>
-                                    <col style={{ width: "20%"}} />{/* ETL procedure name */}
-                                    <col style={{ width: "16%"}} />{/* EHR database name */}
-                                    <col style={{ width: "16%"}} />{/* OMOP CDM version */}
-                                    <col style={{ width: "16%"}} />{/* Creation date */}
-                                    <col style={{ width: "16%"}} />{/* Modification date */}
-                                    <col style={{ width: "16%"}} />{/* Access button */}
-                                </colgroup>
+                    {procedures.length === 0 ? (
+                        <h5>No ETL procedures created</h5>
+                    ) : (
+                        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                            <TableContainer sx={{ maxHeight: 600 }}>
+                                <Table stickyHeader aria-label="sticky table">
+                                    <colgroup>
+                                        <col style={{ width: "20%"}} />{/* ETL procedure name */}
+                                        <col style={{ width: "16%"}} />{/* EHR database name */}
+                                        <col style={{ width: "16%"}} />{/* OMOP CDM version */}
+                                        <col style={{ width: "16%"}} />{/* Creation date */}
+                                        <col style={{ width: "16%"}} />{/* Modification date */}
+                                        <col style={{ width: "16%"}} />{/* Access button */}
+                                    </colgroup>
 
-                                <TableHead>
-                                    <StyledTableRow>
-                                        <StyledTableCell align="left">Name</StyledTableCell>
+                                    <TableHead>
+                                        <StyledTableRow>
+                                            <StyledTableCell align="left">Name</StyledTableCell>
 
-                                        <StyledTableCell align="left">EHR Database</StyledTableCell>
+                                            <StyledTableCell align="left">EHR Database</StyledTableCell>
 
-                                        <StyledTableCell align="left">
-                                            OMOP CDM
-                                            <StyledTableSortLabel
-                                                active={sortBy === "omop"}
-                                                direction={sortOrder}
-                                                onClick={() => requestSort("omop")}
+                                            <StyledTableCell align="left">
+                                                OMOP CDM
+                                                <StyledTableSortLabel
+                                                    active={sortBy === "omop"}
+                                                    direction={sortOrder}
+                                                    onClick={() => requestSort("omop")}
+                                                />
+                                            </StyledTableCell>
+
+                                            <StyledTableCell align="left">
+                                                Creation Date
+                                                <StyledTableSortLabel
+                                                    active={sortBy === "creationDate"}
+                                                    direction={sortOrder}
+                                                    onClick={() => requestSort("creationDate")}
+                                                />
+                                            </StyledTableCell>
+
+                                            <StyledTableCell align="left">
+                                                Modification Date
+                                                <StyledTableSortLabel
+                                                    active={sortBy === "modificationDate"}
+                                                    direction={sortOrder}
+                                                    onClick={() => requestSort("modificationDate")}
+                                                />
+                                            </StyledTableCell>
+                                            <StyledTableCell />
+                                        </StyledTableRow>
+                                    </TableHead>
+
+                                    <TableBody>
+                                        {(rowsPerPage > 0 ?
+                                            procedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : procedures)
+                                            .map((procedure, i) => {
+                                                return(
+                                                    <StyledTableRow key={i}>
+                                                        <StyledTableCell component="th" scope="row">
+                                                            {procedure.name}
+                                                        </StyledTableCell>
+
+                                                        <StyledTableCell component="th" scope="row" align="left">
+                                                            {procedure.ehrDatabase.databaseName}
+                                                        </StyledTableCell>
+
+                                                        <StyledTableCell component="th" scope="row" align="left">
+                                                            {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
+                                                        </StyledTableCell>
+
+                                                        <StyledTableCell component="th" scope="row" align="left">
+                                                            {procedure.creationDate}
+                                                        </StyledTableCell>
+
+                                                        <StyledTableCell component="th" scope="row" align="left">
+                                                            {procedure.modificationDate}
+                                                        </StyledTableCell>
+
+                                                        <StyledTableCell component="th" scope="row" align="center">
+                                                            <Controls.Button
+                                                                text="Access"
+                                                                onClick={() => accessETLProcedure(procedure.id)}
+                                                            />
+                                                        </StyledTableCell>
+                                                    </StyledTableRow>
+                                                )
+                                            })
+                                        }
+                                    </TableBody>
+
+                                    <TableFooter>
+                                        <TableRow>
+                                            <TablePagination
+                                                rowsPerPageOptions={[5, 10, 25]}
+                                                colSpan={6}
+                                                count={procedures.length}
+                                                rowsPerPage={rowsPerPage}
+                                                page={page}
+                                                onChangePage={(event, page) => handleChangePage(event, page)}
+                                                onChangeRowsPerPage={(event) => handleChangeRowsPerPage(event)}
                                             />
-                                        </StyledTableCell>
-
-                                        <StyledTableCell align="left">
-                                            Creation Date
-                                            <StyledTableSortLabel
-                                                active={sortBy === "creationDate"}
-                                                direction={sortOrder}
-                                                onClick={() => requestSort("creationDate")}
-                                            />
-                                        </StyledTableCell>
-
-                                        <StyledTableCell align="left">
-                                            Modification Date
-                                            <StyledTableSortLabel
-                                                active={sortBy === "modificationDate"}
-                                                direction={sortOrder}
-                                                onClick={() => requestSort("modificationDate")}
-                                            />
-                                        </StyledTableCell>
-                                        <StyledTableCell />
-                                    </StyledTableRow>
-                                </TableHead>
-
-                                <TableBody>
-                                    {(rowsPerPage > 0 ?
-                                        procedures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : procedures)
-                                        .map((procedure, i) => {
-                                            return(
-                                                <StyledTableRow key={i}>
-                                                    <StyledTableCell component="th" scope="row">
-                                                        {procedure.name}
-                                                    </StyledTableCell>
-
-                                                    <StyledTableCell component="th" scope="row" align="left">
-                                                        {procedure.ehrDatabase.databaseName}
-                                                    </StyledTableCell>
-
-                                                    <StyledTableCell component="th" scope="row" align="left">
-                                                        {CDMVersions.filter(function(cdm) { return cdm.id === procedure.omopDatabase.databaseName })[0].name}
-                                                    </StyledTableCell>
-
-                                                    <StyledTableCell component="th" scope="row" align="left">
-                                                        {procedure.creationDate}
-                                                    </StyledTableCell>
-
-                                                    <StyledTableCell component="th" scope="row" align="left">
-                                                        {procedure.modificationDate}
-                                                    </StyledTableCell>
-
-                                                    <StyledTableCell component="th" scope="row" align="center">
-                                                        <Controls.Button
-                                                            text="Access"
-                                                            onClick={() => accessETLProcedure(procedure.id)}
-                                                        />
-                                                    </StyledTableCell>
-                                                </StyledTableRow>
-                                            )
-                                        })
-                                    }
-                                </TableBody>
-
-                                <TableFooter>
-                                    <TableRow>
-                                        <TablePagination
-                                            rowsPerPageOptions={[5, 10, 25]}
-                                            colSpan={6}
-                                            count={procedures.length}
-                                            rowsPerPage={rowsPerPage}
-                                            page={page}
-                                            onChangePage={(event, page) => handleChangePage(event, page)}
-                                            onChangeRowsPerPage={(event) => handleChangeRowsPerPage(event)}
-                                        />
-                                    </TableRow>
-                                </TableFooter>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
-
-
-
-                    {/* Modal to choose ETL procedure creation method*/}
-                    <ETLModal
-                        title="Create ETL procedure"
-                        show={showETLCreationModal}
-                        setShow={setShowETLCreationModal}
-                    >
-                        <Grid container>
-                            <Grid item xs={6} sm={6} md={6} lg={6} align="center">
-                                <IconButton color="inherit" onClick={openCreateNewETLModal}>
-                                    <AddIcon className={classes.iconButton} />
-                                </IconButton>
-                                <p>Create a new ETL procedure</p>
-                            </Grid>
-                            <Divider orientation="vertical" flexItem className={classes.divider} />
-                            <Grid item xs={6} sm={6} md={6} lg={6} align="center">
-                                <IconButton color="inherit" onClick={openCreateETLFromFileModal}>
-                                    <AttachFileIcon className={classes.iconButton} />
-                                </IconButton>
-                                <p>Create from file</p>
-                            </Grid>
-                        </Grid>
-                    </ETLModal>
-
-                    {/* Modal to create a new ETL procedure */}
-                    <ETLModal
-                        title={"Create new ETL procedure"}
-                        show={showCreateNewETLModal}
-                        setShow={setShowCreateNewETLModal}
-                    >
-                        <CreateETLForm addSession={createNewETLProcedure} back={backToMethodSelection} close={closeCreateModal} />
-                    </ETLModal>
-
-                    {/* Modal to create ETL procedure from file */}
-                    <ETLModal
-                        title={"Create ETL procedure from summary file"}
-                        show={showCreateETLFromFileModal}
-                        setShow={setShowCreateETLFromFileModal}
-                    >
-                        <CreateETLFromFileForm addSession={createETLProcedureFromJSONFile} back={backToMethodSelection} close={closeCreateFromFileModal} />
-                    </ETLModal>
+                                        </TableRow>
+                                    </TableFooter>
+                                </Table>
+                            </TableContainer>
+                        </Paper>
+                    )}
                 </div>
             )}
         </div>
