@@ -214,6 +214,7 @@ public class TableMappingServiceImpl implements TableMappingService {
 
             if (ehrTable != null && omopTable != null) {
                 TableMapping responseMapping = new TableMapping(etl, ehrTable, omopTable, mapping.getLogic());
+                responseMapping.setComplete(mapping.isComplete());
 
                 for (FieldMapping fieldMapping : mapping.getFieldMappings()) {
                     EHRField ehrField = ehrTable.getFields().stream().filter(srcField -> srcField.getName().equals(fieldMapping.getEhrField().getName())).findFirst().orElse(null);
